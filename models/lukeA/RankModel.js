@@ -10,10 +10,11 @@ var schema = mongoose.Schema(
         id:{type: String, required: '{PATH} is required!'},
         title:String,
         description:String,
-        image_url: String
+        image_url: String,
+        score: Number
     }
 );
 
-var model = db.model('User', schema);
+var model = db.model('Rank', schema);
 
 module.exports =  model;

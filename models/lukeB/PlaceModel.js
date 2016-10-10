@@ -33,7 +33,7 @@ var schema = mongoose.Schema(
     }
 );
 
-var model = db.model('User', schema);
+var model = db.model('Place', schema);
 
 module.exports =  model;
 

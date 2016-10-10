@@ -26,7 +26,7 @@ var schema = mongoose.Schema(
     }
 );
 
-var model = db.model('User', schema);
+var model = db.model('Report', schema);
 
 module.exports =  model;
 

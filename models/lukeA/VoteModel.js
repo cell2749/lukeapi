@@ -14,6 +14,6 @@ var schema = mongoose.Schema(
     }
 );
 
-var model = db.model('User', schema);
+var model = db.model('Vote', schema);
 
 module.exports =  model;

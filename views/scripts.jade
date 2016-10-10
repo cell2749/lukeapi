@@ -1,0 +1,36 @@
+//Created by nikitak on 10.10.2016.
+
+script.
+    var lock = new Auth0Lock('PiNpdLmpYJrgKllnT7GbLbjAFKjtcAY6', 'nikitak.eu.auth0.com', {
+        auth: {
+            redirectUrl: 'http://localhost:3000/login',
+            responseType: 'code',
+            params: {
+                scope: 'openid email' // Learn about scopes: https://auth0.com/docs/scopes
+            }
+        }
+    });
+
+    function httpGetAsync(theUrl, callback) {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function () {
+            if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+                callback(xmlHttp.responseText);
+        }
+        xmlHttp.open("GET", theUrl, true); // true for asynchronous
+        xmlHttp.send(null);
+    }
+
+    function getInfo() {
+        httpGetAsync("/lukeA/test/registered", function (resText) {
+            var res = JSON.parse(resText);
+            if (res.logged) {
+                console.log(res.data);
+            } else {
+                lock.show();
+            }
+        });
+
+    }
+
+

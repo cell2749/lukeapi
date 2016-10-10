@@ -12,7 +12,7 @@ var schema = mongoose.Schema(
         latitude: Number,
         altitude: Number,
         image_url: String,
-        submitterRating: Number,//????
+        submitterRating: Number,
         submitterId: String,
         title:String,
         description:String,
@@ -22,6 +22,6 @@ var schema = mongoose.Schema(
     }
 );
 
-var model = db.model('User', schema);
+var model = db.model('Report', schema);
 
 module.exports =  model;

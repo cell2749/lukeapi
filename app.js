@@ -11,16 +11,14 @@ var lukeB = require('./routes/lukeB');
 var app = express();
 
 // view engine setup
-/*app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');*/
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-/**LOGGING MODE!!!!!!
- * */
+
+
 app.use(logger('dev'));
-/** ^^^^^^^^^^^ comment for production ^^^^^^^^^^
- * */
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -45,7 +43,9 @@ if (app.get('env') === 'development') {
     res.status(err.status || 500);
     res.render('error', {
       message: err.message,
-      error: err
+      error: {}
+      /** ^^^^^^^^^^^ empty for production ??^^^^^^^^^^
+       * */
     });
   });
 }
