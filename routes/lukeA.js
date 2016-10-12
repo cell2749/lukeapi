@@ -1,7 +1,9 @@
 var express = require('express');
 var router = express.Router();
 var jwtCheck = require('./jwtCheck');
-//var async = require('async');
+/* SECURITY */
+var requiresLogin = require('../security/requiresLogin');
+var requiresRole = require('../security/requiresRole');
 /* MODELS */
 var UserModel = require("../models/lukeA/UserModel");
 var ReportModel = require("../models/lukeA/ReportModel");
@@ -10,6 +12,24 @@ var ReportCategoryModel = require("../models/lukeA/ReportCategoryModel");
 var VoteModel = require("../models/lukeA/VoteModel");
 
 /* AUTHENTICATION SETUP */
+
+router.get("/authzero",function(req,res,next){
+  var env = {
+    AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID,
+    AUTH0_DOMAIN: process.env.AUTH0_DOMAIN,
+    AUTH0_CALLBACK_URL: process.env.AUTH0_CALLBACK_URL_A
+  };
+  res.status(200).json(env);
+});
+// NEEDS TESTING !!!!!!!! res.redirect or res.send??
+router.get('/callback',passport.authenticate('auth0', { failureRedirect: '/url-if-something-fails' }),
+    function(req, res) {
+      if (!req.user) {
+        throw new Error('user null');
+      }
+      console.log(req.url);
+      res.redirect(req.url);
+});
 /* GET READ REQUESTS NON AUTH */
 /**
  * */
