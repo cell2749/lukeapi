@@ -3,7 +3,7 @@
  */
 module.exports = function(req, res, next) {
     if (!req.isAuthenticated()) {
-        return res.status(200).json({logged:false});
+        return res.status(200).json({reqLogin:true});
     }
     next();
 }

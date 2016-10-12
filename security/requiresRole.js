@@ -9,8 +9,8 @@ module.exports = function requireRole(role) {
         if (roles.indexOf(role) != -1) {
             next();
         } else {
-            res.status(200).json({auth:false});
+            res.status(200).json({reqAuth:true});
         }
     }
-}
+};
 

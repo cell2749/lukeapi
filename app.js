@@ -70,10 +70,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/lukeA', lukeA);
 app.use('/lukeB', lukeB);
 
-app.get('/callback', function(req, res) {
-  res.send("Logged In. You should apply for your own callback route.");
+app.get('/',function(req,res){
+  res.render('login');
 });
 
+app.get('/url-if-something-fails',function(req,res){
+  res.status(200).send('Authentication failed');
+});
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
