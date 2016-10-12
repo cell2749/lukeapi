@@ -115,10 +115,8 @@ router.get('/user',requiresLogin, function(req, res, next) {
  * */
 router.get('/updateUser',requiresLogin,function(req,res){
   var id = req.query.id || req.user.profile.id;
-
-  var appMetadata = req.user.profile._json.app_metadata || {};
+  var appMetadata = req.user.profile._json.app_metadata || {roles:[]};
   var allow=false;
-
 
   if(id == req.user.profile.id){
     allow=true;
@@ -127,18 +125,21 @@ router.get('/updateUser',requiresLogin,function(req,res){
   }
   if(allow){
     UserModel.findOne({id:id},function(err,doc){
-      //!!!!!
-      for(var key in doc){
-        doc[key]=req.query[key]||doc[key];
+      if(doc!=null) {
+        for (var key in doc) {
+          if (key != 'id' || key != '_id' || key != '__v') {
+            doc[key] = req.query[key] || doc[key];
+          }
+        }
+        doc.save();
+        res.status(200).send('OK');
+      }else{
+        res.status(200).send('No user with such id');
       }
-      doc.save();
-      res.status(200).send('OK');
-    })
+    });
   }else{
     res.status(200).json({reqAuth:true});
   }
-
-
 });
 /* GET READ REQUESTS AUTH */
 router.get('/achievements', requiresLogin,function(req,res,next){
