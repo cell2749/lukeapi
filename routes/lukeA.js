@@ -128,10 +128,11 @@ router.get('/updateUser',requiresLogin,function(req,res){
   if(allow){
     UserModel.findOne({id:id},function(err,doc){
       //!!!!!
-      doc.forEach(function(item,key){
-        doc[key]=req.query[key]||item;
-      });
+      for(var key in doc){
+        doc[key]=req.query[key]||doc[key];
+      }
       doc.save();
+      res.status(200).send('OK');
     })
   }else{
     res.status(200).json({reqAuth:true});
