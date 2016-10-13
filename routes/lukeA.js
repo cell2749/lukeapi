@@ -12,6 +12,10 @@ var RankModel = require("../models/lukeA/RankModel");
 var ReportCategoryModel = require("../models/lukeA/ReportCategoryModel");
 var VoteModel = require("../models/lukeA/VoteModel");
 
+const MONGO_PROJECTION ={
+    _id: 0,
+    __v: 0
+};
 /* AUTHENTICATION SETUP */
 router.get("/authzero",function(req,res,next){
   var env = {
@@ -29,11 +33,8 @@ router.get('/callback',passport.authenticate('auth0', { failureRedirect: '/url-i
   }else{
     var userData = req.user.profile;
     console.log(userData);
-    var projection = {
-      _id:0,
-      __v:0
-    };
-    UserModel.findOne({id:userData.id},projection, function (err, result) {
+
+    UserModel.findOne({id:userData.id},MONGO_PROJECTION, function (err, result) {
       if(err) throw err;
         console.log("User model find");
       if(result!=null){
@@ -67,44 +68,34 @@ router.get('/callback',passport.authenticate('auth0', { failureRedirect: '/url-i
     res.redirect(route);
   }
 });
-/* GET READ REQUESTS NON AUTH */
+/* USER MODEL PRIVATE*/
 /**
  * GET /users
  * */
 router.get('/users', requiresLogin, requiresRole('admin'), function(req, res, next) {
-    var projection = {
-      _id: 0,
-      __v: 0
-    };
-    UserModel.find({},projection, function (err, result) {
+    UserModel.find({},MONGO_PROJECTION, function (err, result) {
       if(err) throw err;
 
-      if(result[0]!=null){
-        res.status(200).json(result);
-      }else{
-        res.status(200).json([]);
-      }
+      var response = result || [];
+      res.status(200).json(response);
     });
 });
 /**
  * */
 router.get('/user',requiresLogin, function(req, res, next) {
-  console.log(req.user);
+  var id=req.query.id || req.user.profile.id;
+  var appMetadata = req.user.profile._json.app_metadata || {roles:[]};
 
-  var id=req.user.profile.id;
-  var projection = {
-    _id: 0,
-    __v: 0
-  };
-  UserModel.findOne({id:id},projection, function (err, result) {
-    if(err) throw err;
+  if(id == req.user.profile.id || appMetadata.roles.indexOf("admin")!=-1) {
+    UserModel.findOne({id: id}, MONGO_PROJECTION, function (err, result) {
+      if (err) throw err;
 
-    if(result!=null){
-      res.status(200).json(result);
-    }else{
-      res.status(200).json({});
-    }
-  });
+      var response = result || {};
+      res.status(200).json(response);
+    });
+  }else{
+    res.status(200).json({reqAuth:true});
+  }
 });
 /**
  * UserModel methods??
@@ -116,14 +107,8 @@ router.get('/user',requiresLogin, function(req, res, next) {
 router.get('/updateUser',requiresLogin,function(req,res){
   var id = req.query.id || req.user.profile.id;
   var appMetadata = req.user.profile._json.app_metadata || {roles:[]};
-  var allow=false;
 
-  if(id == req.user.profile.id){
-    allow=true;
-  }else if(appMetadata.roles.indexOf('admin')!=-1){
-    allow = true;
-  }
-  if(allow){
+  if(id == req.user.profile.id || appMetadata.roles.indexOf('admin')!=-1){
     UserModel.findOne({id:id},function(err,doc){
       if(doc!=null) {
         for (var key in doc) {
@@ -132,16 +117,17 @@ router.get('/updateUser',requiresLogin,function(req,res){
           }
         }
         doc.save();
-        res.status(200).send('OK');
+        res.status(200).json(doc);
       }else{
-        res.status(200).send('No user with such id');
+        res.status(200).json({error:'No user with such id'});
       }
     });
   }else{
     res.status(200).json({reqAuth:true});
   }
+
 });
-/* GET READ REQUESTS AUTH */
+/* ACHIEVEMENTS ?? */
 router.get('/achievements', requiresLogin,function(req,res,next){
   res.writeHead(200, {'Content-Type': 'text/html'});
   res.end("OK");
@@ -153,41 +139,49 @@ router.get('/triggertitle', requiresLogin,function(req,res,next){
 });
 /* POST WRITE REQUESTS AUTH*/
 router.post('/create_rank', requiresLogin,requiresRole('admin'),function(req,res,next){
-  var data = req.body.data;
+  var data = req.body;
   console.log(data);
-  var id = data.id;
-  var title = data.title;
-  var description = data.description;
-  var image_url = data.image_url;
-  var score = data.score;
-  res.writeHead(200, {'Content-Type': 'text/html'});
-  res.end("OK");
+  if(data.id != null) {
+    var rank = new RankModel();
+    for (var key in rank) {
+      if (key != '_id' || key != '__v') {
+        rank[key] = data[key] || rank[key];
+      }
+    }
+    rank.save(function (err, rank) {
+      if (err) throw err;
+
+      res.status(200).json(rank);
+    });
+  }else{
+    res.status(200).json({error:"Missing id"});
+  }
 });
 
 router.post('/create_report',requiresLogin,function(req,res,next){
   var data = req.body;
-  console.log('DATA /');
-  console.log(data);
-  var id  = data.id;
-  var longitude = data.longitude;
-  var latitude = data.latitude;
-  var altitude = data.altitude;
-  var image_url = data.image_url;//!
-  var submitterRating = data.submitterRating;
-  var submitterId = data.submitterId;
-  var title = data.title;
-  var description = data.description;
-  var date = data.date;
-  var categoryId = data.categoryId;
-  if(id==null){
-    res.writeHead(200, {'Content-Type': 'text/html'});
-    res.end("ID");
-  }else {
-    res.writeHead(200, {'Content-Type': 'text/html'});
-    res.end("OK");
+  if(data.id != null) {
+    var report = new ReportModel();
+    for (var key in report) {
+      if (key != '_id' || key != '__v') {
+        report[key] = data[key] || report[key];
+      }
+    }
+    report.save(function (err, report) {
+      if (err) throw err;
+
+      res.status(200).json(report);
+    });
+  }else{
+    res.status(200).json({error:"Missing Id"});
   }
 });
-/* GET AUTH TESTS */
+
+
+
+
+
+/* SECURITY TESTS */
 router.get('/test/public',function(req,res,next){
 
   res.writeHead(200, {'Content-Type': 'text/html'});
@@ -201,4 +195,5 @@ router.get('/test/admin',requiresLogin,requiresRole('adminS'),function(req,res,n
   res.writeHead(200, {'Content-Type': 'text/html'});
   res.end("admin OK");
 });
+
 module.exports = router;

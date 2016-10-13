@@ -22,8 +22,8 @@ script.
         if(jsonResponseObject!=null){
 
             //Route where to return after successful login
-            var myCallbackRoute = '?route=/lukeA/test/admin';
-            myCallbackRoute = '';
+            var myCallbackRoute = '?route=/lukeA/user';
+            //myCallbackRoute = '';
 
             //Setup your AUTH0_LOCK
             AUTH0_LOCK = new Auth0Lock(jsonResponseObject.AUTH0_CLIENT_ID, jsonResponseObject.AUTH0_DOMAIN, {
@@ -37,7 +37,30 @@ script.
             });
         }
     });
+    /*
+    lock.on("authenticated", function (authResult) {
+        // Use the token in authResult to getProfile() and save it to localStorage
+        lock.getProfile(authResult.idToken, function (error, profile) {
+            if (error) {
+                // Handle error
+                return;
+            }
 
+            localStorage.setItem('idToken', authResult.idToken);
+            localStorage.setItem('profile', JSON.stringify(profile));
+        });
+    });*/
+    /*
+    , {
+     auth: {
+     redirectUrl: jsonResponseObject.AUTH0_CALLBACK_URL + myCallbackRoute,
+     responseType: 'code',
+     params: {
+     scope: 'openid email' // Learn about scopes: https://auth0.com/docs/scopes
+     }
+     }
+     }
+    * */
     //Use lock (basic login)
     function login(){
         AUTH0_LOCK.show();
