@@ -8,7 +8,7 @@ var mongoose = require('mongoose');
 var schema = mongoose.Schema(
     {
         userId:{type: String, required: '{PATH} is required!'},
-        reportId:String,
+        reportId:{type: String, required: '{PATH} is required!'},
         rating:Number
 
     }

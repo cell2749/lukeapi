@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var passport = require('passport');
+var mongoose = require('mongoose');
+var mongodb = require('../mongodb/lukeAdb');
 /* SECURITY */
 var requiresLogin = require('../security/requiresLogin');
 var requiresRole = require('../security/requiresRole');
@@ -11,7 +13,7 @@ var ReportModel = require("../models/lukeA/ReportModel");
 var RankModel = require("../models/lukeA/RankModel");
 var ReportCategoryModel = require("../models/lukeA/ReportCategoryModel");
 var VoteModel = require("../models/lukeA/VoteModel");
-
+const REPORT_SCORE_VALUE = 100;
 const MONGO_PROJECTION ={
     _id: 0,
     __v: 0
@@ -43,9 +45,6 @@ router.get('/callback',passport.authenticate('auth0', { failureRedirect: '/url-i
         console.log("creating new");
         var user = new UserModel({
           id: userData.id,
-          username: userData.nickname,
-          email: "",
-          image_url: "",
           score: 0,
           rankingId: "0"
         });
@@ -60,7 +59,7 @@ router.get('/callback',passport.authenticate('auth0', { failureRedirect: '/url-i
       }
     });
   }
-  console.log(req.url);
+  //console.log(req.url);
 
   if(route==null){
     res.status(200).send('OK');
@@ -112,7 +111,7 @@ router.get('/updateUser',requiresLogin,function(req,res){
     UserModel.findOne({id:id},function(err,doc){
       if(doc!=null) {
         for (var key in doc) {
-          if (key != 'id' || key != '_id' || key != '__v') {
+          if (key != 'id' || key != '_id' || key != '__v' || key != 'username' || key != 'score' || key != 'rankingId') {
             doc[key] = req.query[key] || doc[key];
           }
         }
@@ -125,6 +124,32 @@ router.get('/updateUser',requiresLogin,function(req,res){
   }else{
     res.status(200).json({reqAuth:true});
   }
+});
+router.get('/available',requiresLogin,function(req,res){
+    var username = req.query.username;
+    UserModel.findOne({username:username},function(err,doc){
+        if(err) throw err;
+
+        if(doc) {
+            res.status(200).json({exists: true})
+        }else {
+            res.status(200).json({exists: false});
+        }
+    });
+});
+router.get('/set_username',requiresLogin,function(req,res){
+    var username = req.query.username;
+    UserModel.findOne({id:req.user.profile.id},function(err,doc){
+        if(err) throw err;
+        if(doc.username){
+            res.status(200).send("Cannot modify existing value.");
+        }else{
+            doc.username = username;
+            doc.save();
+            res.status(200).send("OK");
+        }
+    });
+
 
 });
 /* ACHIEVEMENTS ?? */
@@ -140,40 +165,94 @@ router.get('/triggertitle', requiresLogin,function(req,res,next){
 /* POST WRITE REQUESTS AUTH*/
 router.post('/create_rank', requiresLogin,requiresRole('admin'),function(req,res,next){
   var data = req.body;
-  console.log(data);
-  if(data.id != null) {
-    var rank = new RankModel();
-    for (var key in rank) {
-      if (key != '_id' || key != '__v') {
-        rank[key] = data[key] || rank[key];
-      }
-    }
-    rank.save(function (err, rank) {
-      if (err) throw err;
+  var id = mongoose.Types.ObjectId();
 
-      res.status(200).json(rank);
-    });
+  if(data.title != null) {
+      var rank = new RankModel();
+      for (var key in rank) {
+          if (key != '_id' || key != '__v' || key != 'id') {
+              rank[key] = data[key] || rank[key];
+          }
+      }
+      rank.id = id;
+      rank._id = id;
+      rank.save(function (err, rank) {
+          if (err) throw err;
+          var returnV = {};
+          for (var key in rank) {
+              if (key != "_id" || key != "__v") {
+                  returnV[key] = rank[key];
+              }
+          }
+          res.status(200).json(returnV);
+      });
   }else{
-    res.status(200).json({error:"Missing id"});
+    res.status(200).json({error:"Missing title"});
   }
 });
+router.get('/create_report_category',requiresLogin,requiresRole('admin'),function(req,res){
+    var data = req.query;
+    var id = mongoose.Types.ObjectId();
+    ReportCategoryModel.findOne({name:data.name},function(err,doc){
+        if(doc){
+            res.status(200).json({error:"Reprot Category with such name already exists!"});
+        }else {
+            var reportCategory = new ReportCategoryModel();
+            for (var k in reportCategory) {
+                if (k != "id" || k != "_id" || k != "__v") {
+                    reportCategory[k] = data[k] || reportCategory[k];
+                }
+            }
+            reportCategory.id = id;
+            reportCategory._id = id;
 
-router.post('/create_report',requiresLogin,function(req,res,next){
-  var data = req.body;
-  if(data.id != null) {
-    var report = new ReportModel();
-    for (var key in report) {
-      if (key != '_id' || key != '__v') {
-        report[key] = data[key] || report[key];
-      }
-    }
-    report.save(function (err, report) {
-      if (err) throw err;
-
-      res.status(200).json(report);
+            reportCategory.save(function (err, result) {
+                if (err)throw err;
+                var returnV = {};
+                for (var key in result) {
+                    if (key != "_id" || key != "__v") {
+                        returnV[key] = result[key];
+                    }
+                }
+                res.status(200).json(returnV);
+            });
+        }
     });
+
+});
+router.get('/create_report',requiresLogin,function(req,res,next){
+  var data = req.query;
+  var id = mongoose.Types.ObjectId();
+
+  if(data.title != null) {
+      UserModel.findOne({id: req.user.profile.id}, function (err, doc) {
+          doc.score = doc.score + REPORT_SCORE_VALUE;
+          var report = new ReportModel();
+          //var vote = new VoteModel();
+
+          for (var key in report) {
+              if (key != '_id' || key != '__v' || key != 'id') {
+                  report[key] = data[key] || report[key];
+              }
+          }
+          if (report.date == null) {
+              report.date = new Date().toISOString();
+          }
+          //vote.report.id = id;
+          report._id = id;
+          report.save(function (err, report) {
+              if (err)throw err;
+              var returnV = {};
+              for (var key in report) {
+                  if (key != "_id" || key != "__v") {
+                      returnV[key] = report[key];
+                  }
+              }
+              res.status(200).json(returnV);
+          });
+      });
   }else{
-    res.status(200).json({error:"Missing Id"});
+    res.status(200).json({error:"Missing title"});
   }
 });
 

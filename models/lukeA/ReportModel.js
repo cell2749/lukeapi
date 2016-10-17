@@ -12,12 +12,13 @@ var schema = mongoose.Schema(
         latitude: Number,
         altitude: Number,
         image_url: String,
-        submitterRating: Number,
-        submitterId: String,
         title:String,
         description:String,
         date:String,
-        categoryId:String
+        categoryId:String,
+        submitterRating: Number,
+        submitterId: String,
+        votes:Number
 
     }
 );
