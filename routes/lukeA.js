@@ -127,13 +127,24 @@ router.get('/updateUser',requiresLogin,function(req,res){
   }
 
 });
+router.get("/username",function(req,res){
+  var username = req.query.name|| "";
+  UserModel.findOne({username:username},function(err,result){
+    if(result){
+      res.status(200).json({taken:true});
+    }else{
+      res.status(200).json({taken:false});
+    }
+  });
+});
 /* ACHIEVEMENTS ?? */
 router.get('/achievements', requiresLogin,function(req,res,next){
   res.writeHead(200, {'Content-Type': 'text/html'});
   res.end("OK");
 });
 
-router.get('/triggertitle', requiresLogin,function(req,res,next){
+router.get('/addExperience', requiresLogin,function(req,res,next){
+
   res.writeHead(200, {'Content-Type': 'text/html'});
   res.end("OK");
 });
@@ -163,7 +174,7 @@ router.post('/create_report',requiresLogin,function(req,res,next){
   if(data.id != null) {
     var report = new ReportModel();
     for (var key in report) {
-      if (key != '_id' || key != '__v') {
+      if (key != '_id' || key != '__v' || key != 'approved' || key != 'submitterId' || key != 'submitterRating') {
         report[key] = data[key] || report[key];
       }
     }
