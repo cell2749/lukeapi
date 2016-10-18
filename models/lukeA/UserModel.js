@@ -11,7 +11,7 @@ var schema = mongoose.Schema(
         email:String,
         image_url:String,
         score: Number,
-        rankingId: Stringw
+        rankingId: String
     }
 );
 

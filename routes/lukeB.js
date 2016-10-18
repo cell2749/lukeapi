@@ -41,9 +41,6 @@ router.get('/callback',passport.authenticate('auth0', { failureRedirect: '/url-i
         console.log("creating new");
         var user = new UserModel({
           id: userData.id,
-          username: userData.nickname,
-          email: "",
-          image_url: "",
           score: 0,
           rankingId: "0"
         });
@@ -123,9 +120,78 @@ router.get('/updateUser',requiresLogin,function(req,res){
   }else{
     res.status(200).json({reqAuth:true});
   }
-
 });
 
+/**
+ * *//*
+router.get("",function(req,res){
+
+});*/
+
+router.get("/username",function(req,res){
+  var username = req.query.name|| "";
+  UserModel.findOne({username:username},function(err,result){
+    if(result){
+      res.status(200).json({taken:true});
+    }else{
+      res.status(200).json({taken:false});
+    }
+  });
+});
+/* ACHIEVEMENTS ?? */
+router.get('/achievements', requiresLogin,function(req,res,next){
+  res.writeHead(200, {'Content-Type': 'text/html'});
+  res.end("OK");
+});
+
+/* POST WRITE REQUESTS AUTH*/
+router.get('/create_report',requiresLogin,function(req,res,next){
+  var data = req.query;
+  var id = mongoose.Types.ObjectId();
+
+  if(data.title != null) {
+    UserModel.findOne({id: req.user.profile.id}, function (err, doc) {
+      doc.score = doc.score + REPORT_SCORE_VALUE;
+      var report = new ReportModel();
+      //var vote = new VoteModel();
+
+      for (var key in report) {
+        if (allowKey(key)) {
+          report[key] = data[key] || report[key];
+        }
+      }
+      if (report.date == null) {
+        report.date = new Date().toISOString();
+      }
+      //vote.report.id = id;
+      report._id = id;
+      report.save(function (err, report) {
+        if (err)throw err;
+        var returnV = {};
+        for (var key in report) {
+          if (key != "_id" || key != "__v") {
+            returnV[key] = report[key];
+          }
+        }
+        res.status(200).json(returnV);
+      });
+    });
+  }else{
+    res.status(200).json({error:"Missing title"});
+  }
+});
+router.get("/remove_report",requiresLogin,requiresRole("admin"),function(req,res){
+  var data = req.query;
+  var id = data.id;
+  ReportModel.find({id:id}).remove(function(err){
+    if(err) throw err;
+
+    res.status(200).send("OK");
+  });
+});
+router.get("/allow_report",requiresLogin,requiresRole("admin"),function(req,res){
+res.status(200).send("Hehehe. Not yet implemented.")
+});
 
 
 module.exports = router;

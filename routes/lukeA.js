@@ -18,6 +18,26 @@ const MONGO_PROJECTION ={
     _id: 0,
     __v: 0
 };
+
+/* UTILITY FUNCTION*/
+function allowKey(key){
+    var omit= [
+        "id",
+        "_id",
+        "__v",
+        "username",
+        "score",
+        "rankingId",
+        "submitterId",
+        "submitterRating"
+    ];
+    for(var i = 0;i<omit.length;i++){
+        if(omit[i]==key){
+            return false;
+        }
+    }
+    return true;
+}
 /* AUTHENTICATION SETUP */
 router.get("/authzero",function(req,res,next){
   var env = {
@@ -111,7 +131,7 @@ router.get('/updateUser',requiresLogin,function(req,res){
     UserModel.findOne({id:id},function(err,doc){
       if(doc!=null) {
         for (var key in doc) {
-          if (key != 'id' || key != '_id' || key != '__v' || key != 'username' || key != 'score' || key != 'rankingId') {
+          if (allowKey(key)) {
             doc[key] = req.query[key] || doc[key];
           }
         }
@@ -164,15 +184,9 @@ router.get("/username",function(req,res){
 });
 /* ACHIEVEMENTS ?? */
 router.get('/achievements', requiresLogin,function(req,res,next){
-  res.writeHead(200, {'Content-Type': 'text/html'});
-  res.end("OK");
+  res.status(200).send("Achievement unlocked: View response of unimplemented feature!");
 });
 
-router.get('/addExperience', requiresLogin,function(req,res,next){
-
-  res.writeHead(200, {'Content-Type': 'text/html'});
-  res.end("OK");
-});
 /* POST WRITE REQUESTS AUTH*/
 router.post('/create_rank', requiresLogin,requiresRole('admin'),function(req,res,next){
   var data = req.body;
@@ -181,7 +195,7 @@ router.post('/create_rank', requiresLogin,requiresRole('admin'),function(req,res
   if(data.title != null) {
       var rank = new RankModel();
       for (var key in rank) {
-          if (key != '_id' || key != '__v' || key != 'id') {
+          if (allowKey(key)) {
               rank[key] = data[key] || rank[key];
           }
       }
@@ -201,7 +215,6 @@ router.post('/create_rank', requiresLogin,requiresRole('admin'),function(req,res
     res.status(200).json({error:"Missing title"});
   }
 });
-/*
 router.get('/create_report_category',requiresLogin,requiresRole('admin'),function(req,res){
     var data = req.query;
     var id = mongoose.Types.ObjectId();
@@ -210,28 +223,13 @@ router.get('/create_report_category',requiresLogin,requiresRole('admin'),functio
             res.status(200).json({error:"Reprot Category with such name already exists!"});
         }else {
             var reportCategory = new ReportCategoryModel();
-            for (var k in reportCategory) {
-                if (k != "id" || k != "_id" || k != "__v") {
-                    reportCategory[k] = data[k] || reportCategory[k];
+            for (var key in reportCategory) {
+                if (allowKey(key)) {
+                    reportCategory[key] = data[key] || reportCategory[key];
                 }
             }
             reportCategory.id = id;
             reportCategory._id = id;
-
-
-router.post('/create_report',requiresLogin,function(req,res,next){
-  var data = req.body;
-  if(data.id != null) {
-    var report = new ReportModel();
-    for (var key in report) {
-      if (key != '_id' || key != '__v' || key != 'approved' || key != 'submitterId' || key != 'submitterRating') {
-        report[key] = data[key] || report[key];
-      }
-    }
-    report.save(function (err, report) {
-      if (err) throw err;
-
-      res.status(200).json(report);
 
             reportCategory.save(function (err, result) {
                 if (err)throw err;
@@ -247,43 +245,50 @@ router.post('/create_report',requiresLogin,function(req,res,next){
     });
 
 });
-*/    /*
 router.get('/create_report',requiresLogin,function(req,res,next){
-  var data = req.query;
-  var id = mongoose.Types.ObjectId();
+    var data = req.query;
+    var id = mongoose.Types.ObjectId();
 
-  if(data.title != null) {
-      UserModel.findOne({id: req.user.profile.id}, function (err, doc) {
-          doc.score = doc.score + REPORT_SCORE_VALUE;
-          var report = new ReportModel();
-          //var vote = new VoteModel();
+    if(data.title != null) {
+        UserModel.findOne({id: req.user.profile.id}, function (err, doc) {
+            doc.score = doc.score + REPORT_SCORE_VALUE;
+            var report = new ReportModel();
+            //var vote = new VoteModel();
 
-          for (var key in report) {
-              if (key != '_id' || key != '__v' || key != 'id') {
-                  report[key] = data[key] || report[key];
-              }
-          }
-          if (report.date == null) {
-              report.date = new Date().toISOString();
-          }
-          //vote.report.id = id;
-          report._id = id;
-          report.save(function (err, report) {
-              if (err)throw err;
-              var returnV = {};
-              for (var key in report) {
-                  if (key != "_id" || key != "__v") {
-                      returnV[key] = report[key];
-                  }
-              }
-              res.status(200).json(returnV);
-          });
-      });
-  }else{
-    res.status(200).json({error:"Missing title"});
-  }
+            for (var key in report) {
+                if (allowKey(key)) {
+                    report[key] = data[key] || report[key];
+                }
+            }
+            if (report.date == null) {
+                report.date = new Date().toISOString();
+            }
+            //vote.report.id = id;
+            report._id = id;
+            report.save(function (err, report) {
+                if (err)throw err;
+                var returnV = {};
+                for (var key in report) {
+                    if (key != "_id" || key != "__v") {
+                        returnV[key] = report[key];
+                    }
+                }
+                res.status(200).json(returnV);
+            });
+        });
+    }else{
+        res.status(200).json({error:"Missing title"});
+    }
 });
-*/
+router.get("/remove_report",requiresLogin,requiresRole("admin"),function(req,res){
+    var data = req.query;
+    var id = data.id;
+    ReportModel.find({id:id}).remove(function(err){
+        if(err) throw err;
+
+        res.status(200).send("OK");
+    });
+});
 
 
 
