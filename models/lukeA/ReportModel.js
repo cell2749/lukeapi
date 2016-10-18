@@ -20,7 +20,6 @@ var schema = mongoose.Schema(
         submitterRating: Number,
         submitterId: String,
         approved:Boolean
-
     }
 );
 
