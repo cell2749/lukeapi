@@ -40,9 +40,7 @@ router.get('/callback',passport.authenticate('auth0', { failureRedirect: '/url-i
       }else {
         console.log("creating new");
         var user = new UserModel({
-          id: userData.id,
-          score: 0,
-          rankingId: "0"
+          id: userData.id
         });
 
         console.log(user);

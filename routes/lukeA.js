@@ -3,16 +3,23 @@ var router = express.Router();
 var passport = require('passport');
 var mongoose = require('mongoose');
 var mongodb = require('../mongodb/lukeAdb');
+var http = require("http");
 /* SECURITY */
 var requiresLogin = require('../security/requiresLogin');
 var requiresRole = require('../security/requiresRole');
 var requiresRoles = require('../security/requiresRoles');
+var ManagementClient = require('auth0').ManagementClient;
+var management = new ManagementClient({
+    token: process.env.AUTH0_API_TOKEN,
+    domain: process.env.AUTH0_DOMAIN
+});
 /* MODELS */
 var UserModel = require("../models/lukeA/UserModel");
 var ReportModel = require("../models/lukeA/ReportModel");
 var RankModel = require("../models/lukeA/RankModel");
 var ReportCategoryModel = require("../models/lukeA/ReportCategoryModel");
 var VoteModel = require("../models/lukeA/VoteModel");
+
 const REPORT_SCORE_VALUE = 100;
 const MONGO_PROJECTION ={
     _id: 0,
@@ -40,12 +47,12 @@ function allowKey(key){
 }
 /* AUTHENTICATION SETUP */
 router.get("/authzero",function(req,res,next){
-  var env = {
+  var lockSetup = {
     AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID,
     AUTH0_DOMAIN: process.env.AUTH0_DOMAIN,
     AUTH0_CALLBACK_URL: process.env.AUTH0_CALLBACK_URL_DEVELOPMENT_A
   };
-  res.status(200).json(env);
+  res.status(200).json(lockSetup);
 });
 router.get('/callback',passport.authenticate('auth0', { failureRedirect: '/url-if-something-fails' }), function(req, res) {
   var route = req.query.route;
@@ -245,6 +252,70 @@ router.get('/create_report_category',requiresLogin,requiresRole('admin'),functio
     });
 
 });
+function deg2rad(deg){
+    return deg*Math.PI/180;
+}
+router.get('/reports',function(req,res){
+    var data = req.query;
+    var returnResult=[];
+    var limit = data.limit || 0;
+
+    //deg2rad might not be necessary
+    var location = {
+        long : deg2rad(data.long),
+        lat : deg2rad(data.lat)
+    };
+    var distance = data.distance || 5000;
+
+    // Set up "Constants"
+    const m1 = 111132.92;		// latitude calculation term 1
+    const m2 = -559.82;		// latitude calculation term 2
+    const m3 = 1.175;			// latitude calculation term 3
+    const m4 = -0.0023;		// latitude calculation term 4
+    const p1 = 111412.84;		// longitude calculation term 1
+    const p2 = -93.5;			// longitude calculation term 2
+    const p3 = 0.118;			// longitude calculation term 3
+
+    var latlen = m1 + (m2 * Math.cos(2 * location.lat)) + (m3 * Math.cos(4 * location.lat)) +
+        (m4 * Math.cos(6 * location.lat));
+    var longlen = (p1 * Math.cos(location.lat)) + (p2 * Math.cos(3 * location.lat)) +
+        (p3 * Math.cos(5 * location.lat));
+
+    var approved=true;
+    if(req.isAuthenticated()) {
+        var appMetadata = req.user.profile._json.app_metadata || {};
+        var roles = appMetadata.roles || [];
+        if (roles.indexOf("admin") != -1 || roles.indexOf("advanced") != -1) {
+            approved = data.approved || true;
+        }
+    }
+    //var rating;
+    //distinction by user, category, location, approved,rating
+    ReportModel.find({categoryId:data.categoryId,approved:approved,submitterId:data.userid},MONGO_PROJECTION).sort({"date":-1}).limit(parseInt(limit)).exec(function(err, result){
+        if(err) throw err;
+
+
+        if(distance&&location.long&&location.lat) {
+            for (var i = 0; i < result.length; i++) {
+
+                if(result[i].latitude!=null&&result[i].longitude!=null) {
+                    if (((location.long - result[i].longitude) * longlen) ^ 2 + ((location.lat - result[i].latitude) * latlen) ^ 2 <= distance ^ 2) {
+                        returnResult.push(result);
+                    }
+                }
+                if(i==result.length-1){
+                    res.status(200).json(returnResult);
+                }
+                //might require improvement right here
+            }
+
+        }else {
+
+            res.status(200).json(result);
+        }
+    });
+});
+
 router.get('/create_report',requiresLogin,function(req,res,next){
     var data = req.query;
     var id = mongoose.Types.ObjectId();
@@ -265,6 +336,11 @@ router.get('/create_report',requiresLogin,function(req,res,next){
             }
             //vote.report.id = id;
             report._id = id;
+            if(report.id == null) {
+                report.id = id;
+            }
+            report.approved = false;
+            doc.save();
             report.save(function (err, report) {
                 if (err)throw err;
                 var returnV = {};
@@ -275,6 +351,7 @@ router.get('/create_report',requiresLogin,function(req,res,next){
                 }
                 res.status(200).json(returnV);
             });
+
         });
     }else{
         res.status(200).json({error:"Missing title"});
@@ -289,9 +366,78 @@ router.get("/remove_report",requiresLogin,requiresRole("admin"),function(req,res
         res.status(200).send("OK");
     });
 });
+router.get("/approve_report",requiresLogin,requiresRole("admin"),function(req,res){
+    var data = req.query;
+    var id = data.id;
+    ReportModel.findOne({id:id},function(err,doc){
+        if(err) throw err;
 
+        doc.approved=true;
+        doc.save();
 
+        res.status(200).send("OK");
+    });
+});
 
+router.get("/add_role",requiresLogin,requiresRole("admin"),function(req,res){
+    var data = req.query;
+    var userId = data.userid;
+    var role = data.role;
+    var rolesArr;
+
+    management.users.get({id:userId},function(err,user) {
+        if (err) {
+            res.status(200).send("Invalid user id");
+        } else {
+
+            rolesArr = user.app_metadata.roles || [];
+
+            if (rolesArr.indexOf(role) == -1 && role != null) {
+                rolesArr.push(role);
+            }
+            console.log(rolesArr);
+            //var params = { id: userId };
+            var metadata = {
+                roles: rolesArr
+            };
+
+            management.users.updateAppMetadata({id: userId}, metadata, function (err, user) {
+                if (err) console.log(err);
+                console.log(user.app_metadata.roles);
+            });
+
+            res.status(200).send("OK");
+        }
+    });
+});
+router.get("/remove_role",requiresLogin,requiresRole("admin"),function(req,res) {
+    var data = req.query;
+    var userId = data.userid;
+    var role = data.role;
+    var roles = [];
+
+    management.users.get({id: userId}, function (err, user) {
+        if (err) {
+            res.status(200).send("Invalid user id");
+        } else {
+            roles = user.app_metadata.roles;
+            if (roles.indexOf(role) != -1) {
+                roles.splice(roles.indexOf(role), 1);
+            }
+
+            var metadata = {
+                roles: roles
+            };
+
+            management.users.updateAppMetadata({id: userId}, metadata, function (err, user) {
+                if (err) console.log(err);
+                console.log(user.app_metadata.roles);
+            });
+
+            res.status(200).send("OK");
+        }
+    });
+});
 
 /* SECURITY TESTS */
 router.get('/test/public',function(req,res,next){

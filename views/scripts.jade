@@ -15,14 +15,14 @@ script.
     }
 
     //SETUP LOCK ON APP LOAD
-    httpGetAsync('/lukeB/authzero',function(res){
+    httpGetAsync('/lukeA/authzero',function(res){
         //Get json response object
         var jsonResponseObject = JSON.parse(res);
 
         if(jsonResponseObject!=null){
 
             //Route where to return after successful login
-            var myCallbackRoute = '?route=/lukeB/user';
+            var myCallbackRoute = '?route=/lukeA/user';
             //myCallbackRoute = '';
 
             //Setup your AUTH0_LOCK
