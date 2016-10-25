@@ -7,19 +7,24 @@ var mongoose = require('mongoose');
 
 var schema = mongoose.Schema(
     {
-        id:{type: String, required: '{PATH} is required!'},
-        longitude: Number,
-        latitude: Number,
-        altitude: Number,
-        image_url: String,
-        title:String,
-        description:String,
-        date:String,
-        categoryId:String,
-        rating:Number,
-        submitterRating: Number,
-        submitterId: String,
-        approved:Boolean
+            id: {type: String, required: '{PATH} is required!'},
+            longitude: Number,
+            latitude: Number,
+            altitude: Number,
+            image_url: String,
+            title: String,
+            description: String,
+            date: String,
+            categoryId: String,
+            rating: Number,
+            submitterId: String,
+            approved: Boolean,
+            votes: [
+                    {
+                            userId: String,
+                            vote: Boolean
+                    }
+            ]
     }
 );
 

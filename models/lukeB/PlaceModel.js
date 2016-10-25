@@ -16,7 +16,7 @@ var schema = mongoose.Schema(
         rating:Number,
         description:String,
         nearReports:[{
-            id:String,
+            id:String
         }],
         visitLog:[{
             id:String,

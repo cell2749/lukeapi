@@ -20,8 +20,10 @@ var schema = mongoose.Schema(
         rating2:Number,
         comments:[{
             rating:Number,
-            profileId:String
-        }]
+            profileId:String,
+            comment:String
+        }],
+        approved:Boolean
 
     }
 );
