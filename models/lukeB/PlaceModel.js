@@ -24,7 +24,7 @@ var schema = mongoose.Schema(
             report:Boolean
         }],
         weatherData:{
-            nearestWeatherStation:String, //???? lat, long?
+            nearestWeatherStation:String, //???? lat, long or address ?
             temperature:Number,
             seaTemperature:Number,
             wind:Number

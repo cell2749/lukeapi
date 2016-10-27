@@ -20,12 +20,10 @@ var ReportCategoryModel = require("../models/lukeA/ReportCategoryModel");
 var VoteModel = require("../models/lukeA/VoteModel");
 var ExperienceModel = require("../models/lukeA/ExperienceModel");
 
-const REPORT_SCORE_VALUE = 100;
 const MONGO_PROJECTION ={
     _id: 0,
     __v: 0
 };
-
 /* UTILITY FUNCTIONS*/
 function allowKey(key){
     var omit= [
@@ -92,7 +90,7 @@ router.get('/callback',passport.authenticate('auth0', { failureRedirect: '/url-i
   //console.log(req.url);
 
   if(route==null){
-    res.status(200).send('OK');
+    res.status(200).send("OK");
   }else{
     res.redirect(route);
   }
@@ -119,7 +117,7 @@ router.get("/login",passport.authenticate('auth0',{failureRedirect:'/url-if-some
             }
         });
     }
-    res.status(200).send('OK');
+    res.status(200).send("OK");
 });
 /* DATABASE HTTP REQUESTS*/
 /* USERS */
@@ -148,7 +146,7 @@ router.get('/user',requiresLogin, function(req, res, next) {
       res.status(200).json(response);
     });
   }else{
-    res.status(200).json({reqAuth:true});
+      res.status(200).json({error:'Proper authorization required',reqAuth:true});
   }
 });
 /**
@@ -177,7 +175,7 @@ router.get('/update-user',requiresLogin,function(req,res){
       }
     });
   }else{
-    res.status(200).json({reqAuth:true});
+    res.status(200).json({error:'Proper authorization required',reqAuth:true});
   }
 });
 router.get('/username-available',requiresLogin,function(req,res){
@@ -197,11 +195,11 @@ router.get('/set-username',requiresLogin,function(req,res){
     UserModel.findOne({id:req.user.profile.id},function(err,doc){
         if(err) throw err;
         if(doc.username){
-            res.status(200).send("Cannot modify existing value.");
+            res.status(200).json({error:"Cannot modify existing value."});
         }else{
             doc.username = username;
             doc.save();
-            res.status(200).send("OK");
+            res.status(200).json({success:true});
         }
     });
 });
@@ -255,8 +253,16 @@ router.get("/update-rank",requiresLogin,requiresRole("admin"),function(req,res){
                         doc[key] = data[key] || doc[key];
                     }
                 }
+                doc.save(function(err,result){
+                    if(err) throw err;
+                    var returnV={}, pattern = new RankModel();
+                    for(var key in pattern){
+                        returnV[key]=result[key];
+                    }
+                    res.status(200).json(returnV);
+                });
             } else {
-                res.status(200).send("Rank with such id doesn't exists!");
+                res.status(200).json({error:"Rank with such id doesn't exists!"});
             }
         });
     }else {
@@ -268,8 +274,16 @@ router.get("/update-rank",requiresLogin,requiresRole("admin"),function(req,res){
                         doc[key] = data[key] || doc[key];
                     }
                 }
+                doc.save(function(err,result){
+                    if(err) throw err;
+                    var returnV={}, pattern = new RankModel();
+                    for(var key in pattern){
+                        returnV[key]=result[key];
+                    }
+                    res.status(200).json(returnV);
+                });
             } else {
-                res.status(200).send("Rank with such title doesn't exists");
+                res.status(200).json({error:"Rank with such title doesn't exists"});
             }
         });
     }
@@ -281,9 +295,9 @@ router.get("/remove-rank",requiresLogin,requiresRole("admin"),function(req,res){
         if (err) throw err;
 
         if (item.result.n != 0) {
-            res.status(200).send("Removed " + item.result.n + " items");
+            res.status(200).json({success:"Removed " + item.result.n + " items"});
         } else {
-            res.status(200).send("No Rank with such id");
+            res.status(200).json({error:"No Rank with such id"});
         }
     });
 });
@@ -328,8 +342,17 @@ router.get("/update-report-category",requiresLogin,requiresRole("admin"),functio
                         doc[key] = data[key] || doc[key];
                     }
                 }
+                doc.save(function(err,result){
+                    if(err) throw err;
+                    var returnV={}, pattern = new ReportCategoryModel();
+                    for(var key in pattern){
+                        returnV[key]=result[key];
+                    }
+                    res.status(200).json(returnV);
+                });
             } else {
                 res.status(200).json({error: "Report Category with such id doesn't exists!"});
+
             }
         });
     }else {
@@ -341,6 +364,14 @@ router.get("/update-report-category",requiresLogin,requiresRole("admin"),functio
                         doc[key] = data[key] || doc[key];
                     }
                 }
+                doc.save(function(err,result){
+                    if(err) throw err;
+                    var returnV={}, pattern = new ReportCategoryModel();
+                    for(var key in pattern){
+                        returnV[key]=result[key];
+                    }
+                    res.status(200).json(returnV);
+                });
             } else {
                 res.status(200).json({error: "Report Category with such name doesn't exists!"});
             }
@@ -354,9 +385,9 @@ router.get("/remove-report-category",requiresLogin,requiresRole("admin"),functio
         if (err) throw err;
 
         if (item.result.n != 0) {
-            res.status(200).json("Removed " + item.result.n + " items");
+            res.status(200).json({success:"Removed " + item.result.n + " items"});
         } else {
-            res.status(200).send("No category with such id");
+            res.status(200).json({error:"No category with such id"});
         }
     });
 });
@@ -433,38 +464,44 @@ router.get('/create-report',requiresLogin,function(req,res,next){
     var id = mongoose.Types.ObjectId();
 
     if(data.title != null) {
-        UserModel.findOne({id: req.user.profile.id}, function (err, doc) {
-            doc.score = doc.score + REPORT_SCORE_VALUE;
-            var report = new ReportModel();
-            //var vote = new VoteModel();
+        ExperienceModel.findOne({active:true},function(err,exp) {
+            if (err) throw err;
+            if (exp) {
+                UserModel.findOne({id: req.user.profile.id}, function (err, doc) {
+                    doc.score = doc.score + exp.reportGain;
+                    var report = new ReportModel();
+                    //var vote = new VoteModel();
 
-            for (var key in report) {
-                if (allowKey(key)) {
-                    report[key] = data[key] || report[key];
-                }
-            }
-            if (report.date == null) {
-                report.date = new Date().toISOString();
-            }
-            //vote.report.id = id;
-            report._id = id;
-            if(report.id == null) {
-                report.id = id;
-            }
-            report.votes = {};
-            report.approved = false;
-            doc.save();
-            report.save(function (err, report) {
-                if (err)throw err;
-                var returnV = {};
-                for (var key in report) {
-                    if (key != "_id" || key != "__v") {
-                        returnV[key] = report[key];
+                    for (var key in report) {
+                        if (allowKey(key)) {
+                            report[key] = data[key] || report[key];
+                        }
                     }
-                }
-                res.status(200).json(returnV);
-            });
-
+                    if (report.date == null) {
+                        report.date = new Date().toISOString();
+                    }
+                    //vote.report.id = id;
+                    report._id = id;
+                    if (report.id == null) {
+                        report.id = id;
+                    }
+                    report.votes = {};
+                    report.approved = false;
+                    doc.save();
+                    report.save(function (err, report) {
+                        if (err)throw err;
+                        var returnV = {};
+                        for (var key in report) {
+                            if (key != "_id" || key != "__v") {
+                                returnV[key] = report[key];
+                            }
+                        }
+                        res.status(200).json(returnV);
+                    });
+                });
+            } else {
+                res.status(200).json({error:"No experience Model active"});
+            }
         });
     }else{
         res.status(200).json({error:"Missing title"});
@@ -489,7 +526,7 @@ router.get("/update-report",requiresLogin,function(req,res){
     var data = req.query;
     ReportModel.findOne({id:data.id},function(err,doc) {
         if (doc.submitterId != req.user.profile.id) {
-            res.status(200).send("Restricted Access");
+            res.status(200).json({error:"Restricted Access"});
         } else {
             if (doc) {
                 var pattern = new ReportModel();
@@ -498,8 +535,16 @@ router.get("/update-report",requiresLogin,function(req,res){
                         doc[key] = data[key] || doc[key];
                     }
                 }
+                doc.save(function(err,result){
+                    var returnV={}, reportPattern = new ReportModel();
+                    for(var key in reportPattern){
+                        returnV[key]=result[key];
+                    }
+                    res.status(200).json(returnV);
+                });
+
             } else {
-                res.status(200).send("No such id");
+                res.status(200).json({error:"No such id"});
             }
         }
     });
@@ -515,13 +560,13 @@ router.get("/remove-report",requiresLogin,function(req,res){
                 if (err) throw err;
 
                 if (item.result.n != 0) {
-                    res.status(200).send("Removed " + item.result.n + " items");
+                    res.status(200).json({success:"Removed " + item.result.n + " items"});
                 } else {
-                    res.status(200).send("No report with such id");
+                    res.status(200).json({error:"No report with such id"});
                 }
             });
         }else{
-            res.status(200).send("Restricted Access");
+            res.status(200).json({error:"Restricted Access"});
         }
     });
 });
@@ -532,155 +577,209 @@ router.get("/approve-report",requiresLogin,requiresRole("admin"),function(req,re
         if(err) throw err;
         if(doc) {
             doc.approved = true;
-            doc.save();
-
-            res.status(200).send("OK");
+            doc.save(function(err,result){
+                if(err) throw err;
+                res.status(200).json({success:true});
+            });
         }else{
-            res.status(200).send("No report with such id");
+            res.status(200).json({error:"No report with such id"});
         }
     });
 });
-router.get("/upvote-report",requiresLogin,function(req,res){
+router.get("/upvote-report",requiresLogin,function(req,res) {
     var userid = req.user.profile.id;
     var reportid = req.query.reportid;
-    if(reportid!=null) {
-        ReportModel.findOne({id: reportid}, function (err, doc) {
+    if (reportid != null) {
+        ExperienceModel.findOne({active: true}, function (err, exp) {
             if (err) throw err;
-            if(doc) {
-                var exists = false;
-                for (var i = 0; i < doc.votes.length; i++) {
-                    if (doc.votes[i].userId == userid) {
-                        exists = true;
-                        if (!doc.votes[i].vote) {
-                            doc.votes[i].vote = true;
-                            if (doc.rating != null) {
-                                doc.rating++;
+
+            if (exp) {
+                ReportModel.findOne({id: reportid}, function (err, doc) {
+                    if (err) throw err;
+                    if (doc) {
+                        UserModel.findOne({id: userid}, function (err, usr) {
+                            if (err) throw err;
+                            if (usr) {
+                                usr.score = usr.score + exp.upvoteGain;
+                                var exists = false;
+                                for (var i = 0; i < doc.votes.length; i++) {
+                                    if (doc.votes[i].userId == userid) {
+                                        exists = true;
+                                        if (!doc.votes[i].vote) {
+                                            doc.votes[i].vote = true;
+                                            if (doc.rating != null) {
+                                                doc.rating++;
+                                            } else {
+                                                doc.rating = 1;
+                                            }
+                                        }
+                                    }
+                                }
+                                if (!exists) {
+                                    doc.votes.push({userId: userid, vote: true});
+                                    if (doc.rating != null) {
+                                        doc.rating++;
+                                    } else {
+                                        doc.rating = 1;
+                                    }
+                                }
+                                doc.save();
+                                res.status(200).json({success: true});
                             } else {
-                                doc.rating = 1;
+                                res.status(200).json({error: "Report does not have a submitter"});
                             }
-                        }
-                    }
-                }
-                if (!exists) {
-                    doc.votes.push({userId: userid, vote: true});
-                    if (doc.rating != null) {
-                        doc.rating++;
+                        });
                     } else {
-                        doc.rating = 1;
+                        res.status(200).json({error: "No report with such id"});
+
                     }
-                }
-                doc.save();
-                res.status(200).send("OK");
-            }else{
-                res.status(200).send("No report with such id");
+                });
+            } else {
+                res.status(200).json({error: "No experience patterns"});
             }
         });
-    }else{
-        res.status(200).send("No report id was provided");
+    } else {
+        res.status(200).json({error: "No report id was provided"});
     }
 });
-router.get("/downvote-report",requiresLogin,function(req,res){
+router.get("/downvote-report",requiresLogin,function(req,res) {
     var userid = req.user.profile.id;
     var reportid = req.query.reportid;
-    if(reportid!=null) {
-        ReportModel.findOne({id: reportid}, function (err, doc) {
+    if (reportid != null) {
+        ExperienceModel.findOne({active: true}, function (err, exp) {
             if (err) throw err;
-            if(doc) {
-                var exists = false;
-                for (var i = 0; i < doc.votes.length; i++) {
-                    if (doc.votes[i].userId == userid) {
-                        exists = true;
-                        if (doc.votes[i].vote) {
-                            doc.votes[i].vote = false;
-                            if (doc.rating != null) {
-                                doc.rating--;
+            if (exp) {
+                ReportModel.findOne({id: reportid}, function (err, doc) {
+                    if (err) throw err;
+                    if (doc) {
+                        UserModel.findOne({id: doc.submitterId}, function (err, usr) {
+                            if (err) throw err;
+                            if (usr) {
+                                usr.score = usr.score + exp.downvoteGain;
+
+                                var exists = false;
+                                for (var i = 0; i < doc.votes.length; i++) {
+                                    if (doc.votes[i].userId == userid) {
+                                        exists = true;
+                                        if (doc.votes[i].vote) {
+                                            doc.votes[i].vote = false;
+                                            if (doc.rating != null) {
+                                                doc.rating--;
+                                            } else {
+                                                doc.rating = -1;
+                                            }
+                                        }
+                                    }
+                                }
+                                if (!exists) {
+                                    doc.votes.push({userId: userid, vote: false});
+                                    if (doc.rating != null) {
+                                        doc.rating--;
+                                    } else {
+                                        doc.rating = -1;
+                                    }
+                                }
+                                doc.save();
+                                res.status(200).json({success: true});
                             } else {
-                                doc.rating = -1;
+                                res.status(200).json({error: "Report does not have a submitter"});
                             }
-                        }
-                    }
-                }
-                if (!exists) {
-                    doc.votes.push({userId: userid, vote: false});
-                    if (doc.rating != null) {
-                        doc.rating--;
+                        });
                     } else {
-                        doc.rating = -1;
+                        res.status(200).json({error: "No report with such id"});
                     }
-                }
-                doc.save();
-                res.status(200).send("OK");
-            }else{
-                res.status(200).send("No report with such id");
+                });
+            } else {
+                res.status(200).json({error: "No experience patterns"});
             }
         });
-    }else{
-        res.status(200).send("No report id was provided");
+    } else {
+        res.status(200).json({error: "No report id was provided"});
     }
 });
-router.get("/vote-report",requiresLogin,function(req,res){
+router.get("/vote-report",requiresLogin,function(req,res) {
     var userid = req.user.profile.id;
     var reportid = req.query.reportid;
     var vote = req.query.vote;
-    if(reportid!=null && vote != null) {
-        ReportModel.findOne({id: reportid}, function (err, doc) {
+    if (reportid != null && vote != null) {
+        ExperienceModel.findOne({active: true}, function (err, exp) {
             if (err) throw err;
-            if(doc) {
-                if(vote=="true"|| vote==1) {
-                    var exists = false;
-                    for (var i = 0; i < doc.votes.length; i++) {
-                        if (doc.votes[i].userId == userid) {
-                            exists = true;
-                            if (!doc.votes[i].vote) {
-                                doc.votes[i].vote = true;
-                                if (doc.rating != null) {
-                                    doc.rating++;
+
+            if (exp) {
+                ReportModel.findOne({id: reportid}, function (err, doc) {
+                    if (err) throw err;
+                    if (doc) {
+                        UserModel.findOne({id: doc.submitterId}, function (err, usr) {
+                            if (err) throw err;
+
+                            if (usr) {
+                                if (vote == "true" || vote == 1) {
+                                    var exists = false;
+                                    for (var i = 0; i < doc.votes.length; i++) {
+                                        if (doc.votes[i].userId == userid) {
+                                            exists = true;
+                                            if (!doc.votes[i].vote) {
+                                                doc.votes[i].vote = true;
+                                                usr.score = usr.score + exp.upvoteGain;
+                                                if (doc.rating != null) {
+                                                    doc.rating++;
+                                                } else {
+                                                    doc.rating = 1;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (!exists) {
+                                        doc.votes.push({userId: userid, vote: true});
+                                        usr.score = usr.score + exp.upvoteGain;
+                                        if (doc.rating != null) {
+                                            doc.rating++;
+                                        } else {
+                                            doc.rating = 1;
+                                        }
+                                    }
                                 } else {
-                                    doc.rating = 1;
+                                    var exists = false;
+                                    for (var i = 0; i < doc.votes.length; i++) {
+                                        if (doc.votes[i].userId == userid) {
+                                            exists = true;
+                                            if (doc.votes[i].vote) {
+                                                doc.votes[i].vote = false;
+                                                usr.score = usr.score + exp.downvoteGain;
+                                                if (doc.rating != null) {
+                                                    doc.rating--;
+                                                } else {
+                                                    doc.rating = -1;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (!exists) {
+                                        doc.votes.push({userId: userid, vote: false});
+                                        usr.score = usr.score + exp.downvoteGain;
+                                        if (doc.rating != null) {
+                                            doc.rating--;
+                                        } else {
+                                            doc.rating = -1;
+                                        }
+                                    }
                                 }
+                                doc.save();
+                                res.status(200).json({success: true});
+                            } else {
+                                res.status(200).json({error: "Report does not have a submitter"});
                             }
-                        }
+                        });
+                    } else {
+                        res.status(200).json({error: "No report with such id"});
                     }
-                    if (!exists) {
-                        doc.votes.push({userId: userid, vote: true});
-                        if (doc.rating != null) {
-                            doc.rating++;
-                        } else {
-                            doc.rating = 1;
-                        }
-                    }
-                }else{
-                    var exists = false;
-                    for (var i = 0; i < doc.votes.length; i++) {
-                        if (doc.votes[i].userId == userid) {
-                            exists = true;
-                            if (doc.votes[i].vote) {
-                                doc.votes[i].vote = false;
-                                if (doc.rating != null) {
-                                    doc.rating--;
-                                } else {
-                                    doc.rating = -1;
-                                }
-                            }
-                        }
-                    }
-                    if (!exists) {
-                        doc.votes.push({userId: userid, vote: false});
-                        if (doc.rating != null) {
-                            doc.rating--;
-                        } else {
-                            doc.rating = -1;
-                        }
-                    }
-                }
-                doc.save();
-                res.status(200).send("OK");
-            }else{
-                res.status(200).send("No report with such id");
+                });
+            } else {
+                res.status(200).json({error: "No experience patterns"});
             }
         });
-    }else{
-        res.status(200).send("Report id or vote was not specified");
+    } else {
+        res.status(200).json({error: "Report id or vote was not specified"});
     }
 });
 /* ROLES */
@@ -695,7 +794,7 @@ router.get("/add-role",requiresLogin,requiresRole("admin"),function(req,res) {
     if (role != "superadmin" && (role != "admin" || adminRoles.indexOf("superadmin") != -1)) {
         management.users.get({id: userId}, function (err, user) {
             if (err) {
-                res.status(200).send("Invalid user id");
+                res.status(200).json({error:"Invalid user id"});
             } else {
                 rolesArr = user.app_metadata.roles || [];
 
@@ -709,12 +808,12 @@ router.get("/add-role",requiresLogin,requiresRole("admin"),function(req,res) {
 
                 management.users.updateAppMetadata({id: userId}, metadata, function (err, user) {
                     if (err) console.log(err);
-                    res.status(200).send("OK");
+                    res.status(200).json({success:true});
                 });
             }
         });
     } else {
-        res.status(200).send("Restricted access");
+        res.status(200).json({error:'Proper authorization required',reqAuth:true});
     }
 });
 router.get("/remove-role",requiresLogin,requiresRole("admin"),function(req,res) {
@@ -728,7 +827,7 @@ router.get("/remove-role",requiresLogin,requiresRole("admin"),function(req,res) 
     if(role!="superadmin"&&(role!="admin"||adminRoles.indexOf("superadmin") != -1)) {
         management.users.get({id: userId}, function (err, user) {
             if (err) {
-                res.status(200).send("Invalid user id");
+                res.status(200).json({error:"Invalid user id"});
             } else {
                 roles = user.app_metadata.roles;
                 if (roles.indexOf(role) != -1 && role != null) {
@@ -741,12 +840,12 @@ router.get("/remove-role",requiresLogin,requiresRole("admin"),function(req,res) 
 
                 management.users.updateAppMetadata({id: userId}, metadata, function (err, user) {
                     if (err) console.log(err);
-                    res.status(200).send("OK");
+                    res.status(200).json({success:true});
                 });
             }
         });
     }else{
-        res.status(200).send("Restricted access");
+        res.status(200).json({error:'Proper authorization required',reqAuth:true});
     }
 });
 router.get("/user-roles",requiresLogin,requiresRole("admin"),function(req,res){
@@ -754,7 +853,7 @@ router.get("/user-roles",requiresLogin,requiresRole("admin"),function(req,res){
     var userId = data.userid;
     management.users.get({id: userId}, function (err, user) {
         if (err) {
-            res.status(200).send("Invalid user id");
+            res.status(200).json({error:"Invalid user id"});
         } else {
             res.status(200).json(user.app_metadata.roles);
         }
@@ -776,7 +875,7 @@ router.get("/create-experience-pattern",requiresLogin,requiresRole("superadmin")
     experiencePattern.save(function(err,result){
         if(err) throw err;
 
-        res.status(200).send("OK");
+        res.status(200).json({success:true});
     });
 });
 router.get("/update-experience-pattern",requiresLogin,requiresRole("superadmin"),function(req,res){
@@ -790,10 +889,17 @@ router.get("/update-experience-pattern",requiresLogin,requiresRole("superadmin")
                     doc[key]= data[key] || doc[key];
                 }
             }
-            doc.save();
-            res.status(200).send("OK");
+            doc.save(function(err,result){
+                if(err) throw err;
+                var returnV={}, pattern = new ExperienceModel();
+                for(var key in pattern){
+                    returnV[key]=result[key];
+                }
+                res.status(200).json(returnV);
+            });
+
         }else{
-            res.status(200).send("No pattern was found");
+            res.status(200).json({error:"No pattern was found"});
         }
     });
 });
@@ -802,9 +908,9 @@ router.get("/remove-experience-pattern",requiresLogin,requiresRole("superadmin")
     ExperienceModel.find({id: data.id}).remove(function (err, item) {
         if (err) throw err;
         if (item.result.n != 0) {
-            res.status(200).send("Removed " + item.result.n + "items");
+            res.status(200).json({success:"Removed " + item.result.n + "items"});
         } else {
-            res.status(200).send("No item with such id");
+            res.status(200).json({error:"No item with such id"});
         }
     });
 });
@@ -814,8 +920,73 @@ router.get("/activate-experience-model",requiresLogin,requiresRole("superadmin")
         if(err) throw err;
         ExperienceModel.update({id: data.id}, {$set: {active: true}}, function (err, doc) {
             if(err) throw err;
-            res.status(200).send("OK");
+            res.status(200).json({success:true});
         });
+    });
+});
+router.get("/nullify-all-experience",requiresLogin,requiresRole("superadmin"),function(req,res){
+    UserModel.update({}, {$set: {score: 0, rankingId:null}}, function (err, result) {
+        if(err) throw err;
+        res.status(200).json({success:true});
+    });
+});
+router.get("/nullify-experience",requiresLogin,requiresRole("superadmin"),function(req,res){
+    var usrId = req.query.id;
+    UserModel.update({id:usrId}, {$set: {score: 0, rankingId:null}}, function (err, result) {
+        if(err) throw err;
+        res.status(200).json({success:true});
+    });
+});
+/* BAN UNBAN */
+router.get("/ban",requiresLogin,requiresRole("admin"),function(req,res) {
+    var data = req.query;
+    var id = data.id;
+    var rolesArr;
+
+    management.users.get({id: id}, function (err, user) {
+        if (err) {
+            res.status(200).json({error: "Invalid user id"});
+        } else {
+            rolesArr = user.app_metadata.roles || [];
+
+            if (rolesArr.indexOf("ban") == -1) {
+                rolesArr.push("ban");
+            }
+
+            var metadata = {
+                roles: rolesArr
+            };
+
+            management.users.updateAppMetadata({id: id}, metadata, function (err, user) {
+                if (err) console.log(err);
+                res.status(200).json({success: true});
+            });
+        }
+    });
+});
+router.get("/unban",requiresLogin,requiresRole("admin"),function(req,res) {
+    var data = req.query;
+    var id = data.id;
+    var roles;
+
+    management.users.get({id: id}, function (err, user) {
+        if (err) {
+            res.status(200).json({error: "Invalid user id"});
+        } else {
+            roles = user.app_metadata.roles;
+            if (roles.indexOf("ban") != -1) {
+                roles.splice(roles.indexOf("ban"), 1);
+            }
+
+            var metadata = {
+                roles: roles
+            };
+
+            management.users.updateAppMetadata({id: id}, metadata, function (err, user) {
+                if (err) console.log(err);
+                res.status(200).json({success: true});
+            });
+        }
     });
 });
 /* ACHIEVEMENTS */

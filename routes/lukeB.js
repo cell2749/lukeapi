@@ -49,9 +49,9 @@ function remove(Model,id) {
         if (err) throw err;
 
         if (item.result.n != 0) {
-            res.status(200).send("Removed " + item.result.n + " items");
+            res.status(200).json({success:"Removed " + item.result.n + " items"});
         } else {
-            res.status(200).send("No such id");
+            res.status(200).json({error:"No such id"});
         }
     });
 }
@@ -65,7 +65,7 @@ function update(Model,data) {
                 }
             }
         } else {
-            res.status(200).send("No such id");
+            res.status(200).json({error:"No such id"});
         }
     });
 }
@@ -164,7 +164,7 @@ router.get('/user',requiresLogin, function(req, res, next) {
             res.status(200).json(response);
         });
     } else {
-        res.status(200).json({reqAuth: true});
+        res.status(200).json({error:'Proper authorization required',reqAuth:true});
     }
 });
 /**
@@ -193,7 +193,7 @@ router.get('/updateUser',requiresLogin,function(req,res) {
             }
         });
     } else {
-        res.status(200).json({reqAuth: true});
+        res.status(200).json({error:'Proper authorization required',reqAuth:true});
     }
 });
 
@@ -323,13 +323,13 @@ router.get("/remove-report",requiresLogin,function(req,res){
                 if (err) throw err;
 
                 if (item.result.n != 0) {
-                    res.status(200).send("Removed " + item.result.n + " items");
+                    res.status(200).json({success:"Removed " + item.result.n + " items"});
                 } else {
-                    res.status(200).send("No report with such id");
+                    res.status(200).json({error:"No report with such id"});
                 }
             });
         }else{
-            res.status(200).send("Restricted Access");
+            res.status(200).json({error:"Restricted Access"});
         }
     });
 });
@@ -340,11 +340,12 @@ router.get("/approve-report",requiresLogin,requiresRole("admin"),function(req,re
         if (err) throw err;
         if(doc) {
             doc.approved = true;
-            doc.save();
-
-            res.status(200).send("OK");
+            doc.save(function(err,result){
+                if(err) throw err;
+                res.status(200).json({success:true});
+            });
         }else{
-            res.status(200).send("No report with such id");
+            res.status(200).json({error:"No report with such id"});
         }
     });
 });
@@ -359,7 +360,7 @@ router.get("/add-role",requiresLogin,requiresRole("admin"),function(req,res) {
     if (role != "superadmin" && (role != "admin" || adminRoles.indexOf("superadmin") != -1)) {
         management.users.get({id: userId}, function (err, user) {
             if (err) {
-                res.status(200).send("Invalid user id");
+                res.status(200).json({error:"Invalid user id"});
             } else {
                 rolesArr = user.app_metadata.roles || [];
 
@@ -373,12 +374,12 @@ router.get("/add-role",requiresLogin,requiresRole("admin"),function(req,res) {
 
                 management.users.updateAppMetadata({id: userId}, metadata, function (err, user) {
                     if (err) console.log(err);
-                    res.status(200).send("OK");
+                    res.status(200).json({success:true});
                 });
             }
         });
     } else {
-        res.status(200).send("Restricted access");
+        res.status(200).json({error:"Restricted access"});
     }
 });
 router.get("/remove-role",requiresLogin,requiresRole("admin"),function(req,res) {
@@ -392,7 +393,7 @@ router.get("/remove-role",requiresLogin,requiresRole("admin"),function(req,res) 
     if(role!="superadmin"&&(role!="admin"||adminRoles.indexOf("superadmin") != -1)) {
         management.users.get({id: userId}, function (err, user) {
             if (err) {
-                res.status(200).send("Invalid user id");
+                res.status(200).json({error:"Invalid user id"});
             } else {
                 roles = user.app_metadata.roles;
                 if (roles.indexOf(role) != -1 && role != null) {
@@ -405,12 +406,12 @@ router.get("/remove-role",requiresLogin,requiresRole("admin"),function(req,res) 
 
                 management.users.updateAppMetadata({id: userId}, metadata, function (err, user) {
                     if (err) console.log(err);
-                    res.status(200).send("OK");
+                    res.status(200).json({success:"OK"});
                 });
             }
         });
     }else{
-        res.status(200).send("Restricted access");
+        res.status(200).json({error:"Restricted access"});
     }
 });
 router.get("/user-roles",requiresLogin,requiresRole("admin"),function(req,res){
@@ -418,11 +419,78 @@ router.get("/user-roles",requiresLogin,requiresRole("admin"),function(req,res){
     var userId = data.userid;
     management.users.get({id: userId}, function (err, user) {
         if (err) {
-            res.status(200).send("Invalid user id");
+            res.status(200).json({error:"Invalid user id"});
         } else {
             res.status(200).json(user.app_metadata.roles);
         }
     });
+});
+/* BAN UNBAN */
+router.get("/ban",requiresLogin,requiresRole("admin"),function(req,res) {
+    var data = req.query;
+    var id = data.id;
+    var rolesArr;
+
+    management.users.get({id: id}, function (err, user) {
+        if (err) {
+            res.status(200).json({error: "Invalid user id"});
+        } else {
+            rolesArr = user.app_metadata.roles || [];
+
+            if (rolesArr.indexOf("ban") == -1) {
+                rolesArr.push("ban");
+            }
+
+            var metadata = {
+                roles: rolesArr
+            };
+
+            management.users.updateAppMetadata({id: id}, metadata, function (err, user) {
+                if (err) console.log(err);
+                res.status(200).json({success: true});
+            });
+        }
+    });
+});
+router.get("/unban",requiresLogin,requiresRole("admin"),function(req,res) {
+    var data = req.query;
+    var id = data.id;
+    var roles;
+
+    management.users.get({id: id}, function (err, user) {
+        if (err) {
+            res.status(200).json({error: "Invalid user id"});
+        } else {
+            roles = user.app_metadata.roles;
+            if (roles.indexOf("ban") != -1) {
+                roles.splice(roles.indexOf("ban"), 1);
+            }
+
+            var metadata = {
+                roles: roles
+            };
+
+            management.users.updateAppMetadata({id: id}, metadata, function (err, user) {
+                if (err) console.log(err);
+                res.status(200).json({success: true});
+            });
+        }
+    });
+});
+
+/* SECURITY TESTS */
+router.get('/test/public',function(req,res,next){
+
+    res.writeHead(200, {'Content-Type': 'text/html'});
+    res.end("public OK");
+});
+router.get('/test/registered',requiresLogin,function(req,res,next){
+    res.writeHead(200, {'Content-Type': 'text/html'});
+    res.end("registered OK");
+});
+router.get('/test/admin',requiresLogin,requiresRole('adminS'),function(req,res,next){
+    res.writeHead(200, {'Content-Type': 'text/html'});
+    res.end("admin OK");
 });
 
 module.exports = router;

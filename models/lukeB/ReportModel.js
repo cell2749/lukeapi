@@ -12,7 +12,7 @@ var schema = mongoose.Schema(
             long:Number,
             lat:Number
         },
-        category:Number,
+        categoryId:String,
         image_url:String,
         description:String,
         profileId: String,
