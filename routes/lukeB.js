@@ -282,37 +282,35 @@ router.get('/create_report',requiresLogin,function(req,res,next) {
     var data = req.query;
     var id = mongoose.Types.ObjectId();
 
-    if (data.title != null) {
-        UserModel.findOne({id: req.user.profile.id}, function (err, doc) {
-            doc.score = doc.score + REPORT_SCORE_VALUE;
-            var report = new ReportModel();
-            //var vote = new VoteModel();
 
+    UserModel.findOne({id: req.user.profile.id}, function (err, doc) {
+        doc.score = doc.score + REPORT_SCORE_VALUE;
+        var report = new ReportModel();
+        //var vote = new VoteModel();
+
+        for (var key in report) {
+            if (allowKey(key)) {
+                report[key] = data[key] || report[key];
+            }
+        }
+        if (report.date == null) {
+            report.date = new Date().toISOString();
+        }
+        //vote.report.id = id;
+        report._id = id;
+        report.approved = false;
+        report.save(function (err, report) {
+            if (err)throw err;
+            var returnV = {};
             for (var key in report) {
-                if (allowKey(key)) {
-                    report[key] = data[key] || report[key];
+                if (key != "_id" || key != "__v") {
+                    returnV[key] = report[key];
                 }
             }
-            if (report.date == null) {
-                report.date = new Date().toISOString();
-            }
-            //vote.report.id = id;
-            report._id = id;
-            report.approved = false;
-            report.save(function (err, report) {
-                if (err)throw err;
-                var returnV = {};
-                for (var key in report) {
-                    if (key != "_id" || key != "__v") {
-                        returnV[key] = report[key];
-                    }
-                }
-                res.status(200).json(returnV);
-            });
+            res.status(200).json(returnV);
         });
-    } else {
-        res.status(200).json({error: "Missing title"});
-    }
+    });
+
 });
 router.get("/remove-report",requiresLogin,function(req,res){
     var data = req.query;

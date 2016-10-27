@@ -18,6 +18,7 @@ var ReportModel = require("../models/lukeA/ReportModel");
 var RankModel = require("../models/lukeA/RankModel");
 var ReportCategoryModel = require("../models/lukeA/ReportCategoryModel");
 var VoteModel = require("../models/lukeA/VoteModel");
+var ExperienceModel = require("../models/lukeA/ExperienceModel");
 
 const REPORT_SCORE_VALUE = 100;
 const MONGO_PROJECTION ={
@@ -759,6 +760,65 @@ router.get("/user-roles",requiresLogin,requiresRole("admin"),function(req,res){
         }
     });
 });
+/* EXPERIENCE MODEL*/
+router.get("/create-experience-pattern",requiresLogin,requiresRole("superadmin"),function(req,res) {
+    var data = req.query;
+    var experiencePattern = new ExperienceModel();
+
+    for (var key in experiencePattern) {
+        if (allowKey(key)) {
+            experiencePattern[key] = data[key] || experiencePattern[key];
+        }
+    }
+    var id = mongoose.Types.ObjectId();
+    experiencePattern.id = id;
+    experiencePattern._id = id;
+    experiencePattern.save(function(err,result){
+        if(err) throw err;
+
+        res.status(200).send("OK");
+    });
+});
+router.get("/update-experience-pattern",requiresLogin,requiresRole("superadmin"),function(req,res){
+    var data = req.query;
+    ExperienceModel.findOne({id:data.id,patternTitle:data.patternTitle},function(err, doc){
+        if(err) throw err;
+        if(doc) {
+            var experiencePattern = new ExperienceModel();
+            for(var key in experiencePattern){
+                if(allowKey(key)){
+                    doc[key]= data[key] || doc[key];
+                }
+            }
+            doc.save();
+            res.status(200).send("OK");
+        }else{
+            res.status(200).send("No pattern was found");
+        }
+    });
+});
+router.get("/remove-experience-pattern",requiresLogin,requiresRole("superadmin"),function(req,res) {
+    var data = req.query;
+    ExperienceModel.find({id: data.id}).remove(function (err, item) {
+        if (err) throw err;
+        if (item.result.n != 0) {
+            res.status(200).send("Removed " + item.result.n + "items");
+        } else {
+            res.status(200).send("No item with such id");
+        }
+    });
+});
+router.get("/activate-experience-model",rquiresLogin,requiresRole("superadmin"),function(req,res) {
+    var data = req.query;
+    ExperienceModel.update({}, {$set: {active: false}}, function (err, result) {
+        if(err) throw err;
+        ExperienceModel.update({id: data.id}, {$set: {active: true}}, function (err, doc) {
+            if(err) throw err;
+            res.status(200).send("OK");
+        });
+    });
+});
+/* ACHIEVEMENTS */
 
 /* SECURITY TESTS */
 router.get('/test/public',function(req,res,next){
