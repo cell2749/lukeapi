@@ -14,6 +14,6 @@ var schema = mongoose.Schema(
     }
 );
 
-var model = db.model('ExperiencePattern', schema);
+var model = db.model('Achievement', schema);
 
 module.exports =  model;
