@@ -808,7 +808,7 @@ router.get("/remove-experience-pattern",requiresLogin,requiresRole("superadmin")
         }
     });
 });
-router.get("/activate-experience-model",rquiresLogin,requiresRole("superadmin"),function(req,res) {
+router.get("/activate-experience-model",requiresLogin,requiresRole("superadmin"),function(req,res) {
     var data = req.query;
     ExperienceModel.update({}, {$set: {active: false}}, function (err, result) {
         if(err) throw err;

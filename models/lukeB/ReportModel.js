@@ -19,6 +19,7 @@ var schema = mongoose.Schema(
         rating:Number,
         rating2:Number,
         comments:[{
+            commentId:String,
             rating:Number,
             profileId:String,
             comment:String
