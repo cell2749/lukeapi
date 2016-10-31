@@ -7,6 +7,7 @@ var mongodb = require('../mongodb/lukeBdb');
 var requiresLogin = require('../security/requiresLogin');
 var requiresRole = require('../security/requiresRole');
 var requiresRoles = require('../security/requiresRoles');
+var restrictBanned = require('../security/restrictBanned');
 var ManagementClient = require('auth0').ManagementClient;
 var management = new ManagementClient({
     token: process.env.AUTH0_API_TOKEN,
@@ -59,11 +60,12 @@ function update(Model,data) {
     Model.findOne({id: data.id}, function (err, doc) {
         if (doc) {
             var pattern = new Model();
-            for (var key in pattern) {
+            for (var key in pattern.schema.paths) {
                 if (allowKey(key)) {
                     doc[key] = data[key] || doc[key];
                 }
             }
+            res.status(200).json({success:true});
         } else {
             res.status(200).json({error:"No such id"});
         }
@@ -138,6 +140,10 @@ router.get("/login",passport.authenticate('auth0',{failureRedirect:'/url-if-some
     }
     res.status(200).send('OK');
 });
+router.get('/logout',requiresLogin,function(req,res){
+    req.logout();
+    res.status(200).json({success:true});
+});
 /* DATABASE HTTP REQUESTS*/
 /**
  * GET /users
@@ -197,27 +203,33 @@ router.get('/updateUser',requiresLogin,function(req,res) {
     }
 });
 
-router.get("/username",function(req,res) {
-    var username = req.query.name || "";
-    UserModel.findOne({username: username}, function (err, result) {
-        if (result) {
-            res.status(200).json({taken: true});
-        } else {
-            res.status(200).json({taken: false});
-        }
-    });
+router.get('/username-available',requiresLogin,function(req,res){
+    var username = req.query.username;
+    if(username) {
+        UserModel.findOne({username: username}, function (err, doc) {
+            if (err) throw err;
+
+            if (doc) {
+                res.status(200).json({exists: true})
+            } else {
+                res.status(200).json({exists: false});
+            }
+        });
+    }else{
+        res.status(200).json({error:"Username not specified"});
+    }
 });
 //distinction by user, category, location, approved,rating
-router.get('/reports',function(req,res) {
+router.get('/reports',function(req,res){
     var data = req.query;
-    var returnResult = [];
+    var returnResult=[];
     var limit = data.limit || 0;
     var rating = data.rating;
 
     //deg2rad might not be necessary
     var location = {
-        long: deg2rad(data.long),
-        lat: deg2rad(data.lat)
+        long : deg2rad(data.long),
+        lat : deg2rad(data.lat)
     };
     var distance = data.distance || 5000;
 
@@ -235,45 +247,45 @@ router.get('/reports',function(req,res) {
     var longlen = (p1 * Math.cos(location.lat)) + (p2 * Math.cos(3 * location.lat)) +
         (p3 * Math.cos(5 * location.lat));
 
-    var approved = true;
-    if (req.isAuthenticated()) {
+    var approved = {$ne:null};
+    var flagged = {$ne:null};
+    var submitterId = data.submitterId || {$ne:null};
+
+    if(req.isAuthenticated()) {
         var appMetadata = req.user.profile._json.app_metadata || {};
         var roles = appMetadata.roles || [];
         if (roles.indexOf("admin") != -1 || roles.indexOf("advanced") != -1) {
-            approved = data.approved || true;
+            approved = data.approved || approved;
+            flagged = data.flagged || flagged;
         }
     }
-    ReportModel.find({
-        categoryId: data.categoryId,
-        approved: approved,
-        submitterId: data.userid
-    }, MONGO_PROJECTION).sort({"rating": -1}).limit(parseInt(limit)).exec(function (err, collection) {
-        if (err) throw err;
+    ReportModel.find({approved:approved,submitterId:submitterId,flagged:flagged},MONGO_PROJECTION).sort({"date":-1}).limit(parseInt(limit)).exec(function(err, collection){
+        if(err) throw err;
         var result = [];
-        if (rating != null) {
+        if(rating!=null) {
             for (i = 0; i < collection.length; i++) {
                 if (collection[i].rating != null && rating < collection[i].rating) {
                     result.push(collection[i]);
                 }
             }
-        } else {
-            result = collection;
+        }else{
+            result=collection;
         }
 
-        if (distance && location.long && location.lat) {
+        if(distance&&location.long&&location.lat) {
             for (var i = 0; i < result.length; i++) {
 
-                if (result[i].latitude != null && result[i].longitude != null) {
-                    if (((location.long - result[i].longitude) * longlen) ^ 2 + ((location.lat - result[i].latitude) * latlen) ^ 2 <= distance ^ 2) {
+                if(result[i].location.lat!=null&&result[i].location.long!=null) {
+                    if (((location.long - result[i].location.long) * longlen) ^ 2 + ((location.lat - result[i].location.lat) * latlen) ^ 2 <= distance ^ 2) {
                         returnResult.push(result);
                     }
                 }
-                if (i == result.length - 1) {
+                if(i==result.length-1){
                     res.status(200).json(returnResult);
                 }
                 //might require improvement right here
             }
-        } else {
+        }else {
             res.status(200).json(result);
         }
     });
@@ -311,6 +323,46 @@ router.get('/create_report',requiresLogin,function(req,res,next) {
         });
     });
 
+});
+router.get('/update-report',requiresLogin,function(req,res){
+    var omitKeyes = [
+        "_id",
+        "__v",
+        "id",
+        "location.long",
+        "location.lat",
+        "date",
+        "rating",
+        "submitterRating",
+        "submitterId",
+        "approved",
+        "votes"
+    ];
+    var data = req.query;
+    ReportModel.findOne({id:data.id},function(err,doc) {
+        if (doc.profileId != req.user.profile.id) {
+            res.status(200).json({error:"Restricted Access"});
+        } else {
+            if (doc) {
+                var pattern = new ReportModel();
+                for (var key in pattern.schema.paths) {
+                    if (omitKeyes.indexOf(key) == -1) {
+                        doc[key] = data[key] || doc[key];
+                    }
+                }
+                doc.save(function(err,result){
+                    var returnV={}, reportPattern = new ReportModel();
+                    for(var key in reportPattern.schema.paths){
+                        returnV[key]=result[key];
+                    }
+                    res.status(200).json(returnV);
+                });
+
+            } else {
+                res.status(200).json({error:"No such id"});
+            }
+        }
+    });
 });
 router.get("/remove-report",requiresLogin,function(req,res){
     var data = req.query;
@@ -414,16 +466,29 @@ router.get("/remove-role",requiresLogin,requiresRole("admin"),function(req,res) 
         res.status(200).json({error:"Restricted access"});
     }
 });
-router.get("/user-roles",requiresLogin,requiresRole("admin"),function(req,res){
+router.get("/user-roles",requiresLogin,function(req,res){
     var data = req.query;
-    var userId = data.userid;
-    management.users.get({id: userId}, function (err, user) {
-        if (err) {
-            res.status(200).json({error:"Invalid user id"});
-        } else {
-            res.status(200).json(user.app_metadata.roles);
-        }
-    });
+    var userId = data.id ||req.user.profile.id;
+    var appMetadata = req.user.profile._json.app_metadata || {};
+    var adminRoles = appMetadata.roles || [];
+
+    if(userId==req.user.profile.id || adminRoles.indexOf("admin")!=-1) {
+        management.users.get({id: userId}, function (err, user) {
+            if (err) {
+                res.status(200).json({error: "Invalid user id"});
+            } else {
+                res.status(200).json(user.app_metadata.roles);
+            }
+        });
+    }else{
+        res.status(200).json({error:'Proper authorization required',auth:true});
+    }
+});
+router.get('/is-admin',requiresLogin,requiresRole("admin"),function(req,res){
+    res.status(200).json({success:true});
+});
+router.get('/is-advanced',requiresLogin,requiresRole("advanced"),function(req,res){
+    res.status(200).json({success:true});
 });
 /* BAN UNBAN */
 router.get("/ban",requiresLogin,requiresRole("admin"),function(req,res) {

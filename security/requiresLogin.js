@@ -3,7 +3,7 @@
  */
 module.exports = function(req, res, next) {
     if (!req.isAuthenticated()) {
-        return res.status(200).json({error:"Authentication required", reqLogin:true});
+        return res.status(200).json({error:"Authentication required", login:true});
     }
     next();
 };

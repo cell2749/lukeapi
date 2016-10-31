@@ -8,7 +8,6 @@ var schema = mongoose.Schema(
     {
         id:{type: String, required: '{PATH} is required!'},
         username:String,
-        email:String,
         image_url:String,
         score: Number,
         rankingId: String

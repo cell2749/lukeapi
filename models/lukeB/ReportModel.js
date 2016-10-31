@@ -7,24 +7,25 @@ var mongoose = require('mongoose');
 
 var schema = mongoose.Schema(
     {
-        id:{type: String, required: '{PATH} is required!'},
-        location:{
-            long:Number,
-            lat:Number
+        id: {type: String, required: '{PATH} is required!'},
+        title: String,
+        location: {
+            long: Number,
+            lat: Number
         },
-        categoryId:String,
-        image_url:String,
-        description:String,
+        categoryId: [String],
+        image_url: String,
+        description: String,
         profileId: String,
-        rating:Number,
-        rating2:Number,
-        comments:[{
-            commentId:String,
-            rating:Number,
-            profileId:String,
-            comment:String
+        rating: Number,
+        rating2: Number,
+        comments: [{
+            rating: Number,
+            profileId: String,
+            comment: String
         }],
-        approved:Boolean
+        approved: Boolean,
+        flagged: Boolean
 
     }
 );

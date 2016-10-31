@@ -7,6 +7,7 @@ var mongodb = require('../mongodb/lukeAdb');
 var requiresLogin = require('../security/requiresLogin');
 var requiresRole = require('../security/requiresRole');
 var requiresRoles = require('../security/requiresRoles');
+var restrictBanned = require('../security/restrictBanned');
 var ManagementClient = require('auth0').ManagementClient;
 var management = new ManagementClient({
     token: process.env.AUTH0_API_TOKEN,
@@ -25,8 +26,8 @@ const MONGO_PROJECTION ={
     __v: 0
 };
 /* UTILITY FUNCTIONS*/
-function allowKey(key){
-    var omit= [
+function allowKey(key) {
+    var omit = [
         "id",
         "_id",
         "__v",
@@ -36,11 +37,11 @@ function allowKey(key){
         "submitterId",
         "submitterRating"
     ];
-    for(var i = 0;i<omit.length;i++){
-        if(omit[i]==key){
-            return false;
-        }
+
+    if (omit.indexOf(key) != -1){
+        return false;
     }
+
     return true;
 }
 function deg2rad(deg){
@@ -119,6 +120,10 @@ router.get("/login",passport.authenticate('auth0',{failureRedirect:'/url-if-some
     }
     res.status(200).send("OK");
 });
+router.get('/logout',requiresLogin,function(req,res){
+    req.logout();
+    res.status(200).json({success:true});
+});
 /* DATABASE HTTP REQUESTS*/
 /* USERS */
 /**
@@ -146,7 +151,7 @@ router.get('/user',requiresLogin, function(req, res, next) {
       res.status(200).json(response);
     });
   }else{
-      res.status(200).json({error:'Proper authorization required',reqAuth:true});
+      res.status(200).json({error:'Proper authorization required',auth:true});
   }
 });
 /**
@@ -156,39 +161,44 @@ router.get('/user',requiresLogin, function(req, res, next) {
  * Update
  *
  * */
-router.get('/update-user',requiresLogin,function(req,res){
-  var id = req.query.id || req.user.profile.id;
-  var appMetadata = req.user.profile._json.app_metadata || {roles:[]};
+router.get('/update-user',requiresLogin,function(req,res) {
+    var id = req.query.id || req.user.profile.id;
+    var appMetadata = req.user.profile._json.app_metadata || {roles: []};
 
-  if(id == req.user.profile.id || appMetadata.roles.indexOf('admin')!=-1){
-    UserModel.findOne({id:id},function(err,doc){
-      if(doc!=null) {
-        for (var key in doc) {
-          if (allowKey(key)) {
-            doc[key] = req.query[key] || doc[key];
-          }
-        }
-        doc.save();
-        res.status(200).json(doc);
-      }else{
-        res.status(200).json({error:'No user with such id'});
-      }
-    });
-  }else{
-    res.status(200).json({error:'Proper authorization required',reqAuth:true});
-  }
+    if (id == req.user.profile.id || appMetadata.roles.indexOf('admin') != -1) {
+        UserModel.findOne({id: id}, function (err, doc) {
+            if (doc != null) {
+                var userPattern = new UserModel();
+                for (var key in userPattern.schema.paths) {
+                    if (allowKey(key)) {
+                        doc[key] = req.query[key] || doc[key];
+                    }
+                }
+                doc.save();
+                res.status(200).json(doc);
+            } else {
+                res.status(200).json({error: 'No user with such id'});
+            }
+        });
+    } else {
+        res.status(200).json({error: 'Proper authorization required', auth: true});
+    }
 });
 router.get('/username-available',requiresLogin,function(req,res){
     var username = req.query.username;
-    UserModel.findOne({username:username},function(err,doc){
-        if(err) throw err;
+    if(username) {
+        UserModel.findOne({username: username}, function (err, doc) {
+            if (err) throw err;
 
-        if(doc) {
-            res.status(200).json({exists: true})
-        }else {
-            res.status(200).json({exists: false});
-        }
-    });
+            if (doc) {
+                res.status(200).json({exists: true})
+            } else {
+                res.status(200).json({exists: false});
+            }
+        });
+    }else{
+        res.status(200).json({error:"Username not specified"});
+    }
 });
 router.get('/set-username',requiresLogin,function(req,res){
     var username = req.query.username;
@@ -203,16 +213,6 @@ router.get('/set-username',requiresLogin,function(req,res){
         }
     });
 });
-router.get("/username",function(req,res){
-  var username = req.query.name|| "";
-  UserModel.findOne({username:username},function(err,result){
-    if(result){
-      res.status(200).json({taken:true,available:false});
-    }else{
-      res.status(200).json({taken:false,available:true});
-    }
-  });
-});
 
 /* RANK */
 router.get('/create-rank', requiresLogin,requiresRole('admin'),function(req,res,next){
@@ -221,7 +221,7 @@ router.get('/create-rank', requiresLogin,requiresRole('admin'),function(req,res,
 
   if(data.title != null) {
       var rank = new RankModel();
-      for (var key in rank) {
+      for (var key in rank.schema.paths) {
           if (allowKey(key)) {
               rank[key] = data[key] || rank[key];
           }
@@ -248,7 +248,7 @@ router.get("/update-rank",requiresLogin,requiresRole("admin"),function(req,res){
         RankModel.findOne({id: data.id}, function (err, doc) {
             if (doc) {
                 var rank = new RankModel();
-                for (var key in rank){
+                for (var key in rank.schema.paths){
                     if(allowKey(key)) {
                         doc[key] = data[key] || doc[key];
                     }
@@ -256,7 +256,7 @@ router.get("/update-rank",requiresLogin,requiresRole("admin"),function(req,res){
                 doc.save(function(err,result){
                     if(err) throw err;
                     var returnV={}, pattern = new RankModel();
-                    for(var key in pattern){
+                    for(var key in pattern.schema.paths){
                         returnV[key]=result[key];
                     }
                     res.status(200).json(returnV);
@@ -269,7 +269,7 @@ router.get("/update-rank",requiresLogin,requiresRole("admin"),function(req,res){
         RankModel.findOne({title: data.title}, function (err, doc) {
             if (doc) {
                 var rank = new RankModel();
-                for (var key in rank){
+                for (var key in rank.schema.paths){
                     if(allowKey(key)) {
                         doc[key] = data[key] || doc[key];
                     }
@@ -277,7 +277,7 @@ router.get("/update-rank",requiresLogin,requiresRole("admin"),function(req,res){
                 doc.save(function(err,result){
                     if(err) throw err;
                     var returnV={}, pattern = new RankModel();
-                    for(var key in pattern){
+                    for(var key in pattern.schema.paths){
                         returnV[key]=result[key];
                     }
                     res.status(200).json(returnV);
@@ -302,34 +302,44 @@ router.get("/remove-rank",requiresLogin,requiresRole("admin"),function(req,res){
     });
 });
 /* REPORT CATEGORY */
+router.get('/report-categories',requiresLogin,function(req,res){
+   ReportCategoryModel.find({},MONGO_PROJECTION,function(err,result){
+      if(err) throw err;
+       res.status(200).json(result);
+   });
+});
 router.get('/create-report-category',requiresLogin,requiresRole('admin'),function(req,res){
     var data = req.query;
     var id = mongoose.Types.ObjectId();
-    ReportCategoryModel.findOne({name:data.name},function(err,doc){
-        if(doc){
-            res.status(200).json({error:"Report Category with such name already exists!"});
-        }else {
-            var reportCategory = new ReportCategoryModel();
-            for (var key in reportCategory) {
-                if (allowKey(key)) {
-                    reportCategory[key] = data[key] || reportCategory[key];
-                }
-            }
-            reportCategory.id = id;
-            reportCategory._id = id;
-
-            reportCategory.save(function (err, result) {
-                if (err)throw err;
-                var returnV = {};
-                for (var key in result) {
-                    if (key != "_id" || key != "__v") {
-                        returnV[key] = result[key];
+    if(data.title) {
+        ReportCategoryModel.findOne({title: data.title}, function (err, doc) {
+            if (doc) {
+                res.status(200).json({error: "Report Category with such name already exists!"});
+            } else {
+                var reportCategory = new ReportCategoryModel();
+                for (var key in reportCategory.schema.paths) {
+                    if (allowKey(key)) {
+                        reportCategory[key] = data[key] || reportCategory[key];
                     }
                 }
-                res.status(200).json(returnV);
-            });
-        }
-    });
+                reportCategory.id = id;
+                reportCategory._id = id;
+
+                reportCategory.save(function (err, result) {
+                    if (err)throw err;
+                    var returnV = {};
+                    for (var key in result) {
+                        if (key != "_id" || key != "__v") {
+                            returnV[key] = result[key];
+                        }
+                    }
+                    res.status(200).json(returnV);
+                });
+            }
+        });
+    }else{
+        res.status(200).json({error:"Category title required"})
+    }
 });
 router.get("/update-report-category",requiresLogin,requiresRole("admin"),function(req,res){
     var data = req.query;
@@ -337,7 +347,7 @@ router.get("/update-report-category",requiresLogin,requiresRole("admin"),functio
         ReportCategoryModel.findOne({id: data.id}, function (err, doc) {
             if (doc) {
                 var reportCategory = new ReportCategoryModel();
-                for (var key in reportCategory){
+                for (var key in reportCategory.schema.paths){
                     if(allowKey(key)) {
                         doc[key] = data[key] || doc[key];
                     }
@@ -345,7 +355,7 @@ router.get("/update-report-category",requiresLogin,requiresRole("admin"),functio
                 doc.save(function(err,result){
                     if(err) throw err;
                     var returnV={}, pattern = new ReportCategoryModel();
-                    for(var key in pattern){
+                    for(var key in pattern.schema.paths){
                         returnV[key]=result[key];
                     }
                     res.status(200).json(returnV);
@@ -359,7 +369,7 @@ router.get("/update-report-category",requiresLogin,requiresRole("admin"),functio
         ReportCategoryModel.findOne({name: data.name}, function (err, doc) {
             if (doc) {
                 var reportCategory = new ReportCategoryModel();
-                for (var key in reportCategory){
+                for (var key in reportCategory.schema.paths){
                     if(allowKey(key)) {
                         doc[key] = data[key] || doc[key];
                     }
@@ -367,7 +377,7 @@ router.get("/update-report-category",requiresLogin,requiresRole("admin"),functio
                 doc.save(function(err,result){
                     if(err) throw err;
                     var returnV={}, pattern = new ReportCategoryModel();
-                    for(var key in pattern){
+                    for(var key in pattern.schema.paths){
                         returnV[key]=result[key];
                     }
                     res.status(200).json(returnV);
@@ -420,15 +430,19 @@ router.get('/reports',function(req,res){
     var longlen = (p1 * Math.cos(location.lat)) + (p2 * Math.cos(3 * location.lat)) +
         (p3 * Math.cos(5 * location.lat));
 
-    var approved=true;
+    var approved = {$ne:null};
+    var flagged = {$ne:null};
+    var submitterId = data.submitterId || {$ne:null};
+
     if(req.isAuthenticated()) {
         var appMetadata = req.user.profile._json.app_metadata || {};
         var roles = appMetadata.roles || [];
         if (roles.indexOf("admin") != -1 || roles.indexOf("advanced") != -1) {
-            approved = data.approved || true;
+            approved = data.approved || approved;
+            flagged = data.flagged || flagged;
         }
     }
-    ReportModel.find({categoryId:data.categoryId,approved:approved,submitterId:data.userid},MONGO_PROJECTION).sort({"date":-1}).limit(parseInt(limit)).exec(function(err, collection){
+    ReportModel.find({approved:approved,submitterId:submitterId,flagged:flagged},MONGO_PROJECTION).sort({"date":-1}).limit(parseInt(limit)).exec(function(err, collection){
         if(err) throw err;
         var result = [];
         if(rating!=null) {
@@ -459,7 +473,7 @@ router.get('/reports',function(req,res){
         }
     });
 });
-router.get('/create-report',requiresLogin,function(req,res,next){
+router.get('/create-report',requiresLogin,restrictBanned,function(req,res,next){
     var data = req.query;
     var id = mongoose.Types.ObjectId();
 
@@ -472,7 +486,7 @@ router.get('/create-report',requiresLogin,function(req,res,next){
                     var report = new ReportModel();
                     //var vote = new VoteModel();
 
-                    for (var key in report) {
+                    for (var key in report.schema.paths) {
                         if (allowKey(key)) {
                             report[key] = data[key] || report[key];
                         }
@@ -486,7 +500,9 @@ router.get('/create-report',requiresLogin,function(req,res,next){
                         report.id = id;
                     }
                     report.votes = {};
-                    report.approved = false;
+                    report.approved = true;
+                    report.flagged = false;
+                    report.submitterId = req.user.profile.id;
                     doc.save();
                     report.save(function (err, report) {
                         if (err)throw err;
@@ -508,7 +524,7 @@ router.get('/create-report',requiresLogin,function(req,res,next){
     }
 });
 //image update should be separated/specified
-router.get("/update-report",requiresLogin,function(req,res){
+router.get("/update-report",requiresLogin,restrictBanned,function(req,res){
    var omitKeyes = [
        "_id",
        "__v",
@@ -530,14 +546,14 @@ router.get("/update-report",requiresLogin,function(req,res){
         } else {
             if (doc) {
                 var pattern = new ReportModel();
-                for (var key in pattern) {
+                for (var key in pattern.schema.paths) {
                     if (omitKeyes.indexOf(key) == -1) {
                         doc[key] = data[key] || doc[key];
                     }
                 }
                 doc.save(function(err,result){
                     var returnV={}, reportPattern = new ReportModel();
-                    for(var key in reportPattern){
+                    for(var key in reportPattern.schema.paths){
                         returnV[key]=result[key];
                     }
                     res.status(200).json(returnV);
@@ -586,7 +602,55 @@ router.get("/approve-report",requiresLogin,requiresRole("admin"),function(req,re
         }
     });
 });
-router.get("/upvote-report",requiresLogin,function(req,res) {
+router.get("/disapprove-report",requiresLogin,requiresRole("admin"),function(req,res){
+    var data = req.query;
+    var id = data.id;
+    ReportModel.findOne({id:id},function(err,doc){
+        if(err) throw err;
+        if(doc) {
+            doc.approved = false;
+            doc.save(function(err,result){
+                if(err) throw err;
+                res.status(200).json({success:true});
+            });
+        }else{
+            res.status(200).json({error:"No report with such id"});
+        }
+    });
+});
+router.get("/flag-report",requiresLogin,restrictBanned,function(req,res){
+    var data = req.query;
+    var id = data.id;
+    ReportModel.findOne({id:id},function(err,doc){
+        if(err) throw err;
+        if(doc) {
+            doc.flagged = true;
+            doc.save(function(err,result){
+                if(err) throw err;
+                res.status(200).json({success:true});
+            });
+        }else{
+            res.status(200).json({error:"No report with such id"});
+        }
+    });
+});
+router.get("/unflag-report",requiresLogin,requiresRole("admin"),function(req,res){
+    var data = req.query;
+    var id = data.id;
+    ReportModel.findOne({id:id},function(err,doc){
+        if(err) throw err;
+        if(doc) {
+            doc.flagged = false;
+            doc.save(function(err,result){
+                if(err) throw err;
+                res.status(200).json({success:true});
+            });
+        }else{
+            res.status(200).json({error:"No report with such id"});
+        }
+    });
+});
+router.get("/upvote-report",requiresLogin,restrictBanned,function(req,res) {
     var userid = req.user.profile.id;
     var reportid = req.query.reportid;
     if (reportid != null) {
@@ -642,7 +706,7 @@ router.get("/upvote-report",requiresLogin,function(req,res) {
         res.status(200).json({error: "No report id was provided"});
     }
 });
-router.get("/downvote-report",requiresLogin,function(req,res) {
+router.get("/downvote-report",requiresLogin,restrictBanned,function(req,res) {
     var userid = req.user.profile.id;
     var reportid = req.query.reportid;
     if (reportid != null) {
@@ -697,10 +761,11 @@ router.get("/downvote-report",requiresLogin,function(req,res) {
         res.status(200).json({error: "No report id was provided"});
     }
 });
-router.get("/vote-report",requiresLogin,function(req,res) {
+router.get("/vote-report",requiresLogin,restrictBanned,function(req,res) {
+    var data = req.query;
     var userid = req.user.profile.id;
-    var reportid = req.query.reportid;
-    var vote = req.query.vote;
+    var reportid = data.id;
+    var vote = data.vote;
     if (reportid != null && vote != null) {
         ExperienceModel.findOne({active: true}, function (err, exp) {
             if (err) throw err;
@@ -785,7 +850,7 @@ router.get("/vote-report",requiresLogin,function(req,res) {
 /* ROLES */
 router.get("/add-role",requiresLogin,requiresRole("admin"),function(req,res) {
     var data = req.query;
-    var userId = data.userid;
+    var userId = data.id;
     var role = data.role;
     var rolesArr;
     var appMetadata = req.user.profile._json.app_metadata || {};
@@ -813,7 +878,7 @@ router.get("/add-role",requiresLogin,requiresRole("admin"),function(req,res) {
             }
         });
     } else {
-        res.status(200).json({error:'Proper authorization required',reqAuth:true});
+        res.status(200).json({error:'Proper authorization required',auth:true});
     }
 });
 router.get("/remove-role",requiresLogin,requiresRole("admin"),function(req,res) {
@@ -845,46 +910,64 @@ router.get("/remove-role",requiresLogin,requiresRole("admin"),function(req,res) 
             }
         });
     }else{
-        res.status(200).json({error:'Proper authorization required',reqAuth:true});
+        res.status(200).json({error:'Proper authorization required',auth:true});
     }
 });
-router.get("/user-roles",requiresLogin,requiresRole("admin"),function(req,res){
+router.get("/user-roles",requiresLogin,function(req,res){
     var data = req.query;
-    var userId = data.userid;
-    management.users.get({id: userId}, function (err, user) {
-        if (err) {
-            res.status(200).json({error:"Invalid user id"});
-        } else {
-            res.status(200).json(user.app_metadata.roles);
-        }
-    });
+    var userId = data.id||req.user.profile.id;
+    var appMetadata = req.user.profile._json.app_metadata || {};
+    var adminRoles = appMetadata.roles || [];
+
+    if(userId==req.user.profile.id || adminRoles.indexOf("admin")!=-1) {
+        management.users.get({id: userId}, function (err, user) {
+            if (err) {
+                res.status(200).json({error: "Invalid user id"});
+            } else {
+                res.status(200).json(user.app_metadata.roles);
+            }
+        });
+    }else{
+        res.status(200).json({error:'Proper authorization required',auth:true});
+    }
 });
 /* EXPERIENCE MODEL*/
+router.get("/experience-patterns",requiresLogin,requiresRole("admin"),function(req,res){
+    ExperienceModel.find({},MONGO_PROJECTION,function(err,result){
+        if(err) throw err;
+
+        res.status(200).json(result);
+    });
+});
 router.get("/create-experience-pattern",requiresLogin,requiresRole("superadmin"),function(req,res) {
     var data = req.query;
     var experiencePattern = new ExperienceModel();
-
-    for (var key in experiencePattern) {
-        if (allowKey(key)) {
-            experiencePattern[key] = data[key] || experiencePattern[key];
+    if(data.title!=null) {
+        for (var key in experiencePattern.schema.paths) {
+            if (allowKey(key)) {
+                experiencePattern[key] = data[key] || experiencePattern[key];
+            }
         }
+        var id = mongoose.Types.ObjectId();
+        experiencePattern.id = id;
+        experiencePattern._id = id;
+        experiencePattern.save(function (err, result) {
+            if (err) throw err;
+            console.log("Result /");
+            console.log(result);
+            res.status(200).json({success: true});
+        });
+    }else{
+        res.status(200).json({error:"Title missing"});
     }
-    var id = mongoose.Types.ObjectId();
-    experiencePattern.id = id;
-    experiencePattern._id = id;
-    experiencePattern.save(function(err,result){
-        if(err) throw err;
-
-        res.status(200).json({success:true});
-    });
 });
 router.get("/update-experience-pattern",requiresLogin,requiresRole("superadmin"),function(req,res){
     var data = req.query;
-    ExperienceModel.findOne({id:data.id,patternTitle:data.patternTitle},function(err, doc){
+    ExperienceModel.findOne({id:data.id},function(err, doc){
         if(err) throw err;
         if(doc) {
             var experiencePattern = new ExperienceModel();
-            for(var key in experiencePattern){
+            for(var key in experiencePattern.schema.paths){
                 if(allowKey(key)){
                     doc[key]= data[key] || doc[key];
                 }
@@ -892,7 +975,7 @@ router.get("/update-experience-pattern",requiresLogin,requiresRole("superadmin")
             doc.save(function(err,result){
                 if(err) throw err;
                 var returnV={}, pattern = new ExperienceModel();
-                for(var key in pattern){
+                for(var key in pattern.schema.paths){
                     returnV[key]=result[key];
                 }
                 res.status(200).json(returnV);
@@ -914,16 +997,30 @@ router.get("/remove-experience-pattern",requiresLogin,requiresRole("superadmin")
         }
     });
 });
-router.get("/activate-experience-model",requiresLogin,requiresRole("superadmin"),function(req,res) {
+router.get("/activate-experience-pattern",requiresLogin,requiresRole("superadmin"),function(req,res) {
     var data = req.query;
-    ExperienceModel.update({}, {$set: {active: false}}, function (err, result) {
-        if(err) throw err;
+    if(data.id) {
         ExperienceModel.update({id: data.id}, {$set: {active: true}}, function (err, doc) {
-            if(err) throw err;
-            res.status(200).json({success:true});
+            if (err) throw err;
+            if(doc.n!=0) {
+                ExperienceModel.update({
+                    id: {$ne: data.id},
+                    active: true
+                }, {$set: {active: false}}, function (err, result) {
+
+
+                    if (err) throw err;
+                    res.status(200).json({success: true});
+                });
+            }else{
+                res.status(200).json({error:"No experience model with such id"});
+            }
         });
-    });
+    }else{
+        res.status(200).json({error:"Missing id for experience model"})
+    }
 });
+// Dangerous!!
 router.get("/nullify-all-experience",requiresLogin,requiresRole("superadmin"),function(req,res){
     UserModel.update({}, {$set: {score: 0, rankingId:null}}, function (err, result) {
         if(err) throw err;
@@ -937,7 +1034,7 @@ router.get("/nullify-experience",requiresLogin,requiresRole("superadmin"),functi
         res.status(200).json({success:true});
     });
 });
-/* BAN UNBAN */
+/* BAN/UNBAN */
 router.get("/ban",requiresLogin,requiresRole("admin"),function(req,res) {
     var data = req.query;
     var id = data.id;
@@ -949,7 +1046,7 @@ router.get("/ban",requiresLogin,requiresRole("admin"),function(req,res) {
         } else {
             rolesArr = user.app_metadata.roles || [];
 
-            if (rolesArr.indexOf("ban") == -1) {
+            if (rolesArr.indexOf("ban") == -1 && rolesArr.indexOf("admin")==-1 && rolesArr.indexOf("superadmin")==-1) {
                 rolesArr.push("ban");
             }
 

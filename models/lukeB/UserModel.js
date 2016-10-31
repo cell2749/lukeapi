@@ -19,7 +19,6 @@ var schema = mongoose.Schema(
             id:String,
             favourite_time:String
         }],
-        profile:{},//??
         visitedPlaces:[{
             id:String,
             report:String
@@ -32,9 +31,7 @@ var schema = mongoose.Schema(
             numberOfComments:Number,
             numberOfRatings:Number,
             numberOfReports:Number
-        },
-        advancedUser:Boolean,
-        adminUser:Boolean
+        }
     }
 );
 

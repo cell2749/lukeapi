@@ -15,10 +15,13 @@ var schema = mongoose.Schema(
             title: String,
             description: String,
             date: String,
-            categoryId: String,
+            categoryId: [
+                String
+            ],
             rating: Number,
             submitterId: String,
             approved: Boolean,
+            flagged: Boolean,
             votes: [
                     {
                             userId: String,

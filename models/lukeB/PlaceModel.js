@@ -8,6 +8,7 @@ var mongoose = require('mongoose');
 var schema = mongoose.Schema(
     {
         id:{type: String, required: '{PATH} is required!'},
+        title:String,
         location:{
             long:Number,
             lat:Number
