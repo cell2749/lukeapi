@@ -11,8 +11,8 @@ var session = require("express-session");
 
 dotenv.load();
 
-var lukeA = require('./routes/lukeA');
-var lukeB = require('./routes/lukeB');
+var lukeA = require('./routes/lukeA/lukeApp');
+var lukeB = require('./routes/lukeB/lukeApp');
 
 // This will configure Passport to use Auth0
 var strategy = new Auth0Strategy({

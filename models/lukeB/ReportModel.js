@@ -17,12 +17,9 @@ var schema = mongoose.Schema(
         image_url: String,
         description: String,
         profileId: String,
-        rating: Number,
-        rating2: Number,
-        comments: [{
-            rating: Number,
-            profileId: String,
-            comment: String
+        votes:[{
+            profileId:String,
+            vote:Boolean
         }],
         approved: Boolean,
         flagged: Boolean

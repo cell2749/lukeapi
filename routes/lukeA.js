@@ -1,3 +1,4 @@
+/*!!!!!!!!!!!!!!! OLD !!!!!!!!!!!!!!!*/
 var express = require('express');
 var router = express.Router();
 var passport = require('passport');
@@ -651,23 +652,22 @@ router.get("/unflag-report",requiresLogin,requiresRole("admin"),function(req,res
     });
 });
 router.get("/upvote-report",requiresLogin,restrictBanned,function(req,res) {
-    var userid = req.user.profile.id;
-    var reportid = req.query.reportid;
-    if (reportid != null) {
+    var userId = req.user.profile.id;
+    var reportId = req.query.id;
+    if (reportId != null) {
         ExperienceModel.findOne({active: true}, function (err, exp) {
             if (err) throw err;
-
             if (exp) {
-                ReportModel.findOne({id: reportid}, function (err, doc) {
+                ReportModel.findOne({id: reportId}, function (err, doc) {
                     if (err) throw err;
                     if (doc) {
-                        UserModel.findOne({id: userid}, function (err, usr) {
+                        UserModel.findOne({id: doc.submitterId}, function (err, usr) {
                             if (err) throw err;
                             if (usr) {
                                 usr.score = usr.score + exp.upvoteGain;
                                 var exists = false;
                                 for (var i = 0; i < doc.votes.length; i++) {
-                                    if (doc.votes[i].userId == userid) {
+                                    if (doc.votes[i].userId == userId) {
                                         exists = true;
                                         if (!doc.votes[i].vote) {
                                             doc.votes[i].vote = true;
@@ -680,7 +680,7 @@ router.get("/upvote-report",requiresLogin,restrictBanned,function(req,res) {
                                     }
                                 }
                                 if (!exists) {
-                                    doc.votes.push({userId: userid, vote: true});
+                                    doc.votes.push({userId: userId, vote: true});
                                     if (doc.rating != null) {
                                         doc.rating++;
                                     } else {
@@ -707,13 +707,13 @@ router.get("/upvote-report",requiresLogin,restrictBanned,function(req,res) {
     }
 });
 router.get("/downvote-report",requiresLogin,restrictBanned,function(req,res) {
-    var userid = req.user.profile.id;
-    var reportid = req.query.reportid;
-    if (reportid != null) {
+    var userId = req.user.profile.id;
+    var reportId = req.query.id;
+    if (reportId != null) {
         ExperienceModel.findOne({active: true}, function (err, exp) {
             if (err) throw err;
             if (exp) {
-                ReportModel.findOne({id: reportid}, function (err, doc) {
+                ReportModel.findOne({id: reportId}, function (err, doc) {
                     if (err) throw err;
                     if (doc) {
                         UserModel.findOne({id: doc.submitterId}, function (err, usr) {
@@ -723,7 +723,7 @@ router.get("/downvote-report",requiresLogin,restrictBanned,function(req,res) {
 
                                 var exists = false;
                                 for (var i = 0; i < doc.votes.length; i++) {
-                                    if (doc.votes[i].userId == userid) {
+                                    if (doc.votes[i].userId == userId) {
                                         exists = true;
                                         if (doc.votes[i].vote) {
                                             doc.votes[i].vote = false;
@@ -736,7 +736,7 @@ router.get("/downvote-report",requiresLogin,restrictBanned,function(req,res) {
                                     }
                                 }
                                 if (!exists) {
-                                    doc.votes.push({userId: userid, vote: false});
+                                    doc.votes.push({userId: userId, vote: false});
                                     if (doc.rating != null) {
                                         doc.rating--;
                                     } else {
@@ -763,15 +763,15 @@ router.get("/downvote-report",requiresLogin,restrictBanned,function(req,res) {
 });
 router.get("/vote-report",requiresLogin,restrictBanned,function(req,res) {
     var data = req.query;
-    var userid = req.user.profile.id;
-    var reportid = data.id;
+    var userId = req.user.profile.id;
+    var reportId = data.id;
     var vote = data.vote;
-    if (reportid != null && vote != null) {
+    if (reportId != null && vote != null) {
         ExperienceModel.findOne({active: true}, function (err, exp) {
             if (err) throw err;
 
             if (exp) {
-                ReportModel.findOne({id: reportid}, function (err, doc) {
+                ReportModel.findOne({id: reportId}, function (err, doc) {
                     if (err) throw err;
                     if (doc) {
                         UserModel.findOne({id: doc.submitterId}, function (err, usr) {
@@ -781,7 +781,7 @@ router.get("/vote-report",requiresLogin,restrictBanned,function(req,res) {
                                 if (vote == "true" || vote == 1) {
                                     var exists = false;
                                     for (var i = 0; i < doc.votes.length; i++) {
-                                        if (doc.votes[i].userId == userid) {
+                                        if (doc.votes[i].userId == userId) {
                                             exists = true;
                                             if (!doc.votes[i].vote) {
                                                 doc.votes[i].vote = true;
@@ -795,7 +795,7 @@ router.get("/vote-report",requiresLogin,restrictBanned,function(req,res) {
                                         }
                                     }
                                     if (!exists) {
-                                        doc.votes.push({userId: userid, vote: true});
+                                        doc.votes.push({userId: userId, vote: true});
                                         usr.score = usr.score + exp.upvoteGain;
                                         if (doc.rating != null) {
                                             doc.rating++;
@@ -806,7 +806,7 @@ router.get("/vote-report",requiresLogin,restrictBanned,function(req,res) {
                                 } else {
                                     var exists = false;
                                     for (var i = 0; i < doc.votes.length; i++) {
-                                        if (doc.votes[i].userId == userid) {
+                                        if (doc.votes[i].userId == userId) {
                                             exists = true;
                                             if (doc.votes[i].vote) {
                                                 doc.votes[i].vote = false;
@@ -820,7 +820,7 @@ router.get("/vote-report",requiresLogin,restrictBanned,function(req,res) {
                                         }
                                     }
                                     if (!exists) {
-                                        doc.votes.push({userId: userid, vote: false});
+                                        doc.votes.push({userId: userId, vote: false});
                                         usr.score = usr.score + exp.downvoteGain;
                                         if (doc.rating != null) {
                                             doc.rating--;
@@ -845,6 +845,52 @@ router.get("/vote-report",requiresLogin,restrictBanned,function(req,res) {
         });
     } else {
         res.status(200).json({error: "Report id or vote was not specified"});
+    }
+});
+router.get("/report-downvotes-count",function(req,res){
+    var data = req.query;
+    var count=0;
+    if(data.id) {
+        ReportModel.findOne({id: data.id}, function (err, doc) {
+            if(err)throw err;
+            if(doc){
+                for(var i=0;i<doc.votes.length;i++){
+                    if(!doc.votes[i].vote){
+                        count++;
+                    }
+                    if(i==doc.votes.length-1){
+                        res.status(200).json({count:count});
+                    }
+                }
+            }else{
+                res.status(200).json({error:"No report with such id"});
+            }
+        });
+    }else{
+        res.status(200).json({error:"Missing report id"});
+    }
+});
+router.get("/report-upvotes-count",function(req,res){
+    var data = req.query;
+    var count=0;
+    if(data.id) {
+        ReportModel.findOne({id: data.id}, function (err, doc) {
+            if(err)throw err;
+            if(doc){
+                for(var i=0;i<doc.votes.length;i++){
+                    if(doc.votes[i].vote){
+                        count++;
+                    }
+                    if(i==doc.votes.length-1){
+                        res.status(200).json({count:count});
+                    }
+                }
+            }else{
+                res.status(200).json({error:"No report with such id"});
+            }
+        });
+    }else{
+        res.status(200).json({error:"Missing report id"});
     }
 });
 /* ROLES */
@@ -883,7 +929,7 @@ router.get("/add-role",requiresLogin,requiresRole("admin"),function(req,res) {
 });
 router.get("/remove-role",requiresLogin,requiresRole("admin"),function(req,res) {
     var data = req.query;
-    var userId = data.userid;
+    var userId = data.id;
     var role = data.role;
     var roles = [];
     var appMetadata = req.user.profile._json.app_metadata || {};
