@@ -11,7 +11,6 @@ var requiresLogin = require('../../../security/requiresLogin');
 var requiresRole = require('../../../security/requiresRole');
 var requiresRoles = require('../../../security/requiresRoles');
 var restrictBanned = require('../../../security/restrictBanned');
-
 /* MODELS */
 var UserModel = require("../../../models/lukeA/UserModel");
 var ReportModel = require("../../../models/lukeA/ReportModel");
@@ -19,30 +18,23 @@ var RankModel = require("../../../models/lukeA/RankModel");
 var ReportCategoryModel = require("../../../models/lukeA/ReportCategoryModel");
 var VoteModel = require("../../../models/lukeA/VoteModel");
 var ExperienceModel = require("../../../models/lukeA/ExperienceModel");
-
+/* UTILITY */
+var UtModule = require("../../utility");
+var Utility = new UtModule([
+    //Omit Keyes to be updated by user
+    "id",
+    "_id",
+    "__v",
+    "username",
+    "score",
+    "rankingId",
+    "submitterId",
+    "submitterRating"
+]);
 const MONGO_PROJECTION ={
     _id: 0,
     __v: 0
 };
-/* UTILITY FUNCTIONS*/
-function allowKey(key) {
-    var omit = [
-        "id",
-        "_id",
-        "__v",
-        "username",
-        "score",
-        "rankingId",
-        "submitterId",
-        "submitterRating"
-    ];
-
-    if (omit.indexOf(key) != -1){
-        return false;
-    }
-
-    return true;
-}
 router.get("/get-all",requiresLogin,requiresRole("admin"),function(req,res){
     ExperienceModel.find({},MONGO_PROJECTION,function(err,result){
         if(err) throw err;
@@ -55,7 +47,7 @@ router.get("/create",requiresLogin,requiresRole("superadmin"),function(req,res) 
     var experiencePattern = new ExperienceModel();
     if(data.title!=null) {
         for (var key in experiencePattern.schema.paths) {
-            if (allowKey(key)) {
+            if (Utility.allowKey(key)) {
                 experiencePattern[key] = data[key] || experiencePattern[key];
             }
         }
@@ -79,7 +71,7 @@ router.get("/update",requiresLogin,requiresRole("superadmin"),function(req,res){
         if(doc) {
             var experiencePattern = new ExperienceModel();
             for(var key in experiencePattern.schema.paths){
-                if(allowKey(key)){
+                if(Utility.allowKey(key)){
                     doc[key]= data[key] || doc[key];
                 }
             }

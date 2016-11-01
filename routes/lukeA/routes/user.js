@@ -22,30 +22,23 @@ var RankModel = require("../../../models/lukeA/RankModel");
 var ReportCategoryModel = require("../../../models/lukeA/ReportCategoryModel");
 var VoteModel = require("../../../models/lukeA/VoteModel");
 var ExperienceModel = require("../../../models/lukeA/ExperienceModel");
-
+/* UTILITY */
+var UtModule = require("../../utility");
+var Utility = new UtModule([
+    //Omit Keyes to be updated by user
+    "id",
+    "_id",
+    "__v",
+    "username",
+    "score",
+    "rankingId",
+    "submitterId",
+    "submitterRating"
+]);
 const MONGO_PROJECTION ={
     _id: 0,
     __v: 0
 };
-/* UTILITY FUNCTIONS*/
-function allowKey(key) {
-    var omit = [
-        "id",
-        "_id",
-        "__v",
-        "username",
-        "score",
-        "rankingId",
-        "submitterId",
-        "submitterRating"
-    ];
-
-    if (omit.indexOf(key) != -1){
-        return false;
-    }
-
-    return true;
-}
 
 router.get('/get-all', requiresLogin, requiresRole('admin'), function(req, res, next) {
     UserModel.find({},MONGO_PROJECTION, function (err, result) {
@@ -88,12 +81,15 @@ router.get('/update',requiresLogin,function(req,res) {
             if (doc != null) {
                 var userPattern = new UserModel();
                 for (var key in userPattern.schema.paths) {
-                    if (allowKey(key)) {
+                    if (Utility.allowKey(key)) {
                         doc[key] = req.query[key] || doc[key];
                     }
                 }
-                doc.save();
-                res.status(200).json(doc);
+                doc.save(function(err,result){
+                    if(err) throw err;
+                    res.status(200).json(result);
+                });
+
             } else {
                 res.status(200).json({error: 'No user with such id'});
             }

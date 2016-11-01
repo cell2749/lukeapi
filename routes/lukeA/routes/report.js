@@ -19,33 +19,23 @@ var RankModel = require("../../../models/lukeA/RankModel");
 var ReportCategoryModel = require("../../../models/lukeA/ReportCategoryModel");
 var VoteModel = require("../../../models/lukeA/VoteModel");
 var ExperienceModel = require("../../../models/lukeA/ExperienceModel");
-
+/* UTILITY */
+var UtModule = require("../../utility");
+var Utility = new UtModule([
+    //Omit Keyes to be updated by user
+    "id",
+    "_id",
+    "__v",
+    "username",
+    "score",
+    "rankingId",
+    "submitterId",
+    "submitterRating"
+]);
 const MONGO_PROJECTION ={
     _id: 0,
     __v: 0
 };
-/* UTILITY FUNCTIONS*/
-function allowKey(key) {
-    var omit = [
-        "id",
-        "_id",
-        "__v",
-        "username",
-        "score",
-        "rankingId",
-        "submitterId",
-        "submitterRating"
-    ];
-
-    if (omit.indexOf(key) != -1){
-        return false;
-    }
-
-    return true;
-}
-function deg2rad(deg){
-    return deg*Math.PI/180;
-}
 router.get('/get-all',function(req,res){
     var data = req.query;
     var returnResult=[];
@@ -54,8 +44,8 @@ router.get('/get-all',function(req,res){
 
     //deg2rad might not be necessary
     var location = {
-        long : deg2rad(data.long),
-        lat : deg2rad(data.lat)
+        long : Utility.deg2rad(data.long),
+        lat : Utility.deg2rad(data.lat)
     };
     var distance = data.distance || 5000;
 
@@ -130,7 +120,7 @@ router.get('/create',requiresLogin,restrictBanned,function(req,res,next){
                     //var vote = new VoteModel();
 
                     for (var key in report.schema.paths) {
-                        if (allowKey(key)) {
+                        if (Utility.allowKey(key)) {
                             report[key] = data[key] || report[key];
                         }
                     }

@@ -2,18 +2,18 @@ var express = require('express');
 var router = express.Router();
 var passport = require('passport');
 var mongoose = require('mongoose');
-var mongodb = require('../mongodb/lukeBdb');
+var mongodb = require('../../mongodb/lukeBdb');
 /* SECURITY */
-var requiresLogin = require('../security/requiresLogin');
-var requiresRole = require('../security/requiresRole');
-var requiresRoles = require('../security/requiresRoles');
-var restrictBanned = require('../security/restrictBanned');
+var requiresLogin = require('../../security/requiresLogin');
+var requiresRole = require('../../security/requiresRole');
+var requiresRoles = require('../../security/requiresRoles');
+var restrictBanned = require('../../security/restrictBanned');
 /* MODELS */
-var UserModel = require("../models/lukeB/UserModel");
-var ReportModel = require("../models/lukeB/ReportModel");
-var PlaceModel = require("../models/lukeB/PlaceModel");
-var CommentModel = require("../models/lukeB/CommentModel");
-var CategoryModel = require("../models/lukeB/CategoryModel");
+var UserModel = require("../../models/lukeB/UserModel");
+var ReportModel = require("../../models/lukeB/ReportModel");
+var PlaceModel = require("../../models/lukeB/PlaceModel");
+var CommentModel = require("../../models/lukeB/CommentModel");
+var CategoryModel = require("../../models/lukeB/CategoryModel");
 /* ROUTES*/
 var user = require('./routes/user');
 var report = require('./routes/report');

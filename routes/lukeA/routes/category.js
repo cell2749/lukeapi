@@ -11,7 +11,6 @@ var requiresLogin = require('../../../security/requiresLogin');
 var requiresRole = require('../../../security/requiresRole');
 var requiresRoles = require('../../../security/requiresRoles');
 var restrictBanned = require('../../../security/restrictBanned');
-
 /* MODELS */
 var UserModel = require("../../../models/lukeA/UserModel");
 var ReportModel = require("../../../models/lukeA/ReportModel");
@@ -19,30 +18,23 @@ var RankModel = require("../../../models/lukeA/RankModel");
 var ReportCategoryModel = require("../../../models/lukeA/ReportCategoryModel");
 var VoteModel = require("../../../models/lukeA/VoteModel");
 var ExperienceModel = require("../../../models/lukeA/ExperienceModel");
-
+/* UTILITY */
+var UtModule = require("../../utility");
+var Utility = new UtModule([
+    //Omit Keyes to be updated by user
+    "id",
+    "_id",
+    "__v",
+    "username",
+    "score",
+    "rankingId",
+    "submitterId",
+    "submitterRating"
+]);
 const MONGO_PROJECTION ={
     _id: 0,
     __v: 0
 };
-/* UTILITY FUNCTIONS*/
-function allowKey(key) {
-    var omit = [
-        "id",
-        "_id",
-        "__v",
-        "username",
-        "score",
-        "rankingId",
-        "submitterId",
-        "submitterRating"
-    ];
-
-    if (omit.indexOf(key) != -1){
-        return false;
-    }
-
-    return true;
-}
 router.get('/all',requiresLogin,function(req,res){
     ReportCategoryModel.find({},MONGO_PROJECTION,function(err,result){
         if(err) throw err;
@@ -59,7 +51,7 @@ router.get('/create',requiresLogin,requiresRole('admin'),function(req,res){
             } else {
                 var reportCategory = new ReportCategoryModel();
                 for (var key in reportCategory.schema.paths) {
-                    if (allowKey(key)) {
+                    if (Utility.allowKey(key)) {
                         reportCategory[key] = data[key] || reportCategory[key];
                     }
                 }
@@ -89,7 +81,7 @@ router.get("/update",requiresLogin,requiresRole("admin"),function(req,res){
             if (doc) {
                 var reportCategory = new ReportCategoryModel();
                 for (var key in reportCategory.schema.paths){
-                    if(allowKey(key)) {
+                    if(Utility.allowKey(key)) {
                         doc[key] = data[key] || doc[key];
                     }
                 }
@@ -111,7 +103,7 @@ router.get("/update",requiresLogin,requiresRole("admin"),function(req,res){
             if (doc) {
                 var reportCategory = new ReportCategoryModel();
                 for (var key in reportCategory.schema.paths){
-                    if(allowKey(key)) {
+                    if(Utility.allowKey(key)) {
                         doc[key] = data[key] || doc[key];
                     }
                 }

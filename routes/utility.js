@@ -1,20 +1,7 @@
-var MyUtility = function(keyes){
+var Utility = function(keyes){
     this.omitKeyes = keyes;
-}
-MyUtility.prototype.allowKey = function(key) {
-    var omit = [
-        "id",
-        "_id",
-        "__v",
-        "username",
-        "profileId",
-        "rating",
-        "rating2",
-        "votes.profileId",
-        "votes.vote",
-        "flagged",
-        "approved"
-    ];
+};
+Utility.prototype.allowKey = function(key) {
     for (var i = 0; i < this.omitKeyes.length; i++) {
         if (this.omitKeyes[i] == key) {
             return false;
@@ -22,10 +9,10 @@ MyUtility.prototype.allowKey = function(key) {
     }
     return true;
 };
-MyUtility.prototype.deg2rad = function(deg) {
+Utility.prototype.deg2rad = function(deg) {
     return deg * Math.PI / 180;
 };
-MyUtility.prototype.remove = function(Model,id) {
+Utility.prototype.remove = function(Model,id) {
     Model.find({id: id}).remove(function (err, item) {
         if (err) throw err;
 
@@ -36,7 +23,7 @@ MyUtility.prototype.remove = function(Model,id) {
         }
     });
 };
-MyUtility.prototype.update = function(Model,data) {
+Utility.prototype.update = function(Model,data) {
     Model.findOne({id: data.id}, function (err, doc) {
         if (doc) {
             var pattern = new Model();
@@ -51,4 +38,4 @@ MyUtility.prototype.update = function(Model,data) {
         }
     });
 };
-module.exports = MyUtility;
+module.exports = Utility;
