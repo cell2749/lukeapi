@@ -9,7 +9,7 @@ var schema = mongoose.Schema(
     {
         id:{type: String, required: '{PATH} is required!'},
         username:String,
-        email:String,
+        email:String,//??
         image_url:String,
         bio:String,
         location:String,
