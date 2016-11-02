@@ -35,7 +35,7 @@ const MONGO_PROJECTION ={
     _id: 0,
     __v: 0
 };
-router.get('/all',requiresLogin,function(req,res){
+router.get('/get-all',requiresLogin,function(req,res){
     ReportCategoryModel.find({},MONGO_PROJECTION,function(err,result){
         if(err) throw err;
         res.status(200).json(result);

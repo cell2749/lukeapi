@@ -11,12 +11,17 @@ var schema = mongoose.Schema(
         profileId: {type: String, required: '{PATH} is required!'},
         reportId:{type: String, required: '{PATH} is required!'},
         text:String,
+        date:String,
         votes:[{
             profileId: String,
+            date: String,
             vote: Boolean
         }],
+        location: {
+            long: Number,
+            lat: Number
+        },
         flagged: Boolean
-
     }
 );
 

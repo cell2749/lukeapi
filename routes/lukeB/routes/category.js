@@ -23,18 +23,20 @@ var Utility = new UtModule([
     "id",
     "_id",
     "__v",
-    "username",
-    "profileId",
-    "votes.profileId",
-    "votes.vote",
-    "flagged",
-    "approved"
+    "image_url"
 ]);
 const MONGO_PROJECTION ={
     _id: 0,
     __v: 0
 };
+router.get("/get-all",function(req,res){
+    CategoryModel.find({}, MONGO_PROJECTION, function (err, result) {
+        if (err) throw err;
 
+        var response = result || [];
+        res.status(200).json(response);
+    });
+});
 router.get("/create",function(req,res){
     var data = req.query;
     res.status(200).send("OK");

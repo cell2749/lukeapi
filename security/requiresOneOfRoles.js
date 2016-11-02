@@ -1,18 +1,17 @@
 /**
- * Created by nikitak on 12.10.2016.
+ * Created by nikitak on 2.11.2016.
  */
-module.exports = function requireRoles(roles) {
+module.exports = function requireOneOfRoles(roles) {
     return function(req, res, next) {
         var appMetadata = req.user.profile._json.app_metadata || {};
         var allRoles = appMetadata.roles || [];
-        var count;
-        count = 0;
+        var passed = false;
         for(var i=0;i<roles.length;i++){
             if(allRoles.indexOf(roles[i])!= -1){
-                count++;
+                passed = true;
             }
         }
-        if (count == roles.length) {
+        if (passed) {
             next();
         } else {
             res.status(200).json({error:'Proper authorization required',auth:true});

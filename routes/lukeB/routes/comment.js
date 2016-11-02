@@ -20,21 +20,31 @@ var CategoryModel = require("../../../models/lukeB/CategoryModel");
 /*Utility*/
 var UtModule = require("../../utility");
 var Utility = new UtModule([
-    "id",
-    "_id",
     "__v",
-    "username",
+    "_id",
+    "id",
     "profileId",
+    "reportId",
+    "votes",
+    "date",
     "votes.profileId",
+    "votes.date",
     "votes.vote",
-    "flagged",
-    "approved"
+    "flagged"
 ]);
 const MONGO_PROJECTION ={
     _id: 0,
     __v: 0
 };
-router.get("/add",requiresLogin,function(req,res) {
+router.get("/get-all",function(req,res){
+    CommentModel.find({}, MONGO_PROJECTION, function (err, result) {
+        if (err) throw err;
+
+        var response = result || [];
+        res.status(200).json(response);
+    });
+});
+router.get("/create",requiresLogin,function(req,res) {
     var data = req.query;
     if (data.reportId != null) {
         ReportModel.findOne({id: data.reportId}, function (err, doc) {
@@ -62,145 +72,26 @@ router.get("/add",requiresLogin,function(req,res) {
         res.status(200).json({error: "Missing report Id"});
     }
 });
-router.get("/edit",requiresLogin,function(req,res){
-    var data = req.query;
-    if(data.id) {
-        CommentModel.findOne({id: data.id}, function (err, doc) {
-            if (err) throw err;
-            if (doc) {
-                if (req.user.profile.id == doc.profileId) {
-                    doc.text = data.text||doc.text;
-                    doc.save(function (err, item) {
-                        if (err) throw err;
-                        res.status(200).json({success: true});
-                    });
-                } else {
-                    res.status(200).json({error: "Cannot modify another users comment"});
-                }
-            } else {
-                res.status(200).json({error: "No comment with such id"});
-            }
-        });
-    }else{
-        res.status(200).json({error: "Missing comment id"});
-    }
+router.get("/update",requiresLogin,function(req,res){
+    Utility.update(CommentModel,req.query,res);
 });
 router.get("/remove",requiresLogin,function(req,res){
-    var data = req.query;
-    if(data.id) {
-        Utility.remove(CommentModel,data.id);
-    }else{
-        res.status(200).json({error: "Missing id"});
-    }
+    Utility.remove(CommentModel,req.query.id,res);
 });
 router.get("/vote",requiresLogin,function(req,res){
-    var data= req.query;
-    if(data.id) {
-        if(data.vote!=null) {
-            CommentModel.findOne({id: data.id}, function (err, doc) {
-                if (err)throw err;
-
-                if (doc) {
-                    var exists = false;
-                    var vote = {
-                        profileId: req.user.profile.id,
-                        vote: data.vote
-                    };
-                    for (var i = 0; i < doc.votes.length; i++) {
-                        if (doc.votes[i].profileId == req.user.profile.id) {
-                            doc.votes[i] = vote;
-                            exists = true;
-                        }
-                        if (i == doc.votes.length - 1) {
-                            if (!exists) {
-                                doc.votes.push(vote);
-                            }
-                            doc.save(function (err, result) {
-                                if (err)throw err;
-                                res.status(200).json({success: true});
-                            });
-                        }
-                    }
-                } else {
-                    res.status(200).json({error: "No comment with such id"});
-                }
-            });
-        }else{
-            res.status(200).json({error:"Missing vote: true or false"});
-        }
-    }else{
-        res.status(200).json({error:"Missing comment id"});
-    }
+    Utility.vote(CommentModel,req,res,req.query.vote);
 });
 router.get("/upvote",requiresLogin,function(req,res){
-    var data= req.query;
-    if(data.id) {
-        CommentModel.findOne({id: data.id}, function (err, doc) {
-            if (err)throw err;
-
-            if (doc) {
-                var exists = false;
-                var vote = {
-                    profileId:req.user.profile.id,
-                    vote:true
-                };
-                for(var i=0;i<doc.votes.length;i++){
-                    if(doc.votes[i].profileId==req.user.profile.id){
-                        doc.votes[i]=vote;
-                        exists=true;
-                    }
-                    if(i==doc.votes.length-1) {
-                        if(!exists) {
-                            doc.votes.push(vote);
-                        }
-                        doc.save(function(err,result){
-                            if(err)throw err;
-                            res.status(200).json({success:true});
-                        });
-                    }
-                }
-            } else {
-                res.status(200).json({error: "No comment with such id"});
-            }
-        });
-    }else{
-        res.status(200).json({error:"Missing comment id"});
-    }
+    Utility.vote(CommentModel,req,res,true);
 });
 router.get("/downvote",requiresLogin,function(req,res){
-    var data= req.query;
-    if(data.id) {
-        CommentModel.findOne({id: data.id}, function (err, doc) {
-            if (err)throw err;
-
-            if (doc) {
-                var exists = false;
-                var vote = {
-                    profileId:req.user.profile.id,
-                    vote:false
-                };
-                for(var i=0;i<doc.votes.length;i++){
-                    if(doc.votes[i].profileId==req.user.profile.id){
-                        doc.votes[i]=vote;
-                        exists=true;
-                    }
-                    if(i==doc.votes.length-1) {
-                        if(!exists) {
-                            doc.votes.push(vote);
-                        }
-                        doc.save(function(err,result){
-                            if(err)throw err;
-                            res.status(200).json({success:true});
-                        });
-                    }
-                }
-            } else {
-                res.status(200).json({error: "No comment with such id"});
-            }
-        });
-    }else{
-        res.status(200).json({error:"Missing comment id"});
-    }
+    Utility.vote(CommentModel,req,res,false);
+});
+router.get("/downvote-count",function(req,res){
+    Utility.voteCount(CommentModel,req.query.id,res,false);
+});
+router.get("/upvote-count",function(req,res){
+    Utility.voteCount(CommentModel,req.query.id,res,true);
 });
 
 module.exports = router;

@@ -11,6 +11,7 @@ var requiresLogin = require('../../../security/requiresLogin');
 var requiresRole = require('../../../security/requiresRole');
 var requiresRoles = require('../../../security/requiresRoles');
 var restrictBanned = require('../../../security/restrictBanned');
+var requiresOneOfRoles = require('../../../security/requiresOneOfRoles');
 var ManagementClient = require('auth0').ManagementClient;
 var management = new ManagementClient({
     token: process.env.AUTH0_API_TOKEN,
@@ -29,17 +30,22 @@ var Utility = new UtModule([
     "_id",
     "__v",
     "username",
+    "image_url",
+    "lastOnline",
     "profileId",
-    "votes.profileId",
-    "votes.vote",
-    "flagged",
-    "approved"
+    "logTimes",
+    "logTimes.locationId",
+    "logTimes.timeLogIn",
+    "logTimes.timeLogOut",
+    "logTimes.numberOfComments",
+    "logTimes.numberOfRatings",
+    "logTimes.numberOfReports"
 ]);
 const MONGO_PROJECTION ={
     _id: 0,
     __v: 0
 };
-router.get('/get-all', requiresLogin, requiresRole('admin'), function(req, res, next) {
+router.get('/get-all', requiresLogin, requiresOneOfRoles(['admin','advanced','researcher']), function(req, res, next) {
     UserModel.find({}, MONGO_PROJECTION, function (err, result) {
         if (err) throw err;
 
@@ -53,7 +59,7 @@ router.get('/',requiresLogin, function(req, res, next) {
     var id = req.query.id || req.user.profile.id;
     var appMetadata = req.user.profile._json.app_metadata || {roles: []};
 
-    if (id == req.user.profile.id || appMetadata.roles.indexOf("admin") != -1) {
+    if (id == req.user.profile.id || appMetadata.roles.indexOf("admin") != -1||appMetadata.roles.indexOf('advanced') != -1||appMetadata.roles.indexOf('researcher') != -1) {
         UserModel.findOne({id: id}, MONGO_PROJECTION, function (err, result) {
             if (err) throw err;
 
@@ -93,7 +99,6 @@ router.get('/update',requiresLogin,function(req,res) {
         res.status(200).json({error:'Proper authorization required',reqAuth:true});
     }
 });
-
 router.get('/available',requiresLogin,function(req,res){
     var username = req.query.username;
     if(username) {
@@ -109,6 +114,23 @@ router.get('/available',requiresLogin,function(req,res){
     }else{
         res.status(200).json({error:"Username not specified"});
     }
+});
+router.get('/set-username',requiresLogin,function(req,res){
+    var username = req.query.username;
+    UserModel.findOne({id:req.user.profile.id},function(err,doc){
+        if(err) throw err;
+        if(doc.username){
+            res.status(200).json({error:"Cannot modify existing value."});
+        }else{
+            doc.username = username;
+            doc.save();
+            res.status(200).json({success:true});
+        }
+    });
+});
+router.get("/copy-profile",requiresLogin,function(req,res){
+   var data = req.user.profile;
+
 });
 /* ROLES*/
 router.get("/add-role",requiresLogin,requiresRole("admin"),function(req,res) {

@@ -14,7 +14,11 @@ var schema = mongoose.Schema(
             lat:Number
         },
         type:String,
-        rating:Number,
+        votes:[{
+            profileId:String,
+            date:String,
+            vote:Boolean
+        }],
         description:String,
         nearReports:[{
             id:String

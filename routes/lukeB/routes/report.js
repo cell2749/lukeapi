@@ -26,10 +26,12 @@ var Utility = new UtModule([
     "id",
     "_id",
     "__v",
-    "username",
     "profileId",
+    "image_url",
+    "votes",
     "votes.profileId",
     "votes.vote",
+    "votes.date",
     "flagged",
     "approved"
 ]);
@@ -37,7 +39,7 @@ const MONGO_PROJECTION ={
     _id: 0,
     __v: 0
 };
-router.get('/reports',function(req,res){
+router.get('/get-all',function(req,res){
     var data = req.query;
     var returnResult=[];
     var limit = data.limit || 0;
@@ -65,8 +67,16 @@ router.get('/reports',function(req,res){
         (p3 * Math.cos(5 * location.lat));
 
     var approved = true; //{$ne:null};
-    var flagged = {$ne:null};
+    var flagged = false; //{$ne:null};
     var submitterId = data.submitterId || {$ne:null};
+    var showVotes = 0;
+    if(data.votes=="false"||data.votes==0){
+        showVotes = 0;
+    }else if(data.votes=="true"||data.votes==1){
+        showVotes = 1;
+    }
+    var newProjection = MONGO_PROJECTION;
+    newProjection[votes]=showVotes;
 
     if(req.isAuthenticated()) {
         var appMetadata = req.user.profile._json.app_metadata || {};
@@ -76,7 +86,7 @@ router.get('/reports',function(req,res){
             flagged = data.flagged || flagged;
         }
     }
-    ReportModel.find({approved:approved,submitterId:submitterId,flagged:flagged},MONGO_PROJECTION).sort({"date":-1}).limit(parseInt(limit)).exec(function(err, collection){
+    ReportModel.find({approved:approved,submitterId:submitterId,flagged:flagged},newProjection).sort({"date":-1}).limit(parseInt(limit)).exec(function(err, collection){
         if(err) throw err;
         var result = [];
         if(rating!=null) {
@@ -107,7 +117,7 @@ router.get('/reports',function(req,res){
         }
     });
 });
-router.get('/create_report',requiresLogin,function(req,res,next) {
+router.get('/create',requiresLogin,function(req,res,next) {
     var data = req.query;
     var id = mongoose.Types.ObjectId();
 
@@ -127,6 +137,8 @@ router.get('/create_report',requiresLogin,function(req,res,next) {
         //vote.report.id = id;
         report._id = id;
         report.approved = false;
+        report.rating = 0;
+        report.rating2 = 0;
         report.save(function (err, report) {
             if (err)throw err;
             var returnV = {};
@@ -140,7 +152,7 @@ router.get('/create_report',requiresLogin,function(req,res,next) {
     });
 
 });
-router.get('/update-report',requiresLogin,function(req,res){
+router.get('/update',requiresLogin,function(req,res){
     var data = req.query;
 
     var allowedKeyes = [
@@ -176,183 +188,25 @@ router.get('/update-report',requiresLogin,function(req,res){
         }
     });
 });
-router.get("/remove-report",requiresLogin,function(req,res){
-    var data = req.query;
-    var id = data.id;
-    var appMetadata = req.user.profile._json.app_metadata || {};
-    var adminRoles = appMetadata.roles || [];
-    ReportModel.findOne({id:id},{"submitterId":1},function(err,doc) {
-        if (doc.submitterId == req.user.profile.id || adminRoles.indexOf("admin")!=-1) {
-            ReportModel.find({id: id}).remove(function (err, item) {
-                if (err) throw err;
-
-                if (item.result.n != 0) {
-                    res.status(200).json({success:"Removed " + item.result.n + " items"});
-                } else {
-                    res.status(200).json({error:"No report with such id"});
-                }
-            });
-        }else{
-            res.status(200).json({error:"Restricted Access"});
-        }
-    });
+router.get("/remove",requiresLogin,function(req,res){
+    Utility.remove(ReportModel, req.query.id,res);
 });
-router.get("/upvote-report",requiresLogin,function(req,res){
-    var data= req.query;
-    if(data.id) {
-        ReportModel.findOne({id: data.id}, function (err, doc) {
-            if (err)throw err;
-
-            if (doc) {
-                var exists = false;
-                var vote = {
-                    profileId:req.user.profile.id,
-                    vote:true
-                };
-                for(var i=0;i<doc.votes.length;i++){
-                    if(doc.votes[i].profileId==req.user.profile.id){
-                        doc.votes[i]=vote;
-                        exists=true;
-                    }
-                    if(i==doc.votes.length-1) {
-                        if(!exists) {
-                            doc.votes.push(vote);
-                        }
-                        doc.save(function(err,result){
-                            if(err)throw err;
-                            res.status(200).json({success:true});
-                        });
-                    }
-                }
-            } else {
-                res.status(200).json({error: "No report with such id"});
-            }
-        });
-    }else{
-        res.status(200).json({error:"Missing report id"});
-    }
+router.get("/upvote",requiresLogin,function(req,res){
+    Utility.vote(ReportModel,req,res,true);
 });
-router.get("/downvote-report",requiresLogin,function(req,res){
-    var data= req.query;
-    if(data.id) {
-        ReportModel.findOne({id: data.id}, function (err, doc) {
-            if (err)throw err;
-
-            if (doc) {
-                var exists = false;
-                var vote = {
-                    profileId:req.user.profile.id,
-                    vote:false
-                };
-                for(var i=0;i<doc.votes.length;i++){
-                    if(doc.votes[i].profileId==req.user.profile.id){
-                        doc.votes[i]=vote;
-                        exists=true;
-                    }
-                    if(i==doc.votes.length-1) {
-                        if(!exists) {
-                            doc.votes.push(vote);
-                        }
-                        doc.save(function(err,result){
-                            if(err)throw err;
-                            res.status(200).json({success:true});
-                        });
-                    }
-                }
-            } else {
-                res.status(200).json({error: "No report with such id"});
-            }
-        });
-    }else{
-        res.status(200).json({error:"Missing report id"});
-    }
+router.get("/downvote",requiresLogin,function(req,res){
+    Utility.vote(ReportModel,req,res,false);
 });
-router.get("/vote-report",requiresLogin,function(req,res){
-    var data= req.query;
-    if(data.id) {
-        if(data.vote!=null) {
-            ReportModel.findOne({id: data.id}, function (err, doc) {
-                if (err)throw err;
-
-                if (doc) {
-                    var exists = false;
-                    var vote = {
-                        profileId: req.user.profile.id,
-                        vote: data.vote
-                    };
-                    for (var i = 0; i < doc.votes.length; i++) {
-                        if (doc.votes[i].profileId == req.user.profile.id) {
-                            doc.votes[i] = vote;
-                            exists = true;
-                        }
-                        if (i == doc.votes.length - 1) {
-                            if (!exists) {
-                                doc.votes.push(vote);
-                            }
-                            doc.save(function (err, result) {
-                                if (err)throw err;
-                                res.status(200).json({success: true});
-                            });
-                        }
-                    }
-                } else {
-                    res.status(200).json({error: "No report with such id"});
-                }
-            });
-        }else{
-            res.status(200).json({error:"Missing vote: true or false"});
-        }
-    }else{
-        res.status(200).json({error:"Missing report id"});
-    }
+router.get("/vote",requiresLogin,function(req,res){
+    Utility.vote(ReportModel,req,res,req.query.vote);
 });
-router.get("/report-downvotes-count",function(req,res){
-    var data = req.query;
-    var count=0;
-    if(data.id) {
-        ReportModel.findOne({id: data.id}, function (err, doc) {
-            if(err)throw err;
-            if(doc){
-                for(var i=0;i<doc.votes.length;i++){
-                    if(!doc.votes[i].vote){
-                        count++;
-                    }
-                    if(i==doc.votes.length-1){
-                        res.status(200).json({count:count});
-                    }
-                }
-            }else{
-                res.status(200).json({error:"No report with such id"});
-            }
-        });
-    }else{
-        res.status(200).json({error:"Missing report id"});
-    }
+router.get("/downvote-count",function(req,res){
+    Utility.voteCount(ReportModel,req.query.id,res,false);
 });
-router.get("/report-upvotes-count",function(req,res){
-    var data = req.query;
-    var count=0;
-    if(data.id) {
-        ReportModel.findOne({id: data.id}, function (err, doc) {
-            if(err)throw err;
-            if(doc){
-                for(var i=0;i<doc.votes.length;i++){
-                    if(doc.votes[i].vote){
-                        count++;
-                    }
-                    if(i==doc.votes.length-1){
-                        res.status(200).json({count:count});
-                    }
-                }
-            }else{
-                res.status(200).json({error:"No report with such id"});
-            }
-        });
-    }else{
-        res.status(200).json({error:"Missing report id"});
-    }
+router.get("/upvote-count",function(req,res){
+    Utility.voteCount(ReportModel,req.query.id,res,true);
 });
-router.get("/approve-report",requiresLogin,requiresRole("admin"),function(req,res) {
+router.get("/approve",requiresLogin,requiresRole("admin"),function(req,res) {
     var data = req.query;
     var id = data.id;
     ReportModel.findOne({id: id}, function (err, doc) {
@@ -368,7 +222,7 @@ router.get("/approve-report",requiresLogin,requiresRole("admin"),function(req,re
         }
     });
 });
-router.get("/disapprove-report",requiresLogin,requiresRole("admin"),function(req,res){
+router.get("/disapprove",requiresLogin,requiresRole("admin"),function(req,res){
     var data = req.query;
     var id = data.id;
     ReportModel.findOne({id:id},function(err,doc){
@@ -384,7 +238,7 @@ router.get("/disapprove-report",requiresLogin,requiresRole("admin"),function(req
         }
     });
 });
-router.get("/flag-report",requiresLogin,restrictBanned,function(req,res){
+router.get("/flag",requiresLogin,restrictBanned,function(req,res){
     var data = req.query;
     var id = data.id;
     ReportModel.findOne({id:id},function(err,doc){
@@ -400,7 +254,7 @@ router.get("/flag-report",requiresLogin,restrictBanned,function(req,res){
         }
     });
 });
-router.get("/unflag-report",requiresLogin,requiresRole("admin"),function(req,res){
+router.get("/unflag",requiresLogin,requiresRole("admin"),function(req,res){
     var data = req.query;
     var id = data.id;
     ReportModel.findOne({id:id},function(err,doc){

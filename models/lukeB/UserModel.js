@@ -23,6 +23,11 @@ var schema = mongoose.Schema(
             id:String,
             report:String
         }],
+        profile: {
+            image_url: String,
+            provider: String,
+            link: String
+        },
         lastOnline:String,
         logTimes:{
             locationId:String,

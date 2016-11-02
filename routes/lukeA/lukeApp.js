@@ -50,22 +50,22 @@ router.get('/callback',passport.authenticate('auth0', { failureRedirect: '/url-i
     throw new Error('user null');
   }else{
     var userData = req.user.profile;
-    console.log(userData);
+    //console.log(userData);
 
     UserModel.findOne({id:userData.id},MONGO_PROJECTION, function (err, result) {
       if(err) throw err;
-        console.log("User model find");
+        //console.log("User model find");
       if(result!=null){
-        console.log("exists");
+        //console.log("exists");
       }else {
-        console.log("creating new");
+        //console.log("creating new");
         var user = new UserModel({
           id: userData.id,
           score: 0,
           rankingId: "0"
         });
 
-        console.log(user);
+        //console.log(user);
 
         user.save(function(err,result){
           if(err) throw err;

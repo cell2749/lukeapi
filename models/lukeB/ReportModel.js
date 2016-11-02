@@ -19,6 +19,7 @@ var schema = mongoose.Schema(
         profileId: String,
         votes:[{
             profileId:String,
+            date:String,
             vote:Boolean
         }],
         approved: Boolean,

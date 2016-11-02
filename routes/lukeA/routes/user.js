@@ -127,6 +127,20 @@ router.get('/set-username',requiresLogin,function(req,res){
         }
     });
 });
+router.get("/copy-profile",requiresLogin,function(req,res) {
+    var data = req.user.profile;
+    var profile = {
+        image_url: data.picture,
+        provider: data.provider,
+        link: data._json.link
+    };
+    console.log(data);
+    console.log("WOW / ");
+    console.log(data.picture);
+    console.log(data.provider);
+    console.log(data._json.link);
+    res.status(200).json(profile);
+});
 router.get("/add-role",requiresLogin,requiresRole("admin"),function(req,res) {
     var data = req.query;
     var userId = data.id;
