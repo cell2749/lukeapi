@@ -18,6 +18,7 @@ var PlaceModel = require("../../../models/lukeB/PlaceModel");
 var CommentModel = require("../../../models/lukeB/CommentModel");
 var CategoryModel = require("../../../models/lukeB/CategoryModel");
 /*Utility*/
+const urlRegex = require('url-regex');
 var UtModule = require("../../utility");
 var Utility = new UtModule([
     "__v",
@@ -46,28 +47,34 @@ router.get("/get-all",function(req,res){
 });
 router.get("/create",requiresLogin,function(req,res) {
     var data = req.query;
+    var text = req.query.text || "";
+    var urls = text.match(urlRegex());
     if (data.reportId != null) {
-        ReportModel.findOne({id: data.reportId}, function (err, doc) {
-            if (err) throw err;
-            if (doc) {
-                var comment = new CommentModel();
-                for (var key in comment.schema.paths) {
-                    if (Utility.allowKey(key)) {
-                        comment[key] = data[key] || comment[key];
+        if (urls.length == 0) {
+            ReportModel.findOne({id: data.reportId}, function (err, doc) {
+                if (err) throw err;
+                if (doc) {
+                    var comment = new CommentModel();
+                    for (var key in comment.schema.paths) {
+                        if (Utility.allowKey(key)) {
+                            comment[key] = data[key] || comment[key];
+                        }
                     }
+                    var id = mongoose.Types.ObjectId();
+                    comment._id = id;
+                    comment.id = id;
+                    comment.profileId = req.user.profileId;
+                    comment.save(function (err, item) {
+                        if (err)throw err;
+                        res.status(200).json({success: true});
+                    });
+                } else {
+                    res.status(200).json({error: "No report with such Id"});
                 }
-                var id = mongoose.Types.ObjectId();
-                comment._id = id;
-                comment.id = id;
-                comment.profileId = req.user.profileId;
-                comment.save(function (err, item) {
-                    if (err)throw err;
-                    res.status(200).json({success: true});
-                });
-            } else {
-                res.status(200).json({error: "No report with such Id"});
-            }
-        });
+            });
+        } else {
+            res.status(200).json({error: "No urls are allowed"});
+        }
     } else {
         res.status(200).json({error: "Missing report Id"});
     }

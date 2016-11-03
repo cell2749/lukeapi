@@ -1,5 +1,6 @@
-var Utility = function(keyes){
+var Utility = function(keyes,maxFlags){
     this.omitKeyes = keyes;
+    this.maxFlags = maxFlags;
 };
 Utility.prototype.allowKey = function(key) {
     for (var i = 0; i < this.omitKeyes.length; i++) {
@@ -59,14 +60,22 @@ Utility.prototype.vote = function(Model,req,res,vote) {
                         date: Date.now(),
                         vote: vote
                     };
+                    var flagCount = 0;
                     for (var i = 0; i < doc.votes.length; i++) {
                         if (doc.votes[i].profileId == req.user.profile.id) {
                             doc.votes[i] = vote;
                             exists = true;
                         }
+                        if(doc.votes[i].vote==false || doc.votes[i].vote=="false" ){
+                            flagCount++;
+                        }
+
                         if (i == doc.votes.length - 1) {
                             if (!exists) {
                                 doc.votes.push(vote);
+                            }
+                            if(this.maxFlags!=null&&flagCount>=this.maxFlags){
+                                   doc.flagged = true;
                             }
                             doc.save(function (err, result) {
                                 if (err)throw err;
