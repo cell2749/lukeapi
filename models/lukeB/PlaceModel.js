@@ -21,15 +21,14 @@ var schema = mongoose.Schema(
         }],
         description:String,
         nearReports:[{
-            id:String
+            reportId:String
         }],
         visitLog:[{
-            id:String,
+            profileId:String,
             date:String,
             report:Boolean
         }],
         weatherData:{
-            nearestWeatherStation:String, //???? lat, long or address ?
             temperature:Number,
             seaTemperature:Number,
             wind:Number

@@ -45,7 +45,8 @@ const MONGO_PROJECTION ={
     _id: 0,
     __v: 0
 };
-router.get('/get-all', requiresLogin, requiresOneOfRoles(['admin','advanced','researcher']), function(req, res, next) {
+//requiresOneOfRoles(['admin','advanced','researcher']) ????
+router.get('/get-all', requiresLogin, function(req, res, next) {
     UserModel.find({}, MONGO_PROJECTION, function (err, result) {
         if (err) throw err;
 
@@ -130,20 +131,79 @@ router.get('/set-username',requiresLogin,function(req,res){
 });
 router.get("/copy-profile",requiresLogin,function(req,res) {
     var data = req.user.profile;
-    var profile = {
-        image_url: data.picture,
-        provider: data.provider,
-        link: data._json.link
-    };
-    console.log(data);
-    console.log("WOW / ");
-    console.log(data.picture);
-    console.log(data.provider);
-    console.log(data._json.link);
-    res.status(200).json(profile);
+    var cpyImg = req.query.cpyImg || true;
 
+    if(data.provider&&data._json.link) {
+        UserModel.findOne({id: data.id}, function (err, doc) {
+            if (err)throw err;
+            var exists = false;
+            doc.profile.forEach(function (item) {
+                if (item.provider == data.provider) {
+                    exists = true;
+                    item.link = data._json.link;
+                }
+            });
+            if (!exists) {
+                doc.profile.push({
+                    provider: data.provider,
+                    link: data._json.link
+                });
+            }
+            if (cpyImg && data.picture) {
+                doc.imate_url = data.picture;
+            }
+        });
+    }else{
+        res.status(200).json({error:"Error in reading social media profile data"});
+    }
 });
-/* ROLES*/
+router.get("/add-favourite-place",requiresLogin,function(req,res) {
+    var data = req.query;
+    PlaceModel.findOne({id: data.id}, function (err, place) {
+        if (err)throw err;
+        if (place) {
+            UserModel.findOne({id: req.user.profile.id}, function (err, user) {
+                if (err)throw err;
+                var exists = false;
+                user.visitedPlaces.forEach(function (item) {
+                    if (item.placeId == place.id) {
+                        exists = true;
+                        item.favouriteTime = data.time;
+                    }
+                });
+                if (!exists) {
+                    user.visitedPlaces.push({
+                        placeId: place.id,
+                        favouriteTime: data.time
+                    });
+                }
+                user.save(function (err, result) {
+                    if (err)throw err;
+                    res.status(200).json({success: true});
+                });
+            });
+        } else {
+            res.status(200).json({error: "No place with such id"});
+        }
+    });
+});
+router.get("/remove-favourite-place",requiresLogin,function(req,res) {
+    var data = req.query;
+    UserModel.findOne({id: req.user.profile.id}, function (err, user) {
+        if (err)throw err;
+        for (var i = 0; i < user.visitedPlaces.length; i++) {
+            if (user.visitedPlaces[i].placeId == data.id) {
+                user.visitedPlaces.splice(i, 1);
+            }
+        }
+        user.save(function (err, result) {
+            if (err)throw err;
+            res.status(200).json({success: true});
+        });
+
+    });
+});
+/* ROLES */
 router.get("/add-role",requiresLogin,requiresRole("admin"),function(req,res) {
     var data = req.query;
     var userId = data.userid;

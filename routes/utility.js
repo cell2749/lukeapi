@@ -1,3 +1,9 @@
+/**
+ * 401 UNAUTHORIZED
+ * 422 UNPROCESSABLE ENTITY
+ * 404 NOT FOUND
+ *
+* */
 var Utility = function(keyes,maxFlags){
     this.omitKeyes = keyes;
     this.maxFlags = maxFlags;
@@ -114,6 +120,19 @@ Utility.prototype.voteCount = function(Model,id,res,vote) {
         });
     } else {
         res.status(200).json({error: "Missing report id"});
+    }
+};
+Utility.prototype.get = function(Model,id,res) {
+    if (id == null) {
+        Model.find({}, function (err, doc) {
+            if (err)throw err;
+            res.status(200).json(doc);
+        });
+    } else {
+        Model.findOne({id: id}, function (err, doc) {
+            if (err) throw err;
+            res.status(200).json(doc);
+        });
     }
 };
 module.exports = Utility;

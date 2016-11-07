@@ -9,25 +9,24 @@ var schema = mongoose.Schema(
     {
         id:{type: String, required: '{PATH} is required!'},
         username:String,
-        email:String,//??
+        email:String,
         image_url:String,
         bio:String,
         location:String,
         gender:String,
         hobby:String,
-        favourite_places:[{
-            id:String,
-            favourite_time:String
+        favouritePlaces:[{
+            placeId:String,
+            favouriteTime:String
         }],
         visitedPlaces:[{
-            id:String,
+            placeId:String,
             report:String
         }],
-        profile: {
-            image_url: String,
+        profile: [{
             provider: String,
             link: String
-        },
+        }],
         lastOnline:String,
         logTimes:{
             locationId:String,
