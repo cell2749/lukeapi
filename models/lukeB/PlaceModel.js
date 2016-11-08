@@ -21,7 +21,7 @@ var schema = mongoose.Schema(
         }],
         description:String,
         nearReports:[{
-            id:String
+            reportId:String
         }],
         reportLog:[{
             profileId:String,

@@ -22,6 +22,7 @@ var report = require('./routes/report');
 var rank = require('./routes/rank');
 var category = require('./routes/category');
 var experience = require('./routes/experience');
+//var apiDoc = require('../../views/apiDocA.html')
 
 const MONGO_PROJECTION ={
     _id: 0,
@@ -33,7 +34,9 @@ router.use('/rank',rank);
 router.use("/category",category);
 router.use("/report",report);
 router.use('/experience-pattern', experience);
-
+/*router.get('/api',function(req,res){
+    res.status(200).send(apiDoc);
+});*/
 /* AUTHENTICATION SETUP */
 router.get("/authzero",function(req,res,next){
   var lockSetup = {

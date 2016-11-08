@@ -58,11 +58,15 @@ router.get('/',requiresLogin, function(req, res, next) {
         UserModel.findOne({id: id}, MONGO_PROJECTION, function (err, result) {
             if (err) throw err;
 
-            var response = result || {};
-            res.status(200).json(response);
+            if(result) {
+                var response = result;
+                res.status(200).json(response);
+            }else{
+                res.status(404).json({error:"No user with such id"});
+            }
         });
     }else{
-        res.status(200).json({error:'Proper authorization required',auth:true});
+        res.status(401).json({error:'Proper authorization required',auth:true});
     }
 });
 /**
@@ -91,7 +95,7 @@ router.get('/update',requiresLogin,function(req,res) {
                 });
 
             } else {
-                res.status(200).json({error: 'No user with such id'});
+                res.status(404).json({error: 'No user with such id'});
             }
         });
     } else {

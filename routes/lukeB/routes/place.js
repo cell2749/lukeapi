@@ -32,7 +32,6 @@ var Utility = new UtModule([
     "visitLog.date",
     "visitLog.report",
     "weatherData",
-    "weatherData.nearestWeatherStation", //??
     "weatherData.temperature",
     "weatherData.seaTemperature",
     "weatherData.wind"
@@ -41,6 +40,13 @@ const MONGO_PROJECTION ={
     _id: 0,
     __v: 0
 };
+router.get("/get-all",requiresLogin,function(req,res) {
+    Utility.get(PlaceModel, null, res);
+});
+router.get("/",requiresLogin,function(req,res) {
+    var id = req.query.id || req.user.profile.id;
+    Utility.get(PlaceModel, id, res);
+});
 router.get("/create",requiresOneOfRoles(["admin","advanced","researcher"]),function(req,res) {
     var data = req.query;
     if (data.title) {

@@ -9,7 +9,7 @@ module.exports = function requireRole(role) {
         if (roles.indexOf(role) != -1) {
             next();
         } else {
-            res.status(200).json({error:'Proper authorization required',auth:true});
+            res.status(401).json({error:'Proper authorization required',auth:true});
         }
     }
 };

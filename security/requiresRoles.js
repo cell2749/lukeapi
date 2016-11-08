@@ -15,7 +15,7 @@ module.exports = function requireRoles(roles) {
         if (count == roles.length) {
             next();
         } else {
-            res.status(200).json({error:'Proper authorization required',auth:true});
+            res.status(401).json({error:'Proper authorization required',auth:true});
         }
     }
 };
