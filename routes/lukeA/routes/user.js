@@ -9,6 +9,7 @@ var mongodb = require('../../../mongodb/lukeAdb');
 var requiresLogin = require('../../../security/requiresLogin');
 var requiresRole = require('../../../security/requiresRole');
 var requiresRoles = require('../../../security/requiresRoles');
+var requiresOneOfRoles = require('../../../security/requiresOneOfRoles');
 var restrictBanned = require('../../../security/restrictBanned');
 var ManagementClient = require('auth0').ManagementClient;
 var management = new ManagementClient({
@@ -31,6 +32,7 @@ var Utility = new UtModule([
     "__v",
     "username",
     "score",
+    "image_url",
     "rankingId",
     "submitterId",
     "submitterRating"
@@ -39,7 +41,36 @@ const MONGO_PROJECTION ={
     _id: 0,
     __v: 0
 };
-
+/**
+ * @api {get} /lukeA/user/get-all Get all users
+ * @apiName GetUsers
+ * @apiGroup User
+ *
+ * @apiSuccess {String} id Id of the User.
+ * @apiSuccess {String} username Username of the User.
+ * @apiSuccess {String} image_url Url of the image that User uses.
+ * @apiSuccess {Number} score Experience of the User.
+ * @apiSuccess {String} rankingId Id of a rank that the User has.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      [{
+ *          id:String,
+ *          username:String,
+ *          image_url:String,
+ *          score: Number,
+ *          rankingId: String
+ *      }]
+ *
+ * @apiDescription
+ * Returns array of json objects containing user information.
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ *
+ * @apiUse roleAdmin
+ */
 router.get('/get-all', requiresLogin, requiresRole('admin'), function(req, res, next) {
     UserModel.find({},MONGO_PROJECTION, function (err, result) {
         if(err) throw err;
@@ -49,7 +80,39 @@ router.get('/get-all', requiresLogin, requiresRole('admin'), function(req, res, 
     });
 });
 /**
- * */
+ * @api {get} /lukeA/user Get user
+ * @apiName GetUser
+ * @apiGroup User
+ *
+ * @apiParam {String} [id="Users own id"] Users unique ID.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          id:String,
+ *          username:String,
+ *          image_url:String,
+ *          score: Number,
+ *          rankingId: String
+ *      }
+ *
+ * @apiSuccess {String} id Id of the User.
+ * @apiSuccess {String} username Username of the User.
+ * @apiSuccess {String} image_url Url of the image that User uses.
+ * @apiSuccess {Number} score Experience of the User.
+ * @apiSuccess {String} rankingId Id of a rank that the User has.
+ *
+ * @apiDescription
+ * Id is optional. If id not specified then function returns the users own information.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeA/user?id=auth0|21jeh192he921e2121
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiUse noUser
+ */
 router.get('/',requiresLogin, function(req, res, next) {
     var id=req.query.id || req.user.profile.id;
     var appMetadata = req.user.profile._json.app_metadata || {roles:[]};
@@ -70,12 +133,37 @@ router.get('/',requiresLogin, function(req, res, next) {
     }
 });
 /**
- * UserModel methods??
- * Delete
- * Ban
- * Update
+ * @api {get} /lukeA/user/update Update user
+ * @apiName UpdateUser
+ * @apiGroup User
  *
- * */
+ * @apiParam (Parameters Forbidden for Update) {String} [id] Users unique ID. For admin.
+ * @apiParam (Parameters Forbidden for Update) {String} [username] Username of the User.
+ * @apiParam (Parameters Forbidden for Update) {String} [image_url] Url of the image that User uses.
+ * @apiParam (Parameters Forbidden for Update) {Number} [score] Experience of the User.
+ * @apiParam (Parameters Forbidden for Update) {String} [rankingId] Id of a rank that the User has.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          success:Boolean
+ *      }
+ *
+ * @apiSuccess {Boolean} success If true, then at least one of the specified parameters was updated
+ *
+ * @apiDescription
+ * <strong>Currently user can't update any of his own parameters.</strong>
+ * Update function available for user to update his own profile. Id is optional.
+ * If id is specified and doesn't belong to the user, the user is checked for admin rights.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeA/user/update?id=auth0|21jeh192he921e2121&username=JohnDoe
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiUse noUser
+ */
 router.get('/update',requiresLogin,function(req,res) {
     var id = req.query.id || req.user.profile.id;
     var appMetadata = req.user.profile._json.app_metadata || {roles: []};
@@ -84,14 +172,16 @@ router.get('/update',requiresLogin,function(req,res) {
         UserModel.findOne({id: id}, function (err, doc) {
             if (doc != null) {
                 var userPattern = new UserModel();
+                var success = false;
                 for (var key in userPattern.schema.paths) {
                     if (Utility.allowKey(key)) {
                         doc[key] = req.query[key] || doc[key];
+                        success = true;
                     }
                 }
                 doc.save(function(err,result){
                     if(err) throw err;
-                    res.status(200).json(result);
+                    res.status(200).json({success:success});
                 });
 
             } else {
@@ -99,9 +189,37 @@ router.get('/update',requiresLogin,function(req,res) {
             }
         });
     } else {
-        res.status(200).json({error: 'Proper authorization required', auth: true});
+        res.status(401).json({error: 'Proper authorization required', auth: true});
     }
 });
+/**
+ * @api {get} /lukeA/user/available Check for username
+ * @apiName AvailableUser
+ * @apiGroup User
+ *
+ * @apiParam {String} username Username that user wants.
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          exists:Boolean
+ *      }
+ *
+ * @apiSuccess {Boolean} exists If true, then username is already taken.
+ *
+ * @apiDescription
+ * Checks for Username availability
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeA/user/available?username=JohnDoe
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiErrorExample Missing Username:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Username not specified"
+ *      }
+ */
 router.get('/available',requiresLogin,function(req,res){
     var username = req.query.username;
     if(username) {
@@ -115,23 +233,90 @@ router.get('/available',requiresLogin,function(req,res){
             }
         });
     }else{
-        res.status(200).json({error:"Username not specified"});
+        res.status(422).json({error:"Username not specified"});
     }
 });
-router.get('/set-username',requiresLogin,function(req,res){
+/**
+ * @api {get} /lukeA/user/set-username Set username
+ * @apiName SetUsername
+ * @apiGroup User
+ *
+ * @apiParam {String} username Username that user wants.
+ * @apiParam {String} [id] Id of a User. For admin.
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          success: true
+ *      }
+ *
+ * @apiSuccess {Boolean} success If true, the username was set successfully
+ *
+ * @apiDescription
+ * User can set a username if one is available and he doesn't have it yet.
+ * Admin can set his own and other users usernames, if the specified username is available.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeA/user/set-username?username=JohnDoe
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiErrorExample Missing Username:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Username not specified"
+ *      }
+ * @apiErrorExample Username un-available:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Username already exists"
+ *      }
+ * @apiErrorExample Username already set:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Cannot modify existing value",
+ *          auth: true
+ *      }
+ * @apiUse specialAdmin
+ */
+router.get('/set-username',requiresLogin,function(req,res) {
+    var id = req.query.id || req.user.profile.id;
     var username = req.query.username;
-    UserModel.findOne({id:req.user.profile.id},function(err,doc){
-        if(err) throw err;
-        if(doc.username){
-            res.status(200).json({error:"Cannot modify existing value."});
-        }else{
-            doc.username = username;
-            doc.save();
-            res.status(200).json({success:true});
+    var appMetadata = req.user.profile._json.app_metadata || {};
+    var roles = appMetadata.roles || [];
+    if (id != req.user.profile.id && roles.indexOf("admin") == -1) {
+        res.status(401).json({error: 'Proper authorization required', auth: true});
+    } else {
+        if (username) {
+            UserModel.findOne({username: username}, function (err, doc) {
+                if (err) throw err;
+
+                if (doc) {
+                    res.status(422).json({error: "Username already exists"});
+                } else {
+                    UserModel.findOne({id: id}, function (err, doc) {
+                        if (err) throw err;
+
+                        if (doc.username && roles.indexOf("admin") == -1) {
+                            res.status(401).json({error: "Cannot modify existing value.", auth: true});
+                        } else {
+                            doc.username = username;
+                            doc.save(function (err, result) {
+                                if (err)throw err;
+                                res.status(200).json({success: true});
+                            });
+
+                        }
+                    });
+                }
+            });
+        } else {
+            res.status(422).json({error: "Username not specified"});
         }
-    });
+    }
+
 });
-router.get("/copy-profile",requiresLogin,function(req,res) {
+/*router.get("/copy-profile",requiresLogin,function(req,res) {
     var data = req.user.profile;
     var profile = {
         image_url: data.picture,
@@ -144,73 +329,184 @@ router.get("/copy-profile",requiresLogin,function(req,res) {
     console.log(data.provider);
     console.log(data._json.link);
     res.status(200).json(profile);
-});
-router.get("/add-role",requiresLogin,requiresRole("admin"),function(req,res) {
+});*/
+/**
+ * @api {get} /lukeA/user/add-role Add role
+ * @apiName AddRole
+ * @apiGroup User
+ *
+ * @apiParam {String} role Role that user needs.
+ * @apiParam {String} id Id of a User
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          success: true
+ *      }
+ *
+ * @apiSuccess {Boolean} success If true, role was added successfully
+ *
+ * @apiDescription
+ * Adds role to a user if the role is not 'superadmin'. Addition of 'admin' requires superadmin rights.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeA/user/add-role?id=auth0|ej21oje10e212oe12&role=advanced
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiErrorExample Missing role:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Role not specified"
+ *      }
+ * @apiErrorExample Invalid user id:
+ *      HTTP/1.1 404
+ *      {
+ *          error:"Invalid user id"
+ *      }
+ * @apiUse roleSuper
+ * @apiUse roleAdmin
+ */
+router.get("/add-role",requiresLogin,requiresOneOfRoles(["admin","superadmin"]),function(req,res) {
     var data = req.query;
     var userId = data.id;
     var role = data.role;
     var rolesArr;
     var appMetadata = req.user.profile._json.app_metadata || {};
     var adminRoles = appMetadata.roles || [];
+    if(role!=null) {
+        if (role != "superadmin" && (role != "admin" || adminRoles.indexOf("superadmin") != -1)) {
+            management.users.get({id: userId}, function (err, user) {
+                if (err) {
+                    res.status(404).json({error: "Invalid user id"});
+                } else {
+                    rolesArr = user.app_metadata.roles || [];
 
-    if (role != "superadmin" && (role != "admin" || adminRoles.indexOf("superadmin") != -1)) {
-        management.users.get({id: userId}, function (err, user) {
-            if (err) {
-                res.status(200).json({error:"Invalid user id"});
-            } else {
-                rolesArr = user.app_metadata.roles || [];
+                    if (rolesArr.indexOf(role) == -1 && role != null) {
+                        rolesArr.push(role);
+                    }
 
-                if (rolesArr.indexOf(role) == -1 && role != null) {
-                    rolesArr.push(role);
+                    var metadata = {
+                        roles: rolesArr
+                    };
+
+                    management.users.updateAppMetadata({id: userId}, metadata, function (err, user) {
+                        if (err) console.log(err);
+                        res.status(200).json({success: true});
+                    });
                 }
-
-                var metadata = {
-                    roles: rolesArr
-                };
-
-                management.users.updateAppMetadata({id: userId}, metadata, function (err, user) {
-                    if (err) console.log(err);
-                    res.status(200).json({success:true});
-                });
-            }
-        });
-    } else {
-        res.status(200).json({error:'Proper authorization required',auth:true});
+            });
+        } else {
+            res.status(401).json({error: 'Proper authorization required', auth: true});
+        }
+    }else{
+        res.status(422).json({error: 'Role not specified'});
     }
 });
-router.get("/remove-role",requiresLogin,requiresRole("admin"),function(req,res) {
+/**
+ * @api {get} /lukeA/user/remove-role Remove role
+ * @apiName RemoveRole
+ * @apiGroup User
+ *
+ * @apiParam {String} role Role that needs to be removed from user
+ * @apiParam {String} id Id of a User
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          success: true
+ *      }
+ *
+ * @apiSuccess {Boolean} success If true, role was removed successfully
+ *
+ * @apiDescription
+ * Removes role from a user if the role is not 'superadmin'. Removing of 'admin' requires superadmin rights.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeA/user/remove-role?id=auth0|ej21oje10e212oe12&role=advanced
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiErrorExample Missing role:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Role not specified"
+ *      }
+ * @apiErrorExample Invalid user id:
+ *      HTTP/1.1 404
+ *      {
+ *          error:"Invalid user id"
+ *      }
+ * @apiUse roleAdmin
+ * @apiUse roleSuper
+ */
+router.get("/remove-role",requiresLogin,requiresOneOfRoles(["admin","superadmin"]),function(req,res) {
     var data = req.query;
     var userId = data.id;
     var role = data.role;
     var roles = [];
     var appMetadata = req.user.profile._json.app_metadata || {};
     var adminRoles = appMetadata.roles || [];
+    if (role != null) {
+        if (role != "superadmin" && (role != "admin" || adminRoles.indexOf("superadmin") != -1)) {
+            management.users.get({id: userId}, function (err, user) {
+                if (err) {
+                    res.status(200).json({error: "Invalid user id"});
+                } else {
+                    roles = user.app_metadata.roles;
+                    if (roles.indexOf(role) != -1 && role != null) {
+                        roles.splice(roles.indexOf(role), 1);
+                    }
 
-    if(role!="superadmin"&&(role!="admin"||adminRoles.indexOf("superadmin") != -1)) {
-        management.users.get({id: userId}, function (err, user) {
-            if (err) {
-                res.status(200).json({error:"Invalid user id"});
-            } else {
-                roles = user.app_metadata.roles;
-                if (roles.indexOf(role) != -1 && role != null) {
-                    roles.splice(roles.indexOf(role), 1);
+                    var metadata = {
+                        roles: roles
+                    };
+
+                    management.users.updateAppMetadata({id: userId}, metadata, function (err, user) {
+                        if (err) console.log(err);
+                        res.status(200).json({success: true});
+                    });
                 }
-
-                var metadata = {
-                    roles: roles
-                };
-
-                management.users.updateAppMetadata({id: userId}, metadata, function (err, user) {
-                    if (err) console.log(err);
-                    res.status(200).json({success:true});
-                });
-            }
-        });
-    }else{
-        res.status(200).json({error:'Proper authorization required',auth:true});
+            });
+        } else {
+            res.status(200).json({error: 'Proper authorization required', auth: true});
+        }
+    } else {
+        res.status(422).json({error: 'Role not specified'});
     }
 });
-router.get("/user-roles",requiresLogin,function(req,res){
+/**
+ * @api {get} /lukeA/user/roles Get roles
+ * @apiName GetRoles
+ * @apiGroup User
+ *
+ * @apiParam {String} [id] Id of a User
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      [
+ *          String
+ *      ]
+ *
+ * @apiSuccess {array} array Contains the roles of specified user
+ *
+ * @apiDescription
+ * Returns array of Strings, that are roles for the specified user (Admin only).
+ * If id was not specified the users' own roles are returned.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeA/user/roles?id=auth0|ej21oje10e212oe12
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiErrorExample Invalid user id:
+ *      HTTP/1.1 404
+ *      {
+ *          error:"Invalid user id"
+ *      }
+ * @apiUse specialAdmin
+ */
+router.get("/roles",requiresLogin,function(req,res){
     var data = req.query;
     var userId = data.id||req.user.profile.id;
     var appMetadata = req.user.profile._json.app_metadata || {};
@@ -219,16 +515,46 @@ router.get("/user-roles",requiresLogin,function(req,res){
     if(userId==req.user.profile.id || adminRoles.indexOf("admin")!=-1) {
         management.users.get({id: userId}, function (err, user) {
             if (err) {
-                res.status(200).json({error: "Invalid user id"});
+                res.status(404).json({error: "Invalid user id"});
             } else {
-                res.status(200).json(user.app_metadata.roles);
+                var result = user.app_metadata.roles||[];
+                res.status(200).json(result);
             }
         });
     }else{
-        res.status(200).json({error:'Proper authorization required',auth:true});
+        res.status(401).json({error:'Proper authorization required',auth:true});
     }
 });
-/* BAN/UNBAN */
+/**
+ * @api {get} /lukeA/user/ban Ban user
+ * @apiName BanUser
+ * @apiGroup User
+ *
+ * @apiParam {String} id Id of a User
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          success: true
+ *      }
+ *
+ * @apiSuccess {Boolean} success If true, user was banned successfully
+ *
+ * @apiDescription
+ * Bans user with specified id.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeA/user/ban?id=auth0|ej21oje10e212oe12
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiErrorExample Invalid user id:
+ *      HTTP/1.1 404
+ *      {
+ *          error:"Invalid user id"
+ *      }
+ * @apiUse roleAdmin
+ */
 router.get("/ban",requiresLogin,requiresRole("admin"),function(req,res) {
     var data = req.query;
     var id = data.id;
@@ -255,6 +581,37 @@ router.get("/ban",requiresLogin,requiresRole("admin"),function(req,res) {
         }
     });
 });
+/**
+ * @api {get} /lukeA/user/unban Unban user
+ * @apiName UnbanUser
+ * @apiGroup User
+ *
+ * @apiParam {String} id Id of a User
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          success: true
+ *      }
+ *
+ * @apiSuccess {Boolean} success If true, user was un-banned successfully
+ *
+ * @apiDescription
+ * Unbans user with specified id.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeA/user/ban?id=auth0|ej21oje10e212oe12
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiErrorExample Invalid user id:
+ *      HTTP/1.1 404
+ *      {
+ *          error:"Invalid user id"
+ *      }
+ *
+ * @apiUse roleAdmin
+ */
 router.get("/unban",requiresLogin,requiresRole("admin"),function(req,res) {
     var data = req.query;
     var id = data.id;

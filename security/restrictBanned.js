@@ -8,6 +8,6 @@ module.exports = function(req, res, next) {
     if (roles.indexOf("ban") == -1) {
         next();
     } else {
-        res.status(200).json({error: 'You are banned from the service', ban: true});
+        res.status(401).json({error: 'You are banned from the service', ban: true});
     }
 };

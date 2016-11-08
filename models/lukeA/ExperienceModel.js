@@ -9,7 +9,7 @@ var mongoose = require('mongoose');
 var schema = mongoose.Schema(
     {
         id:{type: String, required: '{PATH} is required!'},
-        title: {type: String, required: '{PATH} is required!'},
+        title: String,
         reportGain: Number,
         upvoteGain: Number,
         downvoteGain: Number,

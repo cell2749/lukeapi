@@ -31,12 +31,55 @@ var Utility = new UtModule([
     "submitterId",
     "submitterRating"
 ]);
-const MONGO_PROJECTION ={
+const MONGO_PROJECTION = {
     _id: 0,
     __v: 0
 };
-router.get('/create', requiresLogin,requiresRole('admin'),function(req,res,next){
-    var data = req.query;
+/**
+ * @api {post} /lukeA/rank/create Create
+ * @apiName Create
+ * @apiGroup Rank
+ *
+ * @apiParam {String} title Title of rank
+ * @apiParam {String} [description] Description of the rank
+ * @apiParam {File} [img] Image file that is to be used as Rank icon
+ * @apiParam {Number} [score] Required score/experience for a user to get this rank
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          id:String,
+ *          title:String,
+ *          description:String,
+ *          image_url: String,
+ *          score: Number
+ *      }
+ *
+ * @apiSuccess {String} id Id of the rank
+ * @apiSuccess {String} title Title of the rank
+ * @apiSuccess {String} description Description of the rank
+ * @apiSuccess {String} image_url Url to an image(icon) of the rank*
+ * @apiSuccess {Number} score Score required to achieve this rank
+ *
+ * @apiDescription
+ * Creates Rank with specified parameters. Title is required. Returns the created rank.
+ * Requires admin role.
+ *
+ * @apiExample Example:
+ * //POST REQUEST EXAMPLE
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiUse roleAdmin
+ * @apiErrorExample Title is missing:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Missing title"
+ *      }
+ */
+router.post('/create', requiresLogin,requiresRole('admin'),function(req,res,next){
+    var data = req.body;
     var id = mongoose.Types.ObjectId();
 
     if(data.title != null) {
@@ -59,11 +102,60 @@ router.get('/create', requiresLogin,requiresRole('admin'),function(req,res,next)
             res.status(200).json(returnV);
         });
     }else{
-        res.status(200).json({error:"Missing title"});
+        res.status(422).json({error:"Missing title"});
     }
 });
-router.get("/update",requiresLogin,requiresRole("admin"),function(req,res){
-    var data = req.query;
+/**
+ * @api {post} /lukeA/rank/update Update
+ * @apiName Update
+ * @apiGroup Rank
+ *
+ * @apiParam {String} id Id of a rank to be updated
+ * @apiParam {String} [title] Title of rank
+ * @apiParam {String} [description] Description of the rank
+ * @apiParam {File} [img] Image file that is to be used as rank icon/image
+ * @apiParam {Number} [score] Required score/experience for a user to get this rank
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          id:String,
+ *          title:String,
+ *          description:String,
+ *          image_url: String,
+ *          score: Number
+ *      }
+ *
+ * @apiSuccess {String} id Id of the rank
+ * @apiSuccess {String} title Title of the rank
+ * @apiSuccess {String} description Description of the rank
+ * @apiSuccess {String} image_url Url to an image(icon) of the rank*
+ * @apiSuccess {Number} score Score required to achieve this rank
+ *
+ * @apiDescription
+ * Updates Rank with specified parameters. Returns the updated rank.
+ * Requires admin role.
+ *
+ * @apiExample Example:
+ * //POST REQUEST EXAMPLE
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiUse roleAdmin
+ * @apiErrorExample Id is missing:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Id was not specified"
+ *      }
+ * @apiErrorExample Wrong id:
+ *      HTTP/1.1 404
+ *      {
+ *          error:"Rank with such id doesn't exist"
+ *      }
+ */
+router.post("/update",requiresLogin,requiresRole("admin"),function(req,res){
+    var data = req.body;
     if(data.id){
         RankModel.findOne({id: data.id}, function (err, doc) {
             if (doc) {
@@ -82,43 +174,110 @@ router.get("/update",requiresLogin,requiresRole("admin"),function(req,res){
                     res.status(200).json(returnV);
                 });
             } else {
-                res.status(200).json({error:"Rank with such id doesn't exists!"});
+                res.status(404).json({error:"Rank with such id doesn't exist"});
             }
         });
     }else {
-        RankModel.findOne({title: data.title}, function (err, doc) {
-            if (doc) {
-                var rank = new RankModel();
-                for (var key in rank.schema.paths){
-                    if(UtilityallowKey(key)) {
-                        doc[key] = data[key] || doc[key];
-                    }
-                }
-                doc.save(function(err,result){
-                    if(err) throw err;
-                    var returnV={}, pattern = new RankModel();
-                    for(var key in pattern.schema.paths){
-                        returnV[key]=result[key];
-                    }
-                    res.status(200).json(returnV);
-                });
-            } else {
-                res.status(200).json({error:"Rank with such title doesn't exists"});
-            }
-        });
+        res.status(422).json({error:"Id was not specified"});
     }
 });
+/**
+ * @api {get} /lukeA/rank/remove Remove
+ * @apiName Remove
+ * @apiGroup Rank
+ *
+ * @apiParam {String} id Id of a rank to be updated
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          success:"Removed N items"
+ *      }
+ *
+ * @apiSuccess {String} success Indicates amount of ranks removed. Should be 1.
+ *
+ * @apiDescription
+ * Deletes rank with specified id.
+ * Requires admin role.
+ *
+ * @apiExample Example:
+ * http://balticapp.fi/lukeA/rank/remove?id=2121ge921ed123d1
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiUse roleAdmin
+ * @apiErrorExample Id is missing:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Id was not specified"
+ *      }
+ * @apiErrorExample Wrong id:
+ *      HTTP/1.1 404
+ *      {
+ *          error:"No rank with such id"
+ *      }
+ */
 router.get("/remove",requiresLogin,requiresRole("admin"),function(req,res){
     var data = req.query;
     var id = data.id;
-    RankModel.find({id:id}).remove(function(err,item) {
-        if (err) throw err;
+    if(id) {
+        RankModel.find({id: id}).remove(function (err, item) {
+            if (err) throw err;
 
-        if (item.result.n != 0) {
-            res.status(200).json({success:"Removed " + item.result.n + " items"});
-        } else {
-            res.status(200).json({error:"No Rank with such id"});
-        }
-    });
+            if (item.result.n != 0) {
+                res.status(200).json({success: "Removed " + item.result.n + " items"});
+            } else {
+                res.status(404).json({error: "No rank with such id"});
+            }
+        });
+    }else{
+        res.status(404).json({error: "Id was not specified"});
+    }
+});
+/**
+ * @api {get} /lukeA/rank Get rank(s)
+ * @apiName GetAll
+ * @apiGroup Rank
+ *
+ * @apiParam {String} [id] Id of a rank to be fetched
+ *
+ * @apiSuccessExample Success-Response-Single:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          id:String,
+ *          title:String,
+ *          description:String,
+ *          image_url: String,
+ *          score: Number
+ *      }
+ * @apiSuccessExample Success-Response-All:
+ *      HTTP/1.1 200 OK
+ *      [{
+ *          id:String,
+ *          title:String,
+ *          description:String,
+ *          image_url: String,
+ *          score: Number
+ *      }]
+ *
+ * @apiSuccess {String} id Id of the rank
+ * @apiSuccess {String} title Title of the rank
+ * @apiSuccess {String} description Description of the rank
+ * @apiSuccess {String} image_url Url to an image/icon of a rank
+ * @apiSuccess {Number} score Score required to get this rank
+ *
+ * @apiDescription
+ * Returns single rank based on specified id - json. Returns all ranks if id was not specified - array of json.
+ *
+ * @apiExample Example:
+ * http://balticapp.fi/lukeA/rank?id=2121ge921ed123d1
+ *
+ * @apiUse error
+ * @apiUse loginError
+ */
+router.get("/",requiresLogin,function(req,res){
+   var id = req.query.id || null;
+    Utility.get(RankModel,id,res);
 });
 module.exports = router;

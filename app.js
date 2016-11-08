@@ -66,7 +66,7 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'apidoc')));
 
 app.use('/lukeA', lukeA);
 app.use('/lukeB', lukeB);
