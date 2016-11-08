@@ -21,7 +21,7 @@ var schema = mongoose.Schema(
         }],
         visitedPlaces:[{
             id:String,
-            report:String
+            report:Boolean
         }],
         profile: {
             image_url: String,

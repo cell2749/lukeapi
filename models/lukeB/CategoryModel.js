@@ -10,6 +10,7 @@ var schema = mongoose.Schema(
         title:{type: String, required: '{PATH} is required!'},
         description:String,
         image_url:String
+        //add color patterns?
     }
 );
 

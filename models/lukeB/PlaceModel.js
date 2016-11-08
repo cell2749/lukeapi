@@ -23,17 +23,17 @@ var schema = mongoose.Schema(
         nearReports:[{
             id:String
         }],
-        visitLog:[{
-            id:String,
+        reportLog:[{
+            profileId:String,
             date:String,
             report:Boolean
         }],
         weatherData:{
-            nearestWeatherStation:String, //???? lat, long or address ?
             temperature:Number,
             seaTemperature:Number,
             wind:Number
-        }
+        },
+        radius: Number
 
     }
 );
