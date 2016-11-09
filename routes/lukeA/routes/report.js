@@ -47,7 +47,7 @@ const MONGO_PROJECTION ={
     __v: 0
 };
 /**
- * @api {get} /lukeA/report/ Get report(s)
+ * @api {get} /lukeA/report Get report(s)
  * @apiName GetAll
  * @apiGroup Report
  *
@@ -84,6 +84,31 @@ const MONGO_PROJECTION ={
  *              }
  *          ]
  *      }]
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          id: String
+ *          longitude: Number,
+ *          latitude: Number,
+ *          altitude: Number,
+ *          image_url: String,
+ *          title: String,
+ *          description: String,
+ *          date: String,
+ *          categoryId: [
+ *              String
+ *          ],
+ *          rating: Number,
+ *          submitterId: String,
+ *          approved: Boolean,
+ *          flagged: Boolean,
+ *          votes: [
+ *             {
+ *                  userId: String,
+ *                  vote: Boolean
+ *              }
+ *          ]
+ *      }
  *
  * @apiSuccess {String} id Report id
  * @apiSuccess {Number} longitude Longtitude of a report
@@ -139,6 +164,7 @@ router.get('/',function(req,res){
         (m4 * Math.cos(6 * location.lat));
     var longlen = (p1 * Math.cos(location.lat)) + (p2 * Math.cos(3 * location.lat)) +
         (p3 * Math.cos(5 * location.lat));
+
     var id = data.id ||{$ne:null};
     var approved = {$ne:null};
     var flagged = {$ne:null};

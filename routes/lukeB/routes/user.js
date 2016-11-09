@@ -45,41 +45,275 @@ const MONGO_PROJECTION ={
     _id: 0,
     __v: 0
 };
-//requiresOneOfRoles(['admin','advanced','researcher']) ????
-router.get('/get-all', requiresLogin, function(req, res, next) {
-    UserModel.find({}, MONGO_PROJECTION, function (err, result) {
-        if (err) throw err;
-
-        var response = result || [];
-        res.status(200).json(response);
-    });
+/**
+ * @api {get} /lukeB/user/get-all Get All
+ * @apiName GetAll
+ * @apiGroup User
+ *
+ * @apiSuccess {String} id User id
+ * @apiSuccess {String} username Users chosen username
+ * @apiSuccess {String} email Users e-mail
+ * @apiSuccess {String} image_url URL to users image
+ * @apiSuccess {String} bio Users biography
+ * @apiSuccess {String} location Users location (country, town or city)
+ * @apiSuccess {String} gender Users gender. String, not boolean? We support apaches?
+ * @apiSuccess {String} hobby Users hobby
+ * @apiSuccess {Array} favouritePlaces Array of favourite places for user
+ * @apiSuccess {String} favouritePlaces[].placeId Id of the place as reference
+ * @apiSuccess {String} favouritePlaces[].favouriteTime:String Favourite time.(Summer for example or a year)
+ * @apiSuccess {Array} visitedPlaces Places that user has visited
+ * @apiSuccess {String} visitedPlaces[].placeId Place Id as reference
+ * @apiSuccess {Boolean} visitedPlaces[].report Boolean indicating if user has done any reports around that place
+ * @apiSuccess {Array} profile Array containing links to social profiles of the user(Facebook, Twitter and etc.)*
+ * Note! Currently there is no way of linking multiple social profiles to 1 user.
+ * Even though if provider and link will be added, user won't be able to log in from more than 1 of the profiles.
+ * Ask Nikita more about this topic if you have any questions.
+ * @apiSuccess {String} profile[].provider Social Provider (Facebook, Twitter, Google and etc.)
+ * @apiSuccess {String} profile[].link Link to the profile
+ * @apiSuccess {String} lastOnline Date indicating last action of the user?
+ * @apiSuccess {Array} logTimes Array containing log in and log out times bound to certain places
+ * @apiSuccess {String} logTimes[].locationId Place id
+ * @apiSuccess {String} logTimes[].timeLogIn Log in Date&Time
+ * @apiSuccess {String} logTimes[].timeLogOut Log out Date&Time
+ * @apiSuccess {Number} numberOfComments Amount of comments user made
+ * @apiSuccess {Number} numberOfRatings Amount of hearts/flags user has given
+ * @apiSuccess {Number} numberOfReports Amount of reports user has made
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200
+ *      [{
+ *          id:String,
+ *          username:String,
+ *          email:String,
+ *          image_url:String,
+ *          bio:String,
+ *          location:String,
+ *          gender:String,
+ *          hobby:String,
+ *          favouritePlaces:[{
+ *              placeId:String,
+ *              favouriteTime:String
+ *          }],
+ *          visitedPlaces:[{
+ *              placeId:String,
+ *              report:Boolean
+ *          }],
+ *          profile: [{
+ *              provider: String,
+ *              link: String
+ *          }],
+ *          lastOnline:String,
+ *          logTimes:[{
+ *              locationId:String,
+ *              timeLogIn:String,
+ *              timeLogOut:String,
+ *              numberOfComments:Number,
+ *              numberOfRatings:Number,
+ *              numberOfReports:Number
+ *          }]
+ *      }]
+ *
+ * @apiExample
+ * http://balticapp.fi/lukeB/user/get-all
+ * @apiDescription
+ * Returns Array of json objects containing users information.
+ * Requires Login.
+ *
+ * @apiUse error
+ * @apiUse loginError
+ */
+router.get('/get-all',requiresLogin,function(req,res){
+   Utility.get(UserModel,null,res);
 });
 /**
- * */
+ * @api {get} /lukeB/user Get user
+ * @apiName GetUser
+ * @apiGroup User
+ *
+ * @apiParam {String} [id] User id that is to be returned. If not provided, users own information is returned.
+ *
+ * @apiSuccess {String} id User id
+ * @apiSuccess {String} username Users chosen username
+ * @apiSuccess {String} email Users e-mail
+ * @apiSuccess {String} image_url URL to users image
+ * @apiSuccess {String} bio Users biography
+ * @apiSuccess {String} location Users location (country, town or city)
+ * @apiSuccess {String} gender Users gender. String, not boolean? We support apaches?
+ * @apiSuccess {String} hobby Users hobby
+ * @apiSuccess {Array} favouritePlaces Array of favourite places for user
+ * @apiSuccess {String} favouritePlaces[].placeId Id of the place as reference
+ * @apiSuccess {String} favouritePlaces[].favouriteTime:String Favourite time.(Summer for example or a year)
+ * @apiSuccess {Array} visitedPlaces Places that user has visited
+ * @apiSuccess {String} visitedPlaces[].placeId Place Id as reference
+ * @apiSuccess {Boolean} visitedPlaces[].report Boolean indicating if user has done any reports around that place
+ * @apiSuccess {Array} profile Array containing links to social profiles of the user(Facebook, Twitter and etc.)*
+ * Note! Currently there is no way of linking multiple social profiles to 1 user.
+ * Even though if provider and link will be added, user won't be able to log in from more than 1 of the profiles.
+ * Ask Nikita more about this topic if you have any questions.
+ * @apiSuccess {String} profile[].provider Social Provider (Facebook, Twitter, Google and etc.)
+ * @apiSuccess {String} profile[].link Link to the profile
+ * @apiSuccess {String} lastOnline Date indicating last action of the user?
+ * @apiSuccess {Array} logTimes Array containing log in and log out times bound to certain places
+ * @apiSuccess {String} logTimes[].locationId Place id
+ * @apiSuccess {String} logTimes[].timeLogIn Log in Date&Time
+ * @apiSuccess {String} logTimes[].timeLogOut Log out Date&Time
+ * @apiSuccess {Number} numberOfComments Amount of comments user made
+ * @apiSuccess {Number} numberOfRatings Amount of hearts/flags user has given
+ * @apiSuccess {Number} numberOfReports Amount of reports user has made
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200
+ *      {
+ *          id:String,
+ *          username:String,
+ *          email:String,
+ *          image_url:String,
+ *          bio:String,
+ *          location:String,
+ *          gender:String,
+ *          hobby:String,
+ *          favouritePlaces:[{
+ *              placeId:String,
+ *              favouriteTime:String
+ *          }],
+ *          visitedPlaces:[{
+ *              placeId:String,
+ *              report:Boolean
+ *          }],
+ *          profile: [{
+ *              provider: String,
+ *              link: String
+ *          }],
+ *          lastOnline:String,
+ *          logTimes:[{
+ *              locationId:String,
+ *              timeLogIn:String,
+ *              timeLogOut:String,
+ *              numberOfComments:Number,
+ *              numberOfRatings:Number,
+ *              numberOfReports:Number
+ *          }]
+ *      }
+ * @apiExample
+ * http://balticapp.fi/lukeB/user?id=2u190e2u02190u
+ * @apiDescription
+ * Returns single json object containing user own information if no id was provided.
+ * Returns single json object containing user information if id was provided.
+ * Requires Login.
+ *
+ * @apiUse error
+ * @apiUse loginError
+ */
 router.get('/',requiresLogin, function(req, res, next) {
     var id = req.query.id || req.user.profile.id;
-    var appMetadata = req.user.profile._json.app_metadata || {roles: []};
-
-    if (id == req.user.profile.id || appMetadata.roles.indexOf("admin") != -1||appMetadata.roles.indexOf('advanced') != -1||appMetadata.roles.indexOf('researcher') != -1) {
-        UserModel.findOne({id: id}, MONGO_PROJECTION, function (err, result) {
-            if (err) throw err;
-
-            var response = result || {};
-            res.status(200).json(response);
-        });
-    } else {
-        res.status(200).json({error:'Proper authorization required',reqAuth:true});
-    }
+    Utility.get(UserModel,id,res);
 });
 /**
- * UserModel methods??
- * Delete
- * Ban
- * Update
+ * @api {post} /lukeB/user/update Update
+ * @apiName Update
+ * @apiGroup User
  *
- * */
-router.get('/update',requiresLogin,function(req,res) {
-    var id = req.query.id || req.user.profile.id;
+ * @apiParam {String} [id] User id that is to be updated. For admin.
+ * @apiParam {String} [email] Users e-mail
+ * @apiParam {String} [bio] Users biography
+ * @apiParam {String} [location] Users location (country, town or city)
+ * @apiParam {String} [gender] Users gender. String, not boolean? We support apaches?
+ * @apiParam {String} [hobby] Users hobby
+ * @apiParam {File} [image] Image file that is to be linked to user profile.
+ * @apiParam {Array} [favouritePlaces] Array of favourite places for user
+ * @apiParam {String} [favouritePlaces[].placeId] Id of the place as reference
+ * @apiParam {String} [favouritePlaces[].favouriteTime] Favourite time.(Summer for example or a year)
+ * @apiParam {Array} [visitedPlaces] Places that user has visited
+ * @apiParam {String} [visitedPlaces[].placeId] Place Id as reference
+ * @apiParam {Boolean} [visitedPlaces[].report] Boolean indicating if user has done any reports around that place
+ * @apiParam {Array} [profile] Array containing links to social profiles of the user(Facebook, Twitter and etc.)*
+ * Note! Currently there is no way of linking multiple social profiles to 1 user.
+ * Even though if provider and link will be added, user won't be able to log in from more than 1 of the profiles.
+ * Ask Nikita more about this topic if you have any questions.
+ * @apiParam {String} [profile[].provider] Social Provider (Facebook, Twitter, Google and etc.)
+ * @apiParam {String} [profile[].link] Link to the profile
+ *
+ * @apiSuccess {String} id User id
+ * @apiSuccess {String} username Users chosen username
+ * @apiSuccess {String} email Users e-mail
+ * @apiSuccess {String} image_url URL to users image
+ * @apiSuccess {String} bio Users biography
+ * @apiSuccess {String} location Users location (country, town or city)
+ * @apiSuccess {String} gender Users gender. String, not boolean? We support apaches?
+ * @apiSuccess {String} hobby Users hobby
+ * @apiSuccess {Array} favouritePlaces Array of favourite places for user
+ * @apiSuccess {String} favouritePlaces[].placeId Id of the place as reference
+ * @apiSuccess {String} favouritePlaces[].favouriteTime:String Favourite time.(Summer for example or a year)
+ * @apiSuccess {Array} visitedPlaces Places that user has visited
+ * @apiSuccess {String} visitedPlaces[].placeId Place Id as reference
+ * @apiSuccess {Boolean} visitedPlaces[].report Boolean indicating if user has done any reports around that place
+ * @apiSuccess {Array} profile Array containing links to social profiles of the user(Facebook, Twitter and etc.)*
+ * Note! Currently there is no way of linking multiple social profiles to 1 user.
+ * Even though if provider and link will be added, user won't be able to log in from more than 1 of the profiles.
+ * Ask Nikita more about this topic if you have any questions.
+ * @apiSuccess {String} profile[].provider Social Provider (Facebook, Twitter, Google and etc.)
+ * @apiSuccess {String} profile[].link Link to the profile
+ * @apiSuccess {String} lastOnline Date indicating last action of the user?
+ * @apiSuccess {Array} logTimes Array containing log in and log out times bound to certain places
+ * @apiSuccess {String} logTimes[].locationId Place id
+ * @apiSuccess {String} logTimes[].timeLogIn Log in Date&Time
+ * @apiSuccess {String} logTimes[].timeLogOut Log out Date&Time
+ * @apiSuccess {Number} numberOfComments Amount of comments user made
+ * @apiSuccess {Number} numberOfRatings Amount of hearts/flags user has given
+ * @apiSuccess {Number} numberOfReports Amount of reports user has made
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200
+ *      {
+ *          id:String,
+ *          username:String,
+ *          email:String,
+ *          image_url:String,
+ *          bio:String,
+ *          location:String,
+ *          gender:String,
+ *          hobby:String,
+ *          favouritePlaces:[{
+ *              placeId:String,
+ *              favouriteTime:String
+ *          }],
+ *          visitedPlaces:[{
+ *              placeId:String,
+ *              report:Boolean
+ *          }],
+ *          profile: [{
+ *              provider: String,
+ *              link: String
+ *          }],
+ *          lastOnline:String,
+ *          logTimes:[{
+ *              locationId:String,
+ *              timeLogIn:String,
+ *              timeLogOut:String,
+ *              numberOfComments:Number,
+ *              numberOfRatings:Number,
+ *              numberOfReports:Number
+ *          }]
+ *      }
+ *
+ * @apiDescription
+ * Updates the user with specified parameters. Not every parameter is allowed to be updated.
+ * The ones that are listed are allowed. User doesn't have to specify his own id, if id is omitted then users own profile is updated.
+ * Only admin can update another users profile.
+ * Returns updated profile on success.
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiErrorExample Wrong id:
+ *      HTTP/1.1 404
+ *      {
+ *          error: 'No user with such id'
+ *      }
+ */
+router.post('/update',requiresLogin,function(req,res) {
+    var data = req.body;
+    var id = data.id || req.user.profile.id;
     var appMetadata = req.user.profile._json.app_metadata || {roles: []};
 
     if (id == req.user.profile.id || appMetadata.roles.indexOf('admin') != -1) {
@@ -87,19 +321,54 @@ router.get('/update',requiresLogin,function(req,res) {
             if (doc != null) {
                 for (var key in doc) {
                     if (Utility.allowKey(key)) {
-                        doc[key] = req.query[key] || doc[key];
+                        doc[key] = data[key] || doc[key];
                     }
                 }
-                doc.save();
-                res.status(200).json(doc);
+                doc.save(function(err,result) {
+                    if (err)throw err;
+                    var resultV = new UserModel();
+                    for (var key in UserModel.schem.paths) {
+                        resultV[key]=result[key];
+                    }
+                    res.status(200).json(resultV);
+                });
+
             } else {
-                res.status(200).json({error: 'No user with such id'});
+                res.status(404).json({error: 'No user with such id'});
             }
         });
     } else {
-        res.status(200).json({error:'Proper authorization required',reqAuth:true});
+        res.status(401).json({error:'Proper authorization required',reqAuth:true});
     }
 });
+/**
+ * @api {get} /lukeB/user/available Check for username
+ * @apiName AvailableUser
+ * @apiGroup User
+ *
+ * @apiParam {String} username Username that user wants.
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          exists:Boolean
+ *      }
+ *
+ * @apiSuccess {Boolean} exists If true, then username is already taken.
+ *
+ * @apiDescription
+ * Checks for Username availability
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/user/available?username=JohnDoe
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiErrorExample Missing Username:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Username not specified"
+ *      }
+ */
 router.get('/available',requiresLogin,function(req,res){
     var username = req.query.username;
     if(username) {
@@ -113,25 +382,130 @@ router.get('/available',requiresLogin,function(req,res){
             }
         });
     }else{
-        res.status(200).json({error:"Username not specified"});
+        res.status(422).json({error:"Username not specified"});
     }
 });
-router.get('/set-username',requiresLogin,function(req,res){
+/**
+ * @api {get} /lukeB/user/set-username Set username
+ * @apiName SetUsername
+ * @apiGroup User
+ *
+ * @apiParam {String} username Username that user wants.
+ * @apiParam {String} [id] Id of a User. For admin.
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          success: true
+ *      }
+ *
+ * @apiSuccess {Boolean} success If true, the username was set successfully
+ *
+ * @apiDescription
+ * User can set a username if one is available and he doesn't have it yet.
+ * Admin can set his own and other users usernames, if the specified username is available.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/user/set-username?username=JohnDoe
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiErrorExample Missing Username:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Username not specified"
+ *      }
+ * @apiErrorExample Username un-available:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Username already exists"
+ *      }
+ * @apiErrorExample Username already set:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Cannot modify existing value",
+ *          auth: true
+ *      }
+ * @apiUse specialAdmin
+ */
+router.get('/set-username',requiresLogin,function(req,res) {
+    var id = req.query.id || req.user.profile.id;
     var username = req.query.username;
-    UserModel.findOne({id:req.user.profile.id},function(err,doc){
-        if(err) throw err;
-        if(doc.username){
-            res.status(200).json({error:"Cannot modify existing value."});
-        }else{
-            doc.username = username;
-            doc.save();
-            res.status(200).json({success:true});
+    var appMetadata = req.user.profile._json.app_metadata || {};
+    var roles = appMetadata.roles || [];
+    if (id != req.user.profile.id && roles.indexOf("admin") == -1) {
+        res.status(401).json({error: 'Proper authorization required', auth: true});
+    } else {
+        if (username) {
+            UserModel.findOne({username: username}, function (err, doc) {
+                if (err) throw err;
+
+                if (doc) {
+                    res.status(422).json({error: "Username already exists"});
+                } else {
+                    UserModel.findOne({id: id}, function (err, doc) {
+                        if (err) throw err;
+
+                        if (doc.username && roles.indexOf("admin") == -1) {
+                            res.status(401).json({error: "Cannot modify existing value.", auth: true});
+                        } else {
+                            doc.username = username;
+                            doc.save(function (err, result) {
+                                if (err)throw err;
+                                res.status(200).json({success: true});
+                            });
+
+                        }
+                    });
+                }
+            });
+        } else {
+            res.status(422).json({error: "Username not specified"});
         }
-    });
+    }
 });
+/**
+ * @api {get} /lukeB/user/copy-profile Copy Profile
+ * @apiName CopyProfile
+ * @apiGroup User
+ *
+ * @apiParam {Boolean} [cpyImg=true] If true sets the image provided by social media to be user image.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          success: true
+ *      }
+ *
+ * @apiSuccess {Boolean} success If true, the profile was copied successfully
+ *
+ * @apiDescription
+ * Adds social media profile that user has logged with to profile property.
+ * (Optional) Sets user image to one provided by social media.
+ * Returns error in case user has not logged through social network.
+ *
+ * @apiExample Example URL 1:
+ * http://balticapp.fi/lukeB/user/copy-profile?cpyImg=false
+ * @apiExample Example URL 2:
+ * http://balticapp.fi/lukeB/user/copy-profile?cpyImg=0
+ * @apiExample Example URL 3:
+ * http://balticapp.fi/lukeB/user/copy-profile
+ *
+ * @apiUse error
+ * @apiUse loginError
+ *
+ * @apiErrorExample Missing provider:
+ *      HTTP/1.1 404
+ *      {
+ *          error:"Error in reading social media profile data"
+ *      }
+ */
 router.get("/copy-profile",requiresLogin,function(req,res) {
     var data = req.user.profile;
-    var cpyImg = req.query.cpyImg || true;
+    var cpyImg = true;
+    if(req.query.cpyImg=="false" || req.query.cpyImg==0){
+        cpyImg = false;
+    }
 
     if(data.provider&&data._json.link) {
         UserModel.findOne({id: data.id}, function (err, doc) {
@@ -150,15 +524,51 @@ router.get("/copy-profile",requiresLogin,function(req,res) {
                 });
             }
             if (cpyImg && data.picture) {
-                doc.imate_url = data.picture;
+                doc.image_url = data.picture;
             }
+            doc.save(function(err,result){
+                if(err)throw err;
+                res.status(200).json({success:true});
+            });
         });
     }else{
-        res.status(200).json({error:"Error in reading social media profile data"});
+        res.status(404).json({error:"Error in reading social media profile data"});
     }
 });
+/**
+ * @api {get} /lukeB/user/add-favourite-place Add Favourite Place
+ * @apiName AddFavouritePlace
+ * @apiGroup User
+ *
+ * @apiParam {String} id Place id
+ * @apiParam {String} [favouriteTime] String indicating users' time preference towards a place.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          success: true
+ *      }
+ *
+ * @apiSuccess {Boolean} success If true, the addition was successful.
+ *
+ * @apiDescription
+ * Adds place to user favourites by id.
+ *
+ * @apiExample Example URL 1:
+ * http://balticapp.fi/lukeB/user/add-favourite-place?id=19012h9120812&favouriteTime=Autumn
+ *
+ * @apiUse error
+ * @apiUse loginError
+ *
+ * @apiErrorExample Missing or wrong id:
+ *      HTTP/1.1 404
+ *      {
+ *          error:"No place with such id"
+ *      }
+ */
 router.get("/add-favourite-place",requiresLogin,function(req,res) {
     var data = req.query;
+
     PlaceModel.findOne({id: data.id}, function (err, place) {
         if (err)throw err;
         if (place) {
@@ -168,13 +578,13 @@ router.get("/add-favourite-place",requiresLogin,function(req,res) {
                 user.visitedPlaces.forEach(function (item) {
                     if (item.placeId == place.id) {
                         exists = true;
-                        item.favouriteTime = data.time;
+                        item.favouriteTime = data.favouriteTime;
                     }
                 });
                 if (!exists) {
                     user.visitedPlaces.push({
                         placeId: place.id,
-                        favouriteTime: data.time
+                        favouriteTime: data.favouriteTime
                     });
                 }
                 user.save(function (err, result) {
@@ -183,10 +593,37 @@ router.get("/add-favourite-place",requiresLogin,function(req,res) {
                 });
             });
         } else {
-            res.status(200).json({error: "No place with such id"});
+            res.status(404).json({error: "No place with such id"});
         }
     });
 });
+/**
+ * @api {get} /lukeB/user/remove-favourite-place Remove Favourite Place
+ * @apiName RemoveFavouritePlace
+ * @apiGroup User
+ *
+ * @apiParam {String} id Place id
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          success: true
+ *      }
+ *
+ * @apiSuccess {Boolean} success Always true
+ *
+ * @apiDescription
+ * Removes the place from favourites if it finds matching.
+ * Does not check for validity of id.
+ * Does not say if any place was removed.
+ *
+ * @apiExample Example URL 1:
+ * http://balticapp.fi/lukeB/user/remove-favourite-place?id=19012h9120812
+ *
+ * @apiUse error
+ * @apiUse loginError
+ *
+ */
 router.get("/remove-favourite-place",requiresLogin,function(req,res) {
     var data = req.query;
     UserModel.findOne({id: req.user.profile.id}, function (err, user) {
@@ -203,7 +640,43 @@ router.get("/remove-favourite-place",requiresLogin,function(req,res) {
 
     });
 });
-/* ROLES */
+/**
+ * @api {get} /lukeB/user/add-role Add role
+ * @apiName AddRole
+ * @apiGroup User
+ *
+ * @apiParam {String} role Role that user needs.
+ * @apiParam {String} id Id of a User
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          success: true
+ *      }
+ *
+ * @apiSuccess {Boolean} success If true, role was added successfully
+ *
+ * @apiDescription
+ * Adds role to a user if the role is not 'superadmin'. Addition of 'admin' requires superadmin rights.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/user/add-role?id=auth0|ej21oje10e212oe12&role=advanced
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiErrorExample Missing role:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Role not specified"
+ *      }
+ * @apiErrorExample Invalid user id:
+ *      HTTP/1.1 404
+ *      {
+ *          error:"Invalid user id"
+ *      }
+ * @apiUse roleSuper
+ * @apiUse roleAdmin
+ */
 router.get("/add-role",requiresLogin,requiresRole("admin"),function(req,res) {
     var data = req.query;
     var userId = data.userid;
@@ -237,6 +710,43 @@ router.get("/add-role",requiresLogin,requiresRole("admin"),function(req,res) {
         res.status(200).json({error:"Restricted access"});
     }
 });
+/**
+ * @api {get} /lukeB/user/remove-role Remove role
+ * @apiName RemoveRole
+ * @apiGroup User
+ *
+ * @apiParam {String} role Role that needs to be removed from user
+ * @apiParam {String} id Id of a User
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          success: true
+ *      }
+ *
+ * @apiSuccess {Boolean} success If true, role was removed successfully
+ *
+ * @apiDescription
+ * Removes role from a user if the role is not 'superadmin'. Removing of 'admin' requires superadmin rights.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/user/remove-role?id=auth0|ej21oje10e212oe12&role=advanced
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiErrorExample Missing role:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Role not specified"
+ *      }
+ * @apiErrorExample Invalid user id:
+ *      HTTP/1.1 404
+ *      {
+ *          error:"Invalid user id"
+ *      }
+ * @apiUse roleAdmin
+ * @apiUse roleSuper
+ */
 router.get("/remove-role",requiresLogin,requiresRole("admin"),function(req,res) {
     var data = req.query;
     var userId = data.userid;
@@ -269,7 +779,38 @@ router.get("/remove-role",requiresLogin,requiresRole("admin"),function(req,res) 
         res.status(200).json({error:"Restricted access"});
     }
 });
-router.get("/user-roles",requiresLogin,function(req,res){
+/**
+ * @api {get} /lukeB/user/roles Get roles
+ * @apiName GetRoles
+ * @apiGroup User
+ *
+ * @apiParam {String} [id] Id of a User
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      [
+ *          String
+ *      ]
+ *
+ * @apiSuccess {array} array Contains the roles of specified user
+ *
+ * @apiDescription
+ * Returns array of Strings, that are roles for the specified user (Admin only).
+ * If id was not specified the users' own roles are returned.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/user/roles?id=auth0|ej21oje10e212oe12
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiErrorExample Invalid user id:
+ *      HTTP/1.1 404
+ *      {
+ *          error:"Invalid user id"
+ *      }
+ * @apiUse specialAdmin
+ */
+router.get("/roles",requiresLogin,function(req,res){
     var data = req.query;
     var userId = data.id ||req.user.profile.id;
     var appMetadata = req.user.profile._json.app_metadata || {};
@@ -287,13 +828,90 @@ router.get("/user-roles",requiresLogin,function(req,res){
         res.status(200).json({error:'Proper authorization required',auth:true});
     }
 });
+/**
+ * @api {get} /lukeB/user/is-admin Is Admin
+ * @apiName IsAdmin
+ * @apiGroup User
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          success: true
+ *      }
+ *
+ * @apiSuccess {Boolean} success If true, user is admin
+ *
+ * @apiDescription
+ * Checks if user is admin. Used for gui manipulation.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/user/is-admin
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiUse roleAdmin
+ */
 router.get('/is-admin',requiresLogin,requiresRole("admin"),function(req,res){
     res.status(200).json({success:true});
 });
+/**
+ * @api {get} /lukeB/user/is-advanced Is Advanced
+ * @apiName IsAdvanced
+ * @apiGroup User
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          success: true
+ *      }
+ *
+ * @apiSuccess {Boolean} success If true, user is advanced
+ *
+ * @apiDescription
+ * Checks if user is advanced. Used for gui manipulation.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/user/is-advanced
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiUse roleAdv
+ */
 router.get('/is-advanced',requiresLogin,requiresRole("advanced"),function(req,res){
     res.status(200).json({success:true});
 });
-/* BAN UNBAN */
+/**
+ * @api {get} /lukeB/user/ban Ban
+ * @apiName Ban
+ * @apiGroup User
+ *
+ * @apiParam {String} id Id of a User
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          success: true
+ *      }
+ *
+ * @apiSuccess {Boolean} success If true, user was banned successfully
+ *
+ * @apiDescription
+ * Bans user with specified id.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/user/ban?id=auth0|ej21oje10e212oe12
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiErrorExample Invalid user id:
+ *      HTTP/1.1 404
+ *      {
+ *          error:"Invalid user id"
+ *      }
+ * @apiUse roleAdmin
+ */
 router.get("/ban",requiresLogin,requiresRole("admin"),function(req,res) {
     var data = req.query;
     var id = data.id;
@@ -320,6 +938,37 @@ router.get("/ban",requiresLogin,requiresRole("admin"),function(req,res) {
         }
     });
 });
+/**
+ * @api {get} /lukeB/user/unban Unban
+ * @apiName Unban
+ * @apiGroup User
+ *
+ * @apiParam {String} id Id of a User
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          success: true
+ *      }
+ *
+ * @apiSuccess {Boolean} success If true, user was un-banned successfully
+ *
+ * @apiDescription
+ * Unbans user with specified id.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/user/ban?id=auth0|ej21oje10e212oe12
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiErrorExample Invalid user id:
+ *      HTTP/1.1 404
+ *      {
+ *          error:"Invalid user id"
+ *      }
+ *
+ * @apiUse roleAdmin
+ */
 router.get("/unban",requiresLogin,requiresRole("admin"),function(req,res) {
     var data = req.query;
     var id = data.id;

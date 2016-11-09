@@ -314,7 +314,6 @@ router.get('/set-username',requiresLogin,function(req,res) {
             res.status(422).json({error: "Username not specified"});
         }
     }
-
 });
 /*router.get("/copy-profile",requiresLogin,function(req,res) {
     var data = req.user.profile;
@@ -526,8 +525,62 @@ router.get("/roles",requiresLogin,function(req,res){
     }
 });
 /**
- * @api {get} /lukeA/user/ban Ban user
- * @apiName BanUser
+ * @api {get} /lukeA/user/is-admin Is Admin
+ * @apiName IsAdmin
+ * @apiGroup User
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          success: true
+ *      }
+ *
+ * @apiSuccess {Boolean} success If true, user is admin
+ *
+ * @apiDescription
+ * Checks if user is admin. Used for gui manipulation.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeA/user/is-admin
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiUse roleAdmin
+ */
+router.get('/is-admin',requiresLogin,requiresRole("admin"),function(req,res){
+    res.status(200).json({success:true});
+});
+/**
+ * @api {get} /lukeA/user/is-advanced Is Advanced
+ * @apiName IsAdvanced
+ * @apiGroup User
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          success: true
+ *      }
+ *
+ * @apiSuccess {Boolean} success If true, user is advanced
+ *
+ * @apiDescription
+ * Checks if user is advanced. Used for gui manipulation.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeA/user/is-advanced
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiUse roleAdv
+ */
+router.get('/is-advanced',requiresLogin,requiresRole("advanced"),function(req,res){
+    res.status(200).json({success:true});
+});
+/**
+ * @api {get} /lukeA/user/ban Ban
+ * @apiName Ban
  * @apiGroup User
  *
  * @apiParam {String} id Id of a User
@@ -582,8 +635,8 @@ router.get("/ban",requiresLogin,requiresRole("admin"),function(req,res) {
     });
 });
 /**
- * @api {get} /lukeA/user/unban Unban user
- * @apiName UnbanUser
+ * @api {get} /lukeA/user/unban Unban
+ * @apiName Unban
  * @apiGroup User
  *
  * @apiParam {String} id Id of a User

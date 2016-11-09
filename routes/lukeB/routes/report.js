@@ -39,7 +39,93 @@ const MONGO_PROJECTION ={
     _id: 0,
     __v: 0
 };
-router.get('/get-all',function(req,res){
+/**
+ * @api {get} /lukeA/report Get report(s)
+ * @apiName GetAll
+ * @apiGroup Report
+ *
+ * @apiParam {String} [id] Id of a report in case single report needs to be viewed.
+ * @apiParam {Boolean} [approved] Filter results by approved value
+ * @apiParam {Boolean} [flagged] Filter results by flagged value
+ * @apiParam {String} [profileId] Filter results by submitters' id
+ * @apiParam {String} [long] Filter results by longitude (only if latitude is set). Center of circle.
+ * @apiParam {String} [lat] Filter results by latitude (only if longitude is set). Center of circle.
+ * @apiParam {String} [distance=5000] Filter results by radius(in meters, only if longitude and latitude is set). Radius of circle.
+ *
+ * @apiSuccessExample Success-Response-Multiple:
+ *      HTTP/1.1 200 OK
+ *      [{
+ *          id: String,
+ *          title: String,
+ *          location: {
+ *              long: Number,
+ *              lat: Number
+ *          },
+ *          categoryId: [String],
+ *          image_url: String,
+ *          description: String,
+ *          profileId: String,
+ *          date: String,
+ *          votes:[{
+ *              profileId:String,
+ *              date:String,
+ *              vote:Boolean
+ *          }],
+ *          approved: Boolean,
+ *          flagged: Boolean
+ *      }]
+ * @apiSuccessExample Success-Response-Single:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          id: String,
+ *          title: String,
+ *          location: {
+ *              long: Number,
+ *              lat: Number
+ *          },
+ *          categoryId: [String],
+ *          image_url: String,
+ *          description: String,
+ *          profileId: String,
+ *          date: String,
+ *          votes:[{
+ *              profileId:String,
+ *              date:String,
+ *              vote:Boolean
+ *          }],
+ *          approved: Boolean,
+ *          flagged: Boolean
+ *      }
+ *
+ * @apiSuccess {String} id Report id
+ * @apiSuccess {Object} location Json object containing longitude and latitude
+ * @apiSuccess {Number} longitude Longtitude of a report
+ * @apiSuccess {Number} latitude Latitude of a report
+ * @apiSuccess {String} image_url Url to image that report has
+ * @apiSuccess {String} title Title of a report
+ * @apiSuccess {String} description Description of a report
+ * @apiSuccess {String} date Date when reprot was made
+ * @apiSuccess {Array} categoryId Array containing category ids of a report
+ * @apiSuccess {String} profileId User id of reports submitter
+ * @apiSuccess {Boolean} approved If true indicates that report is approved
+ * @apiSuccess {Boolean} flagged If true indicates that report is reported/flagged
+ * @apiSuccess {Array} votes Array containing json objects (Below details)
+ * @apiSuccess {String} votes[].userId Id of user who voted on this report
+ * @apiSuccess {Boolean} votes[].vote False if downvote. True if upvote.
+ * @apiSuccess {String} votes[].date Date when vote was made
+ *
+ * @apiDescription
+ * Public access and registered users receive only filtered results (approved,!flagged).
+ * Admins and advanced users have more options to filter the results.
+ * Location filter is available for public. Returns single report in case id is specified.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/report?profileId=facebook|ad10ed1j2d010d21
+ *
+ * @apiUse specialAdmin
+ * @apiUse specialAdv
+ */
+router.get('/',function(req,res){
     var data = req.query;
     var returnResult=[];
     var limit = data.limit || 0;
@@ -68,7 +154,8 @@ router.get('/get-all',function(req,res){
 
     var approved = true; //{$ne:null};
     var flagged = false; //{$ne:null};
-    var submitterId = data.submitterId || {$ne:null};
+    var id = data.id || {$ne:null};
+    var profileId = data.profileId || {$ne:null};
     var showVotes = 0;
     if(data.votes=="false"||data.votes==0){
         showVotes = 0;
@@ -86,7 +173,7 @@ router.get('/get-all',function(req,res){
             flagged = data.flagged || flagged;
         }
     }
-    ReportModel.find({approved:approved,submitterId:submitterId,flagged:flagged},newProjection).sort({"date":-1}).limit(parseInt(limit)).exec(function(err, collection){
+    ReportModel.find({id:id, approved:approved,profileId:profileId,flagged:flagged},newProjection).sort({"date":-1}).limit(parseInt(limit)).exec(function(err, collection){
         if(err) throw err;
         var result = [];
         if(rating!=null) {

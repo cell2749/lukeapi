@@ -28,14 +28,14 @@ var schema = mongoose.Schema(
             link: String
         }],
         lastOnline:String,
-        logTimes:{
+        logTimes:[{
             locationId:String,
             timeLogIn:String,
             timeLogOut:String,
             numberOfComments:Number,
             numberOfRatings:Number,
             numberOfReports:Number
-        }
+        }]
     }
 );
 

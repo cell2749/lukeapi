@@ -123,14 +123,28 @@ Utility.prototype.voteCount = function(Model,id,res,vote) {
     }
 };
 Utility.prototype.get = function(Model,id,res) {
+    var returnV = new Model();
+    var returnArray = [];
     if (id == null) {
         Model.find({}, function (err, doc) {
             if (err)throw err;
-            res.status(200).json(doc);
+            for(var i=0 ;i<doc.length;i++) {
+                for (var key in Model.schema.paths) {
+                    returnV[key] = doc[i][key];
+                }
+                returnArray.push(returnV);
+                returnV={};
+                if(i==doc.length-1){
+                    res.status(200).json(returnArray);
+                }
+            }
         });
     } else {
         Model.findOne({id: id}, function (err, doc) {
             if (err) throw err;
+            for(var key in Model.schema.paths){
+                returnV[key]=doc[key];
+            }
             res.status(200).json(doc);
         });
     }

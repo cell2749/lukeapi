@@ -17,6 +17,7 @@ var schema = mongoose.Schema(
         image_url: String,
         description: String,
         profileId: String,
+        date: String,
         votes:[{
             profileId:String,
             date:String,

@@ -27,7 +27,7 @@ var Utility = new UtModule([
     "__v",
     "image_url"
 ]);
-const MONGO_PROJECTION ={
+const MONGO_PROJECTION = {
     _id: 0,
     __v: 0
 };
