@@ -26,11 +26,21 @@ var Utility = new UtModule([
     "id",
     "_id",
     "__v",
+    "longitude",
+    "latitude",
+    "altitude",
+    "image_url",
+    "rating",
+    "submitterId",
+    "approved",
+    "flagged",
+    "votes",
+    "votes.userId",
+    "votes.vote",
     "username",
     "score",
     "rankingId",
-    "submitterId",
-    "submitterRating"
+    "submitterId"
 ]);
 const MONGO_PROJECTION ={
     _id: 0,

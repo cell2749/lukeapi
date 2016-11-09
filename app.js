@@ -72,7 +72,7 @@ app.use('/lukeA', lukeA);
 app.use('/lukeB', lukeB);
 
 app.get('/',function(req,res){
-  res.render('login');
+  res.render('index');
 });
 
 app.get('/url-if-something-fails',function(req,res){

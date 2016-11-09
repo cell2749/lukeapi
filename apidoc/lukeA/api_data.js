@@ -1,5 +1,161 @@
 define({ "api": [
   {
+    "type": "get",
+    "url": "/lukeA/callback",
+    "title": "Callback",
+    "name": "Callback",
+    "group": "Auth0",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "route",
+            "description": "<p>Redirect route after successful authentication</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response-Single:",
+          "content": "HTTP/1.1 200 OK",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "optional": false,
+            "field": "Default",
+            "description": "<p>Responds with HTTP/1.1 200 OK if route is not provided.</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Callback url for the auth0 setup. Can be used with parameters - route. After registering/checking the user in local database redirects to specified route or responds with OK 200.</p>",
+    "version": "0.0.0",
+    "filename": "routes/lukeA/lukeApp.js",
+    "groupTitle": "Auth0"
+  },
+  {
+    "type": "get",
+    "url": "/lukeA/authzero",
+    "title": "Get setup",
+    "name": "GetSetup",
+    "group": "Auth0",
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response-Single:",
+          "content": "HTTP/1.1 200 OK\n{\n     AUTH0_CLIENT_ID: String,\n     AUTH0_DOMAIN: String,\n     AUTH0_CALLBACK_URL: String\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "AUTH0_CLIENT_ID",
+            "description": "<p>Auth0 client id</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "AUTH0_DOMAIN",
+            "description": "<p>Auth0 domain</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "AUTH0_CALLBACK_URL",
+            "description": "<p>Callback url to server. Read more on the callback url implementation.</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Returns auth0 connection setup information.</p>",
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "http://balticapp.fi/lukeA/authzero",
+        "type": "json"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "routes/lukeA/lukeApp.js",
+    "groupTitle": "Auth0"
+  },
+  {
+    "type": "get",
+    "url": "/lukeA/login",
+    "title": "Login",
+    "name": "Login",
+    "group": "Auth0",
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response-Single:",
+          "content": "HTTP/1.1 200 OK",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "optional": false,
+            "field": "Default",
+            "description": "<p>Responds with HTTP/1.1 200 OK on successful authentication</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Meant to be used instead of callback in case redirection is not needed. Note that this route is not specified as a callback, therefore it has to be called manually. (!Note: token is either manipulated automatically or you will have to send it manually)</p>",
+    "version": "0.0.0",
+    "filename": "routes/lukeA/lukeApp.js",
+    "groupTitle": "Auth0"
+  },
+  {
+    "type": "get",
+    "url": "/lukeA/logout",
+    "title": "Logout",
+    "name": "Logout",
+    "group": "Auth0",
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response-Single:",
+          "content": "HTTP/1.1 200\n{\n    success:true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>True if logout is successful</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Logout function. Call this if user wants to logout from application. (!Note: token is either manipulated automatically or you will have to send it manually)</p>",
+    "version": "0.0.0",
+    "filename": "routes/lukeA/lukeApp.js",
+    "groupTitle": "Auth0"
+  },
+  {
     "type": "post",
     "url": "/lukeA/category/create",
     "title": "Create",

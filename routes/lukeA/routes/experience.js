@@ -24,12 +24,7 @@ var Utility = new UtModule([
     //Omit Keyes to be updated by user
     "id",
     "_id",
-    "__v",
-    "username",
-    "score",
-    "rankingId",
-    "submitterId",
-    "submitterRating"
+    "__v"
 ]);
 const MONGO_PROJECTION ={
     _id: 0,

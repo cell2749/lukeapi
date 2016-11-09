@@ -13,11 +13,7 @@ var requiresRoles = require('../../../security/requiresRoles');
 var restrictBanned = require('../../../security/restrictBanned');
 /* MODELS */
 var UserModel = require("../../../models/lukeA/UserModel");
-var ReportModel = require("../../../models/lukeA/ReportModel");
 var RankModel = require("../../../models/lukeA/RankModel");
-var ReportCategoryModel = require("../../../models/lukeA/ReportCategoryModel");
-var VoteModel = require("../../../models/lukeA/VoteModel");
-var ExperienceModel = require("../../../models/lukeA/ExperienceModel");
 /* UTILITY */
 var UtModule = require("../../utility");
 var Utility = new UtModule([
@@ -25,11 +21,7 @@ var Utility = new UtModule([
     "id",
     "_id",
     "__v",
-    "username",
-    "score",
-    "rankingId",
-    "submitterId",
-    "submitterRating"
+    "image_url"
 ]);
 const MONGO_PROJECTION = {
     _id: 0,
