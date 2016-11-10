@@ -204,14 +204,76 @@ router.get('/',function(req,res){
         }
     });
 });
-router.get('/create',requiresLogin,function(req,res,next) {
-    var data = req.query;
+/**
+ * @api {post} /lukeA/report/create Create
+ * @apiName Create
+ * @apiGroup Report
+ *
+ * @apiParam {String} title Title of a report
+ * @apiParam {Object} [location] Json object containing longitude and latitude
+ * @apiParam {Number} [location.longitude] Longtitude of a report
+ * @apiParam {Number} [location.latitude] Latitude of a report
+ * @apiParam {File} [image] Image file to be used in a report
+ * @apiParam {String} [description] Description of a report
+ * @apiParam {String} [date] Date when report was made*
+ * @apiParam {Array} [categoryId] Array containing category ids of a report
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          id: String,
+ *          title: String,
+ *          location: {
+ *              long: Number,
+ *              lat: Number
+ *          },
+ *          categoryId: [String],
+ *          image_url: String,
+ *          description: String,
+ *          profileId: String,
+ *          date: String,
+ *          votes:[{
+ *              profileId:String,
+ *              date:String,
+ *              vote:Boolean
+ *          }],
+ *          approved: Boolean,
+ *          flagged: Boolean
+ *      }
+ *
+ * @apiSuccess {String} id Report id
+ * @apiSuccess {Object} location Json object containing longitude and latitude
+ * @apiSuccess {Number} longitude Longtitude of a report
+ * @apiSuccess {Number} latitude Latitude of a report
+ * @apiSuccess {String} image_url Url to image that report has
+ * @apiSuccess {String} title Title of a report
+ * @apiSuccess {String} description Description of a report
+ * @apiSuccess {String} date Date when reprot was made
+ * @apiSuccess {Array} categoryId Array containing category ids of a report
+ * @apiSuccess {String} profileId User id of reports submitter
+ * @apiSuccess {Boolean} approved If true indicates that report is approved
+ * @apiSuccess {Boolean} flagged If true indicates that report is reported/flagged
+ * @apiSuccess {Array} votes Array containing json objects (Below details)
+ * @apiSuccess {String} votes[].userId Id of user who voted on this report
+ * @apiSuccess {Boolean} votes[].vote False if downvote. True if upvote.
+ * @apiSuccess {String} votes[].date Date when vote was made
+ *
+ * @apiDescription
+ * Create report using provided parameters. Date is currently created on the server side.
+ * Maybe make it client side?
+ * Image not yet implemented. Returns created report.
+ *
+ * @apiExample Example URL:
+ * //POST REQUEST EXAMPLE
+ *
+ * @apiUse loginError
+ */
+router.post('/create',requiresLogin,function(req,res,next) {
+    var data = req.body;
     var id = mongoose.Types.ObjectId();
 
     UserModel.findOne({id: req.user.profile.id}, function (err, doc) {
-        doc.score = doc.score + REPORT_SCORE_VALUE;
         var report = new ReportModel();
-        //var vote = new VoteModel();
 
         for (var key in report) {
             if (Utility.allowKey(key)) {
@@ -229,18 +291,85 @@ router.get('/create',requiresLogin,function(req,res,next) {
         report.save(function (err, report) {
             if (err)throw err;
             var returnV = {};
-            for (var key in report) {
-                if (key != "_id" || key != "__v") {
-                    returnV[key] = report[key];
-                }
+            for (var key in ReportModel.schema.paths) {
+                returnV[key] = report[key];
             }
             res.status(200).json(returnV);
         });
     });
 
 });
-router.get('/update',requiresLogin,function(req,res){
-    var data = req.query;
+/**
+ * @api {post} /lukeA/report/update Update
+ * @apiName Update
+ * @apiGroup Report
+ *
+ * @apiParam {String} id Id of the report to be updated
+ * @apiParam {String} [title] Title of a report
+ * @apiParam {String} [description] Description of a report
+ * @apiParam {Array} [categoryId] Array containing category ids of a report
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          id: String,
+ *          title: String,
+ *          location: {
+ *              long: Number,
+ *              lat: Number
+ *          },
+ *          categoryId: [String],
+ *          image_url: String,
+ *          description: String,
+ *          profileId: String,
+ *          date: String,
+ *          votes:[{
+ *              profileId:String,
+ *              date:String,
+ *              vote:Boolean
+ *          }],
+ *          approved: Boolean,
+ *          flagged: Boolean
+ *      }
+ *
+ * @apiSuccess {String} id Report id
+ * @apiSuccess {Object} location Json object containing longitude and latitude
+ * @apiSuccess {Number} longitude Longtitude of a report
+ * @apiSuccess {Number} latitude Latitude of a report
+ * @apiSuccess {String} image_url Url to image that report has
+ * @apiSuccess {String} title Title of a report
+ * @apiSuccess {String} description Description of a report
+ * @apiSuccess {String} date Date when reprot was made
+ * @apiSuccess {Array} categoryId Array containing category ids of a report
+ * @apiSuccess {String} profileId User id of reports submitter
+ * @apiSuccess {Boolean} approved If true indicates that report is approved
+ * @apiSuccess {Boolean} flagged If true indicates that report is reported/flagged
+ * @apiSuccess {Array} votes Array containing json objects (Below details)
+ * @apiSuccess {String} votes[].userId Id of user who voted on this report
+ * @apiSuccess {Boolean} votes[].vote False if downvote. True if upvote.
+ * @apiSuccess {String} votes[].date Date when vote was made
+ *
+ * @apiDescription
+ * Updates the report by id. Image is currently not updatable.
+ * Returns updated report.
+ *
+ * @apiExample Example URL:
+ * //POST REQUEST EXAMPLE
+ *
+ * @apiUse loginError
+ * @apiErrorExample Access restriction:
+ *      HTTP/1.1 401
+ *      {
+ *          error:"Restricted Access"
+ *      }
+ * @apiErrorExample Wrong id:
+ *      HTTP/1.1 401
+ *      {
+ *          error:"No report with such id"
+ *      }
+ */
+router.post('/update',requiresLogin,function(req,res) {
+    var data = req.body;
 
     var allowedKeyes = [
         "title",
@@ -250,9 +379,9 @@ router.get('/update',requiresLogin,function(req,res){
     var appMetadata = req.user.profile._json.app_metadata || {};
     var roles = appMetadata.roles || [];
 
-    ReportModel.findOne({id:data.id},function(err,doc) {
-        if (doc.profileId != req.user.profile.id && roles.indexOf("admin")==-1) {
-            res.status(200).json({error:"Restricted Access"});
+    ReportModel.findOne({id: data.id}, function (err, doc) {
+        if (doc.profileId != req.user.profile.id && roles.indexOf("admin") == -1) {
+            res.status(401).json({error: "Restricted Access"});
         } else {
             if (doc) {
                 var pattern = new ReportModel();
@@ -261,38 +390,185 @@ router.get('/update',requiresLogin,function(req,res){
                         doc[key] = data[key] || doc[key];
                     }
                 }
-                doc.save(function(err,result){
-                    var returnV={}, reportPattern = new ReportModel();
-                    for(var key in reportPattern.schema.paths){
-                        returnV[key]=result[key];
+                doc.save(function (err, result) {
+                    var returnV = {}, reportPattern = new ReportModel();
+                    for (var key in reportPattern.schema.paths) {
+                        returnV[key] = result[key];
                     }
                     res.status(200).json(returnV);
                 });
 
             } else {
-                res.status(200).json({error:"No such id"});
+                res.status(404).json({error: "No report with such id"});
             }
         }
     });
 });
-router.get("/remove",requiresLogin,function(req,res){
-    Utility.remove(ReportModel, req.query.id,res);
+/**
+ * @api {get} /lukeA/report/remove Remove
+ * @apiName Remove
+ * @apiGroup Report
+ *
+ * @apiParam {String} id Id of the report to be removed
+ *
+ * @apiDescription
+ * Removes the report by id. Admin can remove other users reports.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/report/remove?id=y892128121u08
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiErrorExample Access restriction:
+ *      HTTP/1.1 401
+ *      {
+ *          error:"Restricted Access"
+ *      }
+ * @apiUse removeStatus
+ * @apiUse specialAdmin
+ */
+router.get("/remove",requiresLogin,function(req,res) {
+    var id = req.query.id;
+    ReportModel.findOne({id: id}, function (err, doc) {
+        if (err) throw err;
+
+        if (doc.profileId == req.user.profileId || Utility.hasRole(req, "admin")) {
+            Utility.remove(ReportModel, req.query.id, res);
+        } else {
+            res.status(401).json({error: "Restricted access"});
+        }
+    });
 });
+/**
+ * @api {get} /lukeA/report/upvote Upvote
+ * @apiName Upvote
+ * @apiGroup Report
+ *
+ * @apiParam {String} id Id of the report
+ *
+ * @apiDescription
+ * Upvotes the report by id.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/report/upvote?id=y892128121u08
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse voteStatus
+ */
 router.get("/upvote",requiresLogin,function(req,res){
     Utility.vote(ReportModel,req,res,true);
 });
+/**
+ * @api {get} /lukeA/report/downvote Downvote
+ * @apiName Downvote
+ * @apiGroup Report
+ *
+ * @apiParam {String} id Id of the report
+ *
+ * @apiDescription
+ * Downvotes the report by id.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/report/downvote?id=y892128121u08
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse voteStatus
+ */
 router.get("/downvote",requiresLogin,function(req,res){
     Utility.vote(ReportModel,req,res,false);
 });
+/**
+ * @api {get} /lukeA/report/vote Vote
+ * @apiName Vote
+ * @apiGroup Report
+ *
+ * @apiParam {String} id Id of the report
+ * @apiParam {Boolean} vote true if upvote, false if downvote.
+ *
+ * @apiDescription
+ * Votes the report by id.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/report/upvote?id=y892128121u08?vote=true
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse voteStatus
+ * @apiUse missingVote
+ */
 router.get("/vote",requiresLogin,function(req,res){
     Utility.vote(ReportModel,req,res,req.query.vote);
 });
+/**
+ * @api {get} /lukeA/report/downvote-count Downvote count
+ * @apiName DownvoteCount
+ * @apiGroup Report
+ *
+ * @apiParam {String} id Id of the report
+ *
+ * @apiDescription
+ * Returns count of downvotes of the report by id.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/report/downvote-count?id=y892128121u08
+ *
+ * @apiUse error
+ * @apiUse voteCountStatus
+ */
 router.get("/downvote-count",function(req,res){
     Utility.voteCount(ReportModel,req.query.id,res,false);
 });
+/**
+ * @api {get} /lukeA/report/upvote-count Upvote count
+ * @apiName UpvoteCount
+ * @apiGroup Report
+ *
+ * @apiParam {String} id Id of the report
+ *
+ * @apiDescription
+ * Returns count of upvotes of the report by id.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/report/upvote-count?id=y892128121u08
+ *
+ * @apiUse error
+ * @apiUse voteCountStatus
+ */
 router.get("/upvote-count",function(req,res){
     Utility.voteCount(ReportModel,req.query.id,res,true);
 });
+/**
+ * @api {get} /lukeA/report/approve Approve
+ * @apiName Approve
+ * @apiGroup Report
+ *
+ * @apiParam {String} id Id of the report
+ *
+ * @apiSuccess {Boolean} success True if approving was successful
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200
+ *      {
+ *          success:true
+ *      }
+ * @apiDescription
+ * Approves report by id.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/report/approve?id=y892128121u08
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiUse roleAdmin
+ * @apiErrorExample Missing Id:
+ *      HTTP/1.1 404
+ *      {
+ *          error: "No report with such id"
+ *      }
+ */
 router.get("/approve",requiresLogin,requiresRole("admin"),function(req,res) {
     var data = req.query;
     var id = data.id;
@@ -305,10 +581,40 @@ router.get("/approve",requiresLogin,requiresRole("admin"),function(req,res) {
                 res.status(200).json({success:true});
             });
         }else{
-            res.status(200).json({error:"No report with such id"});
+            res.status(404).json({error:"No report with such id"});
         }
     });
 });
+/**
+ * @api {get} /lukeA/report/disapprove Disapprove
+ * @apiName Disapprove
+ * @apiGroup Report
+ *
+ * @apiParam {String} id Id of the report
+ *
+ * @apiSuccess {Boolean} success True if approving was successful
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200
+ *      {
+ *          success:true
+ *      }
+ * @apiDescription
+ * Disapproves report by id.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/report/disapprove?id=y892128121u08
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiUse roleAdmin
+ * @apiErrorExample Missing Id:
+ *      HTTP/1.1 404
+ *      {
+ *          error: "No report with such id"
+ *      }
+ */
 router.get("/disapprove",requiresLogin,requiresRole("admin"),function(req,res){
     var data = req.query;
     var id = data.id;
@@ -325,6 +631,35 @@ router.get("/disapprove",requiresLogin,requiresRole("admin"),function(req,res){
         }
     });
 });
+/**
+ * @api {get} /lukeA/report/flag Flag
+ * @apiName Flag
+ * @apiGroup Report
+ *
+ * @apiParam {String} id Id of the report
+ *
+ * @apiSuccess {Boolean} success True if report was flagged successfully
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200
+ *      {
+ *          success:true
+ *      }
+ * @apiDescription
+ * Flags the report by id.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/report/flag?id=y892128121u08
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse banned
+ * @apiErrorExample Missing Id:
+ *      HTTP/1.1 404
+ *      {
+ *          error: "No report with such id"
+ *      }
+ */
 router.get("/flag",requiresLogin,restrictBanned,function(req,res){
     var data = req.query;
     var id = data.id;
@@ -341,6 +676,36 @@ router.get("/flag",requiresLogin,restrictBanned,function(req,res){
         }
     });
 });
+/**
+ * @api {get} /lukeA/report/unflag Unflag
+ * @apiName Unflag
+ * @apiGroup Report
+ *
+ * @apiParam {String} id Id of the report
+ *
+ * @apiSuccess {Boolean} success True if report was unflagged successfully
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200
+ *      {
+ *          success:true
+ *      }
+ * @apiDescription
+ * Unflags the report by id.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/report/unflag?id=y892128121u08
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiUse roleAdmin
+ * @apiErrorExample Missing Id:
+ *      HTTP/1.1 404
+ *      {
+ *          error: "No report with such id"
+ *      }
+ */
 router.get("/unflag",requiresLogin,requiresRole("admin"),function(req,res){
     var data = req.query;
     var id = data.id;

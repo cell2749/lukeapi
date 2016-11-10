@@ -37,8 +37,17 @@ router.get("/get-all",function(req,res){
         res.status(200).json(response);
     });
 });
-router.get("/create",function(req,res){
+router.post("/create",function(req,res){
+    var data = req.body;
+    res.status(200).send("OK");
+});
+router.post("/update",function(req,res){
+    var data = req.body;
+    res.status(200).send("OK");
+});
+router.get("/remove",function(req,res){
     var data = req.query;
     res.status(200).send("OK");
 });
+
 module.exports = router;

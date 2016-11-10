@@ -40,15 +40,191 @@ const MONGO_PROJECTION ={
     _id: 0,
     __v: 0
 };
-router.get("/get-all",requiresLogin,function(req,res) {
-    Utility.get(PlaceModel, null, res);
+/**
+ * @api {get} /lukeB/place Get place(s)
+ * @apiName GetAll
+ * @apiGroup Place
+ *
+ * @apiParam {String} [id] Id of a place to be viewed
+ *
+ * @apiSuccessExample Success-Response-Multiple:
+ *      HTTP/1.1 200 OK
+ *      [{
+ *          id:String,
+ *          title:String,
+ *          location:{
+ *              long:Number,
+ *              lat:Number
+ *          },
+ *          type:String,
+ *          votes:[{
+ *              profileId:String,
+ *              date:String,
+ *              vote:Boolean
+ *          }],
+ *          description:String,
+ *          nearReports:[{
+ *              reportId:String
+ *          }],
+ *          reportLog:[{
+ *              profileId:String,
+ *              date:String,
+ *              report:Boolean
+ *          }],
+ *          weatherData:{
+ *              temperature:Number,
+ *              seaTemperature:Number,
+ *              wind:Number
+ *          },
+ *          radius: Number
+ *      }]
+ * @apiSuccessExample Success-Response-Single:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          id:String,
+ *          title:String,
+ *          location:{
+ *              long:Number,
+ *              lat:Number
+ *          },
+ *          type:String,
+ *          votes:[{
+ *              profileId:String,
+ *              date:String,
+ *              vote:Boolean
+ *          }],
+ *          description:String,
+ *          nearReports:[{
+ *              reportId:String
+ *          }],
+ *          reportLog:[{
+ *              profileId:String,
+ *              date:String,
+ *              report:Boolean
+ *          }],
+ *          weatherData:{
+ *              temperature:Number,
+ *              seaTemperature:Number,
+ *              wind:Number
+ *          },
+ *          radius: Number
+ *      }
+ *
+ * @apiSuccess {String} id Place id
+ * @apiSuccess {String} title Title of the place
+ * @apiSuccess {Object} location Json object containing information about the place location
+ * @apiSuccess {Number} location.long Longitude of the place
+ * @apiSuccess {Number} location.lat Latitude of the place
+ * @apiSuccess {String} type Type of the place
+ * @apiSuccess {Array} votes Array of json objects containing votes
+ * @apiSuccess {String} votes[].profileId Id of the user who voted on this report
+ * @apiSuccess {String} votes[].date Date when the vote was made
+ * @apiSuccess {Boolean} votes[].vote Vote - true if heart, false if flag.
+ * @apiSuccess {String} description Description of the place
+ * @apiSuccess {Array} nearReports Array of reports that are made withing the area of this place
+ * @apiSuccess {String} nearReports[].reportId Id of the report as a reference
+ * @apiSuccess {Array} reportLog Array containing visiting log of users
+ * @apiSuccess {String} reportLog.profileId Id of the user who visited the place
+ * @apiSuccess {String} reportLog.date Date when the place was visited by this user
+ * @apiSuccess {Boolean} reportLog.report If true, user made submission in the area
+ * @apiSuccess {Object} weatherData Json object containing current weather data about the place
+ * @apiSuccess {Number} weatherData.temperature Temperature at the place
+ * @apiSuccess {Number} weatherData.seaTemperature Sea tempereature if the area provides such information
+ * @apiSuccess {Number} weatherData.wind Wind speed at the place
+ * @apiSuccess {Number} radius Radius of the area around the place
+ *
+ * @apiDescription
+ * Returns All places or place by provided id. Open to all.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/place
+ */
+router.get("/",function(req,res) {
+    Utility.get(PlaceModel, req.query.id, res);
 });
-router.get("/",requiresLogin,function(req,res) {
-    var id = req.query.id || req.user.profile.id;
-    Utility.get(PlaceModel, id, res);
-});
-router.get("/create",requiresOneOfRoles(["admin","advanced","researcher"]),function(req,res) {
-    var data = req.query;
+/**
+ * @api {post} /lukeB/place/create Create
+ * @apiName Create
+ * @apiGroup Place
+ *
+ * @apiParam {String} title Title of the place
+ * @apiParam {Object} [location Json] object containing location of the place
+ * @apiParam {Number} [location.long] Longiture of the place
+ * @apiParam {Number} [location.lat] Latitude of the place
+ * @apiParam {String} [type] Type of the place
+ * @apiParam {String} [description] Description of the place
+ * @apiParam {Number} [radius] Radius of the place
+ *
+ * @apiSuccessExample Success-Response-Single:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          id:String,
+ *          title:String,
+ *          location:{
+ *              long:Number,
+ *              lat:Number
+ *          },
+ *          type:String,
+ *          votes:[{
+ *              profileId:String,
+ *              date:String,
+ *              vote:Boolean
+ *          }],
+ *          description:String,
+ *          nearReports:[{
+ *              reportId:String
+ *          }],
+ *          reportLog:[{
+ *              profileId:String,
+ *              date:String,
+ *              report:Boolean
+ *          }],
+ *          weatherData:{
+ *              temperature:Number,
+ *              seaTemperature:Number,
+ *              wind:Number
+ *          },
+ *          radius: Number
+ *      }
+ *
+ * @apiSuccess {String} id Place id
+ * @apiSuccess {String} title Title of the place
+ * @apiSuccess {Object} location Json object containing information about the place location
+ * @apiSuccess {Number} location.long Longitude of the place
+ * @apiSuccess {Number} location.lat Latitude of the place
+ * @apiSuccess {String} type Type of the place
+ * @apiSuccess {Array} votes Array of json objects containing votes
+ * @apiSuccess {String} votes[].profileId Id of the user who voted on this report
+ * @apiSuccess {String} votes[].date Date when the vote was made
+ * @apiSuccess {Boolean} votes[].vote Vote - true if heart, false if flag.
+ * @apiSuccess {String} description Description of the place
+ * @apiSuccess {Array} nearReports Array of reports that are made withing the area of this place
+ * @apiSuccess {String} nearReports[].reportId Id of the report as a reference
+ * @apiSuccess {Array} reportLog Array containing visiting log of users
+ * @apiSuccess {String} reportLog.profileId Id of the user who visited the place
+ * @apiSuccess {String} reportLog.date Date when the place was visited by this user
+ * @apiSuccess {Boolean} reportLog.report If true, user made submission in the area
+ * @apiSuccess {Object} weatherData Json object containing current weather data about the place
+ * @apiSuccess {Number} weatherData.temperature Temperature at the place
+ * @apiSuccess {Number} weatherData.seaTemperature Sea tempereature if the area provides such information
+ * @apiSuccess {Number} weatherData.wind Wind speed at the place
+ * @apiSuccess {Number} radius Radius of the area around the place
+ *
+ * @apiDescription
+ * Creates place using provided parameters. Title required. Returns created place.
+ *
+ * @apiExample Example URL:
+ * //POST REQUEST EXAMPLE
+ *
+ * @apiUse error
+ * @apiErrorExample Missing title:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Missing title"
+ *      }
+ */
+router.post("/create",requiresOneOfRoles(["admin","advanced","researcher"]),function(req,res) {
+    var data = req.body;
     if (data.title) {
         var place = new PlaceModel();
 
@@ -65,27 +241,211 @@ router.get("/create",requiresOneOfRoles(["admin","advanced","researcher"]),funct
             res.status(200).json({success: true});
         });
     } else {
-        res.status(200).json({error: "Missing title"});
+        res.status(422).json({error: "Missing title"});
     }
 });
-router.get("/update",requiresOneOfRoles(["admin","advanced","researcher"]),function(req,res) {
-    Utility.update(PlaceModel, req.query,res);
+/**
+ * @api {post} /lukeB/place/update Update
+ * @apiName Update
+ * @apiGroup Place
+ *
+ * @apiParam {String} id Id of the place to be updated
+ * @apiParam {String} [title] Title of the place
+ * @apiParam {Object} [location Json] object containing location of the place
+ * @apiParam {Number} [location.long] Longitude of the place
+ * @apiParam {Number} [location.lat] Latitude of the place
+ * @apiParam {String} [type] Type of the place
+ * @apiParam {String} [description] Description of the place
+ * @apiParam {Number} [radius] Radius of the place
+ *
+ * @apiSuccessExample Success-Response-Single:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          id:String,
+ *          title:String,
+ *          location:{
+ *              long:Number,
+ *              lat:Number
+ *          },
+ *          type:String,
+ *          votes:[{
+ *              profileId:String,
+ *              date:String,
+ *              vote:Boolean
+ *          }],
+ *          description:String,
+ *          nearReports:[{
+ *              reportId:String
+ *          }],
+ *          reportLog:[{
+ *              profileId:String,
+ *              date:String,
+ *              report:Boolean
+ *          }],
+ *          weatherData:{
+ *              temperature:Number,
+ *              seaTemperature:Number,
+ *              wind:Number
+ *          },
+ *          radius: Number
+ *      }
+ *
+ * @apiSuccess {String} id Place id
+ * @apiSuccess {String} title Title of the place
+ * @apiSuccess {Object} location Json object containing information about the place location
+ * @apiSuccess {Number} location.long Longitude of the place
+ * @apiSuccess {Number} location.lat Latitude of the place
+ * @apiSuccess {String} type Type of the place
+ * @apiSuccess {Array} votes Array of json objects containing votes
+ * @apiSuccess {String} votes[].profileId Id of the user who voted on this report
+ * @apiSuccess {String} votes[].date Date when the vote was made
+ * @apiSuccess {Boolean} votes[].vote Vote - true if heart, false if flag.
+ * @apiSuccess {String} description Description of the place
+ * @apiSuccess {Array} nearReports Array of reports that are made withing the area of this place
+ * @apiSuccess {String} nearReports[].reportId Id of the report as a reference
+ * @apiSuccess {Array} reportLog Array containing visiting log of users
+ * @apiSuccess {String} reportLog.profileId Id of the user who visited the place
+ * @apiSuccess {String} reportLog.date Date when the place was visited by this user
+ * @apiSuccess {Boolean} reportLog.report If true, user made submission in the area
+ * @apiSuccess {Object} weatherData Json object containing current weather data about the place
+ * @apiSuccess {Number} weatherData.temperature Temperature at the place
+ * @apiSuccess {Number} weatherData.seaTemperature Sea tempereature if the area provides such information
+ * @apiSuccess {Number} weatherData.wind Wind speed at the place
+ * @apiSuccess {Number} radius Radius of the area around the place
+ *
+ * @apiDescription
+ * Updates place by id, using parameters provided. Returns updated place.
+ *
+ * @apiExample Example URL:
+ * //POST REQUEST EXAMPLE
+ *
+ * @apiUse error
+ * @apiUse updateStatus
+ */
+router.post("/update",requiresOneOfRoles(["admin","advanced","researcher"]),function(req,res) {
+    Utility.update(PlaceModel, req.body,res);
 });
-router.get("/remove",requiresOneOfRoles(["admin","advanced","researcher"]),function(req,res) {
+/**
+ * @api {get} /lukeB/place/remove Remove
+ * @apiName Remove
+ * @apiGroup Place
+ *
+ * @apiParam {String} id Id of the place to be updated
+ *
+ * @apiDescription
+ * Remove place by id.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/place/remove?id=e2921y8998e1
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse roleAdmin
+ * @apiUse roleAdv
+ * @apiUse removeStatus
+ */
+router.get("/remove",requiresLogin,requiresOneOfRoles(["admin","advanced","researcher"]),function(req,res) {
     Utility.remove(PlaceModel, req.query.id,res);
 });
+/**
+ * @api {get} /lukeB/place/upvote Upvote
+ * @apiName Upvote
+ * @apiGroup Place
+ *
+ * @apiParam {String} id Id of the place to be upvoted
+ *
+ * @apiDescription
+ * Upvote place by id
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/place/upvote?id=28h2e82818210u
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse voteStatus
+ * @apiUse banned
+ */
 router.get("/upvote",requiresLogin,restrictBanned,function(req,res){
     Utility.vote(PlaceModel,req,res,true);
 });
+/**
+ * @api {get} /lukeB/place/downvote Downvote
+ * @apiName Downvote
+ * @apiGroup Place
+ *
+ * @apiParam {String} id Id of the place to be upvoted
+ *
+ * @apiDescription
+ * Downvote place by id
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/place/downvote?id=28h2e82818210u
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse voteStatus
+ * @apiUse banned
+ */
 router.get("/downvote",requiresLogin,restrictBanned,function(req,res){
     Utility.vote(PlaceModel,req,res,false);
 });
+/**
+ * @api {get} /lukeB/place/downvote Downvote
+ * @apiName Downvote
+ * @apiGroup Place
+ *
+ * @apiParam {String} id Id of the place to be upvoted
+ * @apiParam {Boolean} vote If true - upvote, if false - downvote
+ * @apiDescription
+ * Vote place by id using vote parameter.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/place/vote?id=28h2e82818210u&vote=false
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse voteStatus
+ * @apiUse missingVote
+ * @apiUse banned
+ */
 router.get("/vote",requiresLogin,restrictBanned,function(req,res){
     Utility.vote(PlaceModel,req,res,req.query.vote);
 });
+/**
+ * @api {get} /lukeA/place/downvote-count Downvote count
+ * @apiName DownvoteCount
+ * @apiGroup Place
+ *
+ * @apiParam {String} id Id of the place
+ *
+ * @apiDescription
+ * Returns count of downvotes of the place by id.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/place/downvote-count?id=y892128121u08
+ *
+ * @apiUse error
+ * @apiUse voteCountStatus
+ */
 router.get("/downvote-count",function(req,res){
     Utility.voteCount(PlaceModel,req.query.id,res,false);
 });
+/**
+ * @api {get} /lukeA/place/upvote-count Upvote count
+ * @apiName UpvoteCount
+ * @apiGroup Place
+ *
+ * @apiParam {String} id Id of the place
+ *
+ * @apiDescription
+ * Returns count of upvotes of the place by id.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/place/upvote-count?id=y892128121u08
+ *
+ * @apiUse error
+ * @apiUse voteCountStatus
+ */
 router.get("/upvote-count",function(req,res){
     Utility.voteCount(PlaceModel,req.query.id,res,true);
 });

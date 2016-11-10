@@ -1,5 +1,1908 @@
 define({ "api": [
   {
+    "type": "post",
+    "url": "/lukeB/place/create",
+    "title": "Create",
+    "name": "Create",
+    "group": "Place",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "title",
+            "description": "<p>Title of the place</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": true,
+            "field": "location",
+            "description": "<p>Json] object containing location of the place</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": true,
+            "field": "location.long",
+            "description": "<p>Longiture of the place</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": true,
+            "field": "location.lat",
+            "description": "<p>Latitude of the place</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "type",
+            "description": "<p>Type of the place</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "description",
+            "description": "<p>Description of the place</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": true,
+            "field": "radius",
+            "description": "<p>Radius of the place</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response-Single:",
+          "content": "HTTP/1.1 200 OK\n{\n    id:String,\n    title:String,\n    location:{\n        long:Number,\n        lat:Number\n    },\n    type:String,\n    votes:[{\n        profileId:String,\n        date:String,\n        vote:Boolean\n    }],\n    description:String,\n    nearReports:[{\n        reportId:String\n    }],\n    reportLog:[{\n        profileId:String,\n        date:String,\n        report:Boolean\n    }],\n    weatherData:{\n        temperature:Number,\n        seaTemperature:Number,\n        wind:Number\n    },\n    radius: Number\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Place id</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "title",
+            "description": "<p>Title of the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "location",
+            "description": "<p>Json object containing information about the place location</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "location.long",
+            "description": "<p>Longitude of the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "location.lat",
+            "description": "<p>Latitude of the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "type",
+            "description": "<p>Type of the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "votes",
+            "description": "<p>Array of json objects containing votes</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "votes[]",
+            "description": "<p>.profileId Id of the user who voted on this report</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "description",
+            "description": "<p>Description of the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "nearReports",
+            "description": "<p>Array of reports that are made withing the area of this place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "nearReports[]",
+            "description": "<p>.reportId Id of the report as a reference</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "reportLog",
+            "description": "<p>Array containing visiting log of users</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "reportLog.profileId",
+            "description": "<p>Id of the user who visited the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "reportLog.date",
+            "description": "<p>Date when the place was visited by this user</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "reportLog.report",
+            "description": "<p>If true, user made submission in the area</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "weatherData",
+            "description": "<p>Json object containing current weather data about the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "weatherData.temperature",
+            "description": "<p>Temperature at the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "weatherData.seaTemperature",
+            "description": "<p>Sea tempereature if the area provides such information</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "weatherData.wind",
+            "description": "<p>Wind speed at the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "radius",
+            "description": "<p>Radius of the area around the place</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Creates place using provided parameters. Title required. Returns created place.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "//POST REQUEST EXAMPLE",
+        "type": "json"
+      }
+    ],
+    "error": {
+      "examples": [
+        {
+          "title": "Missing title:",
+          "content": "HTTP/1.1 422\n{\n    error:\"Missing title\"\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/place.js",
+    "groupTitle": "Place"
+  },
+  {
+    "type": "get",
+    "url": "/lukeB/place/downvote",
+    "title": "Downvote",
+    "name": "Downvote",
+    "group": "Place",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the place to be upvoted</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Downvote place by id</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeB/place/downvote?id=28h2e82818210u",
+        "type": "json"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/place.js",
+    "groupTitle": "Place",
+    "error": {
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing id:",
+          "content": "HTTP/1.1 422\n{\n    success: \"Missing id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Wrong id:",
+          "content": "HTTP/1.1 404\n{\n    success: \"No such id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Banned:",
+          "content": "HTTP/1.1 401\n{\n    error: 'You are banned from the service',\n    ban: true\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success: true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>True if voting was successful</p>"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "get",
+    "url": "/lukeB/place/downvote",
+    "title": "Downvote",
+    "name": "Downvote",
+    "group": "Place",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the place to be upvoted</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Boolean",
+            "optional": false,
+            "field": "vote",
+            "description": "<p>If true - upvote, if false - downvote</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Vote place by id using vote parameter.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeB/place/vote?id=28h2e82818210u&vote=false",
+        "type": "json"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/place.js",
+    "groupTitle": "Place",
+    "error": {
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing id:",
+          "content": "HTTP/1.1 422\n{\n    success: \"Missing id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Wrong id:",
+          "content": "HTTP/1.1 404\n{\n    success: \"No such id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing Vote:",
+          "content": "HTTP/1.1 422\n{\n    success: \"Missing vote:true or false\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Banned:",
+          "content": "HTTP/1.1 401\n{\n    error: 'You are banned from the service',\n    ban: true\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success: true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>True if voting was successful</p>"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "get",
+    "url": "/lukeA/place/downvote-count",
+    "title": "Downvote count",
+    "name": "DownvoteCount",
+    "group": "Place",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the place</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Returns count of downvotes of the place by id.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeB/place/downvote-count?id=y892128121u08",
+        "type": "json"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/place.js",
+    "groupTitle": "Place",
+    "error": {
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Missing id:",
+          "content": "HTTP/1.1 422\n{\n    success: \"Missing id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Wrong id:",
+          "content": "HTTP/1.1 404\n{\n    success: \"No such id\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    count: Number\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "count",
+            "description": "<p>Vote count</p>"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "get",
+    "url": "/lukeB/place",
+    "title": "Get place(s)",
+    "name": "GetAll",
+    "group": "Place",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "id",
+            "description": "<p>Id of a place to be viewed</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response-Multiple:",
+          "content": "HTTP/1.1 200 OK\n[{\n    id:String,\n    title:String,\n    location:{\n        long:Number,\n        lat:Number\n    },\n    type:String,\n    votes:[{\n        profileId:String,\n        date:String,\n        vote:Boolean\n    }],\n    description:String,\n    nearReports:[{\n        reportId:String\n    }],\n    reportLog:[{\n        profileId:String,\n        date:String,\n        report:Boolean\n    }],\n    weatherData:{\n        temperature:Number,\n        seaTemperature:Number,\n        wind:Number\n    },\n    radius: Number\n}]",
+          "type": "json"
+        },
+        {
+          "title": "Success-Response-Single:",
+          "content": "HTTP/1.1 200 OK\n{\n    id:String,\n    title:String,\n    location:{\n        long:Number,\n        lat:Number\n    },\n    type:String,\n    votes:[{\n        profileId:String,\n        date:String,\n        vote:Boolean\n    }],\n    description:String,\n    nearReports:[{\n        reportId:String\n    }],\n    reportLog:[{\n        profileId:String,\n        date:String,\n        report:Boolean\n    }],\n    weatherData:{\n        temperature:Number,\n        seaTemperature:Number,\n        wind:Number\n    },\n    radius: Number\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Place id</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "title",
+            "description": "<p>Title of the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "location",
+            "description": "<p>Json object containing information about the place location</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "location.long",
+            "description": "<p>Longitude of the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "location.lat",
+            "description": "<p>Latitude of the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "type",
+            "description": "<p>Type of the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "votes",
+            "description": "<p>Array of json objects containing votes</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "votes[]",
+            "description": "<p>.profileId Id of the user who voted on this report</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "description",
+            "description": "<p>Description of the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "nearReports",
+            "description": "<p>Array of reports that are made withing the area of this place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "nearReports[]",
+            "description": "<p>.reportId Id of the report as a reference</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "reportLog",
+            "description": "<p>Array containing visiting log of users</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "reportLog.profileId",
+            "description": "<p>Id of the user who visited the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "reportLog.date",
+            "description": "<p>Date when the place was visited by this user</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "reportLog.report",
+            "description": "<p>If true, user made submission in the area</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "weatherData",
+            "description": "<p>Json object containing current weather data about the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "weatherData.temperature",
+            "description": "<p>Temperature at the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "weatherData.seaTemperature",
+            "description": "<p>Sea tempereature if the area provides such information</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "weatherData.wind",
+            "description": "<p>Wind speed at the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "radius",
+            "description": "<p>Radius of the area around the place</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Returns All places or place by provided id. Open to all.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeB/place",
+        "type": "json"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/place.js",
+    "groupTitle": "Place"
+  },
+  {
+    "type": "get",
+    "url": "/lukeB/place/remove",
+    "title": "Remove",
+    "name": "Remove",
+    "group": "Place",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the place to be updated</p>"
+          }
+        ],
+        "Required Role": [
+          {
+            "group": "Required Role",
+            "optional": false,
+            "field": "admin",
+            "description": ""
+          },
+          {
+            "group": "Required Role",
+            "optional": false,
+            "field": "advanced",
+            "description": ""
+          }
+        ]
+      }
+    },
+    "description": "<p>Remove place by id.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeB/place/remove?id=e2921y8998e1",
+        "type": "json"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/place.js",
+    "groupTitle": "Place",
+    "error": {
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing id:",
+          "content": "HTTP/1.1 422\n{\n    success: \"Missing id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Wrong id:",
+          "content": "HTTP/1.1 404\n{\n    success: \"No such id\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success: \"Removed N items\"\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "success",
+            "description": "<p>Indicates amount of removed items.</p>"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "post",
+    "url": "/lukeB/place/update",
+    "title": "Update",
+    "name": "Update",
+    "group": "Place",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the place to be updated</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "title",
+            "description": "<p>Title of the place</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": true,
+            "field": "location",
+            "description": "<p>Json] object containing location of the place</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": true,
+            "field": "location.long",
+            "description": "<p>Longitude of the place</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": true,
+            "field": "location.lat",
+            "description": "<p>Latitude of the place</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "type",
+            "description": "<p>Type of the place</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "description",
+            "description": "<p>Description of the place</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": true,
+            "field": "radius",
+            "description": "<p>Radius of the place</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response-Single:",
+          "content": "HTTP/1.1 200 OK\n{\n    id:String,\n    title:String,\n    location:{\n        long:Number,\n        lat:Number\n    },\n    type:String,\n    votes:[{\n        profileId:String,\n        date:String,\n        vote:Boolean\n    }],\n    description:String,\n    nearReports:[{\n        reportId:String\n    }],\n    reportLog:[{\n        profileId:String,\n        date:String,\n        report:Boolean\n    }],\n    weatherData:{\n        temperature:Number,\n        seaTemperature:Number,\n        wind:Number\n    },\n    radius: Number\n}",
+          "type": "json"
+        },
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success: true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Place id</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "title",
+            "description": "<p>Title of the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "location",
+            "description": "<p>Json object containing information about the place location</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "location.long",
+            "description": "<p>Longitude of the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "location.lat",
+            "description": "<p>Latitude of the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "type",
+            "description": "<p>Type of the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "votes",
+            "description": "<p>Array of json objects containing votes</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "votes[]",
+            "description": "<p>.profileId Id of the user who voted on this report</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "description",
+            "description": "<p>Description of the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "nearReports",
+            "description": "<p>Array of reports that are made withing the area of this place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "nearReports[]",
+            "description": "<p>.reportId Id of the report as a reference</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "reportLog",
+            "description": "<p>Array containing visiting log of users</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "reportLog.profileId",
+            "description": "<p>Id of the user who visited the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "reportLog.date",
+            "description": "<p>Date when the place was visited by this user</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "reportLog.report",
+            "description": "<p>If true, user made submission in the area</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "weatherData",
+            "description": "<p>Json object containing current weather data about the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "weatherData.temperature",
+            "description": "<p>Temperature at the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "weatherData.seaTemperature",
+            "description": "<p>Sea tempereature if the area provides such information</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "weatherData.wind",
+            "description": "<p>Wind speed at the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "radius",
+            "description": "<p>Radius of the area around the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>True if update was successful</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Updates place by id, using parameters provided. Returns updated place.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "//POST REQUEST EXAMPLE",
+        "type": "json"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/place.js",
+    "groupTitle": "Place",
+    "error": {
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Missing id:",
+          "content": "HTTP/1.1 422\n{\n    success: \"Missing id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Wrong id:",
+          "content": "HTTP/1.1 404\n{\n    success: \"No such id\"\n}",
+          "type": "json"
+        }
+      ]
+    }
+  },
+  {
+    "type": "get",
+    "url": "/lukeB/place/upvote",
+    "title": "Upvote",
+    "name": "Upvote",
+    "group": "Place",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the place to be upvoted</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Upvote place by id</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeB/place/upvote?id=28h2e82818210u",
+        "type": "json"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/place.js",
+    "groupTitle": "Place",
+    "error": {
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing id:",
+          "content": "HTTP/1.1 422\n{\n    success: \"Missing id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Wrong id:",
+          "content": "HTTP/1.1 404\n{\n    success: \"No such id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Banned:",
+          "content": "HTTP/1.1 401\n{\n    error: 'You are banned from the service',\n    ban: true\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success: true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>True if voting was successful</p>"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "get",
+    "url": "/lukeA/place/upvote-count",
+    "title": "Upvote count",
+    "name": "UpvoteCount",
+    "group": "Place",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the place</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Returns count of upvotes of the place by id.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeB/place/upvote-count?id=y892128121u08",
+        "type": "json"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/place.js",
+    "groupTitle": "Place",
+    "error": {
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Missing id:",
+          "content": "HTTP/1.1 422\n{\n    success: \"Missing id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Wrong id:",
+          "content": "HTTP/1.1 404\n{\n    success: \"No such id\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    count: Number\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "count",
+            "description": "<p>Vote count</p>"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "get",
+    "url": "/lukeA/report/approve",
+    "title": "Approve",
+    "name": "Approve",
+    "group": "Report",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the report</p>"
+          }
+        ],
+        "Required Role": [
+          {
+            "group": "Required Role",
+            "optional": false,
+            "field": "admin",
+            "description": ""
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>True if approving was successful</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success:true\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "description": "<p>Approves report by id.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeB/report/approve?id=y892128121u08",
+        "type": "json"
+      }
+    ],
+    "error": {
+      "examples": [
+        {
+          "title": "Missing Id:",
+          "content": "HTTP/1.1 404\n{\n    error: \"No report with such id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Authorization Error:",
+          "content": "HTTP/1.1 401\n{\n    error:'Proper authorization required',\n    auth:true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/report.js",
+    "groupTitle": "Report"
+  },
+  {
+    "type": "post",
+    "url": "/lukeA/report/create",
+    "title": "Create",
+    "name": "Create",
+    "group": "Report",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "title",
+            "description": "<p>Title of a report</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Object",
+            "optional": true,
+            "field": "location",
+            "description": "<p>Json object containing longitude and latitude</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": true,
+            "field": "location.longitude",
+            "description": "<p>Longtitude of a report</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": true,
+            "field": "location.latitude",
+            "description": "<p>Latitude of a report</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "File",
+            "optional": true,
+            "field": "image",
+            "description": "<p>Image file to be used in a report</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "description",
+            "description": "<p>Description of a report</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "date",
+            "description": "<p>Date when report was made*</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Array",
+            "optional": true,
+            "field": "categoryId",
+            "description": "<p>Array containing category ids of a report</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n    id: String,\n    title: String,\n    location: {\n        long: Number,\n        lat: Number\n    },\n    categoryId: [String],\n    image_url: String,\n    description: String,\n    profileId: String,\n    date: String,\n    votes:[{\n        profileId:String,\n        date:String,\n        vote:Boolean\n    }],\n    approved: Boolean,\n    flagged: Boolean\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Report id</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "location",
+            "description": "<p>Json object containing longitude and latitude</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "longitude",
+            "description": "<p>Longtitude of a report</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "latitude",
+            "description": "<p>Latitude of a report</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "image_url",
+            "description": "<p>Url to image that report has</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "title",
+            "description": "<p>Title of a report</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "description",
+            "description": "<p>Description of a report</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "date",
+            "description": "<p>Date when reprot was made</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "categoryId",
+            "description": "<p>Array containing category ids of a report</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "profileId",
+            "description": "<p>User id of reports submitter</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "approved",
+            "description": "<p>If true indicates that report is approved</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "flagged",
+            "description": "<p>If true indicates that report is reported/flagged</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "votes",
+            "description": "<p>Array containing json objects (Below details)</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "votes[]",
+            "description": "<p>.userId Id of user who voted on this report</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Create report using provided parameters. Date is currently created on the server side. Maybe make it client side? Image not yet implemented. Returns created report.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "//POST REQUEST EXAMPLE",
+        "type": "json"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/report.js",
+    "groupTitle": "Report",
+    "error": {
+      "examples": [
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        }
+      ]
+    }
+  },
+  {
+    "type": "get",
+    "url": "/lukeA/report/disapprove",
+    "title": "Disapprove",
+    "name": "Disapprove",
+    "group": "Report",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the report</p>"
+          }
+        ],
+        "Required Role": [
+          {
+            "group": "Required Role",
+            "optional": false,
+            "field": "admin",
+            "description": ""
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>True if approving was successful</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success:true\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "description": "<p>Disapproves report by id.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeB/report/disapprove?id=y892128121u08",
+        "type": "json"
+      }
+    ],
+    "error": {
+      "examples": [
+        {
+          "title": "Missing Id:",
+          "content": "HTTP/1.1 404\n{\n    error: \"No report with such id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Authorization Error:",
+          "content": "HTTP/1.1 401\n{\n    error:'Proper authorization required',\n    auth:true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/report.js",
+    "groupTitle": "Report"
+  },
+  {
+    "type": "get",
+    "url": "/lukeA/report/downvote",
+    "title": "Downvote",
+    "name": "Downvote",
+    "group": "Report",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the report</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Downvotes the report by id.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeB/report/downvote?id=y892128121u08",
+        "type": "json"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/report.js",
+    "groupTitle": "Report",
+    "error": {
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing id:",
+          "content": "HTTP/1.1 422\n{\n    success: \"Missing id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Wrong id:",
+          "content": "HTTP/1.1 404\n{\n    success: \"No such id\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success: true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>True if voting was successful</p>"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "get",
+    "url": "/lukeA/report/downvote-count",
+    "title": "Downvote count",
+    "name": "DownvoteCount",
+    "group": "Report",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the report</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Returns count of downvotes of the report by id.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeB/report/downvote-count?id=y892128121u08",
+        "type": "json"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/report.js",
+    "groupTitle": "Report",
+    "error": {
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Missing id:",
+          "content": "HTTP/1.1 422\n{\n    success: \"Missing id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Wrong id:",
+          "content": "HTTP/1.1 404\n{\n    success: \"No such id\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    count: Number\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "count",
+            "description": "<p>Vote count</p>"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "get",
+    "url": "/lukeA/report/flag",
+    "title": "Flag",
+    "name": "Flag",
+    "group": "Report",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the report</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>True if report was flagged successfully</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success:true\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "description": "<p>Flags the report by id.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeB/report/flag?id=y892128121u08",
+        "type": "json"
+      }
+    ],
+    "error": {
+      "examples": [
+        {
+          "title": "Missing Id:",
+          "content": "HTTP/1.1 404\n{\n    error: \"No report with such id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Banned:",
+          "content": "HTTP/1.1 401\n{\n    error: 'You are banned from the service',\n    ban: true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/report.js",
+    "groupTitle": "Report"
+  },
+  {
     "type": "get",
     "url": "/lukeA/report",
     "title": "Get report(s)",
@@ -202,6 +2105,646 @@ define({ "api": [
     "version": "0.0.0",
     "filename": "routes/lukeB/routes/report.js",
     "groupTitle": "Report"
+  },
+  {
+    "type": "get",
+    "url": "/lukeA/report/remove",
+    "title": "Remove",
+    "name": "Remove",
+    "group": "Report",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the report to be removed</p>"
+          }
+        ],
+        "Special Access Roles": [
+          {
+            "group": "Special Access Roles",
+            "optional": false,
+            "field": "admin",
+            "description": ""
+          }
+        ]
+      }
+    },
+    "description": "<p>Removes the report by id. Admin can remove other users reports.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeB/report/remove?id=y892128121u08",
+        "type": "json"
+      }
+    ],
+    "error": {
+      "examples": [
+        {
+          "title": "Access restriction:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Restricted Access\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing id:",
+          "content": "HTTP/1.1 422\n{\n    success: \"Missing id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Wrong id:",
+          "content": "HTTP/1.1 404\n{\n    success: \"No such id\"\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/report.js",
+    "groupTitle": "Report",
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success: \"Removed N items\"\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "success",
+            "description": "<p>Indicates amount of removed items.</p>"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "get",
+    "url": "/lukeA/report/unflag",
+    "title": "Unflag",
+    "name": "Unflag",
+    "group": "Report",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the report</p>"
+          }
+        ],
+        "Required Role": [
+          {
+            "group": "Required Role",
+            "optional": false,
+            "field": "admin",
+            "description": ""
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>True if report was unflagged successfully</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success:true\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "description": "<p>Unflags the report by id.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeB/report/unflag?id=y892128121u08",
+        "type": "json"
+      }
+    ],
+    "error": {
+      "examples": [
+        {
+          "title": "Missing Id:",
+          "content": "HTTP/1.1 404\n{\n    error: \"No report with such id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Authorization Error:",
+          "content": "HTTP/1.1 401\n{\n    error:'Proper authorization required',\n    auth:true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/report.js",
+    "groupTitle": "Report"
+  },
+  {
+    "type": "post",
+    "url": "/lukeA/report/update",
+    "title": "Update",
+    "name": "Update",
+    "group": "Report",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the report to be updated</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "title",
+            "description": "<p>Title of a report</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "description",
+            "description": "<p>Description of a report</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Array",
+            "optional": true,
+            "field": "categoryId",
+            "description": "<p>Array containing category ids of a report</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n    id: String,\n    title: String,\n    location: {\n        long: Number,\n        lat: Number\n    },\n    categoryId: [String],\n    image_url: String,\n    description: String,\n    profileId: String,\n    date: String,\n    votes:[{\n        profileId:String,\n        date:String,\n        vote:Boolean\n    }],\n    approved: Boolean,\n    flagged: Boolean\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Report id</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "location",
+            "description": "<p>Json object containing longitude and latitude</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "longitude",
+            "description": "<p>Longtitude of a report</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "latitude",
+            "description": "<p>Latitude of a report</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "image_url",
+            "description": "<p>Url to image that report has</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "title",
+            "description": "<p>Title of a report</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "description",
+            "description": "<p>Description of a report</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "date",
+            "description": "<p>Date when reprot was made</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "categoryId",
+            "description": "<p>Array containing category ids of a report</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "profileId",
+            "description": "<p>User id of reports submitter</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "approved",
+            "description": "<p>If true indicates that report is approved</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "flagged",
+            "description": "<p>If true indicates that report is reported/flagged</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "votes",
+            "description": "<p>Array containing json objects (Below details)</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "votes[]",
+            "description": "<p>.userId Id of user who voted on this report</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Updates the report by id. Image is currently not updatable. Returns updated report.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "//POST REQUEST EXAMPLE",
+        "type": "json"
+      }
+    ],
+    "error": {
+      "examples": [
+        {
+          "title": "Access restriction:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Restricted Access\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Wrong id:",
+          "content": "HTTP/1.1 401\n{\n    error:\"No report with such id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/report.js",
+    "groupTitle": "Report"
+  },
+  {
+    "type": "get",
+    "url": "/lukeA/report/upvote",
+    "title": "Upvote",
+    "name": "Upvote",
+    "group": "Report",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the report</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Upvotes the report by id.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeB/report/upvote?id=y892128121u08",
+        "type": "json"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/report.js",
+    "groupTitle": "Report",
+    "error": {
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing id:",
+          "content": "HTTP/1.1 422\n{\n    success: \"Missing id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Wrong id:",
+          "content": "HTTP/1.1 404\n{\n    success: \"No such id\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success: true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>True if voting was successful</p>"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "get",
+    "url": "/lukeA/report/upvote-count",
+    "title": "Upvote count",
+    "name": "UpvoteCount",
+    "group": "Report",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the report</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Returns count of upvotes of the report by id.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeB/report/upvote-count?id=y892128121u08",
+        "type": "json"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/report.js",
+    "groupTitle": "Report",
+    "error": {
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Missing id:",
+          "content": "HTTP/1.1 422\n{\n    success: \"Missing id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Wrong id:",
+          "content": "HTTP/1.1 404\n{\n    success: \"No such id\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    count: Number\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "count",
+            "description": "<p>Vote count</p>"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "get",
+    "url": "/lukeA/report/vote",
+    "title": "Vote",
+    "name": "Vote",
+    "group": "Report",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the report</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Boolean",
+            "optional": false,
+            "field": "vote",
+            "description": "<p>true if upvote, false if downvote.</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Votes the report by id.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeB/report/upvote?id=y892128121u08?vote=true",
+        "type": "json"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/report.js",
+    "groupTitle": "Report",
+    "error": {
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing id:",
+          "content": "HTTP/1.1 422\n{\n    success: \"Missing id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Wrong id:",
+          "content": "HTTP/1.1 404\n{\n    success: \"No such id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing Vote:",
+          "content": "HTTP/1.1 422\n{\n    success: \"Missing vote:true or false\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success: true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>True if voting was successful</p>"
+          }
+        ]
+      }
+    }
   },
   {
     "type": "get",
