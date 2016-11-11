@@ -2705,7 +2705,7 @@
   },
   {
     "type": "get",
-    "url": "/lukeA/report/",
+    "url": "/lukeA/report",
     "title": "Get report(s)",
     "name": "GetAll",
     "group": "Report",
@@ -2784,6 +2784,11 @@
         {
           "title": "Success-Response:",
           "content": "HTTP/1.1 200 OK\n[{\n    id: String\n    longitude: Number,\n    latitude: Number,\n    altitude: Number,\n    image_url: String,\n    title: String,\n    description: String,\n    date: String,\n    categoryId: [\n        String\n    ],\n    rating: Number,\n    submitterId: String,\n    approved: Boolean,\n    flagged: Boolean,\n    votes: [\n       {\n            userId: String,\n            vote: Boolean\n        }\n    ]\n}]",
+          "type": "json"
+        },
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n    id: String\n    longitude: Number,\n    latitude: Number,\n    altitude: Number,\n    image_url: String,\n    title: String,\n    description: String,\n    date: String,\n    categoryId: [\n        String\n    ],\n    rating: Number,\n    submitterId: String,\n    approved: Boolean,\n    flagged: Boolean,\n    votes: [\n       {\n            userId: String,\n            vote: Boolean\n        }\n    ]\n}",
           "type": "json"
         }
       ],
@@ -3769,8 +3774,8 @@
   {
     "type": "get",
     "url": "/lukeA/user/ban",
-    "title": "Ban user",
-    "name": "BanUser",
+    "title": "Ban",
+    "name": "Ban",
     "group": "User",
     "parameter": {
       "fields": {
@@ -4172,6 +4177,166 @@
   },
   {
     "type": "get",
+    "url": "/lukeA/user/is-admin",
+    "title": "Is Admin",
+    "name": "IsAdmin",
+    "group": "User",
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n    success: true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>If true, user is admin</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Checks if user is admin. Used for gui manipulation.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeA/user/is-admin",
+        "type": "json"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "routes/lukeA/routes/user.js",
+    "groupTitle": "User",
+    "error": {
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Authorization Error:",
+          "content": "HTTP/1.1 401\n{\n    error:'Proper authorization required',\n    auth:true\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Required Role": [
+          {
+            "group": "Required Role",
+            "optional": false,
+            "field": "admin",
+            "description": ""
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "get",
+    "url": "/lukeA/user/is-advanced",
+    "title": "Is Advanced",
+    "name": "IsAdvanced",
+    "group": "User",
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n    success: true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>If true, user is advanced</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Checks if user is advanced. Used for gui manipulation.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeA/user/is-advanced",
+        "type": "json"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "routes/lukeA/routes/user.js",
+    "groupTitle": "User",
+    "error": {
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Authorization Error:",
+          "content": "HTTP/1.1 401\n{\n    error:'Proper authorization required',\n    auth:true\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Required Role": [
+          {
+            "group": "Required Role",
+            "optional": false,
+            "field": "advanced",
+            "description": ""
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "get",
     "url": "/lukeA/user/remove-role",
     "title": "Remove role",
     "name": "RemoveRole",
@@ -4396,8 +4561,8 @@
   {
     "type": "get",
     "url": "/lukeA/user/unban",
-    "title": "Unban user",
-    "name": "UnbanUser",
+    "title": "Unban",
+    "name": "Unban",
     "group": "User",
     "parameter": {
       "fields": {

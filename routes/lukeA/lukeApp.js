@@ -2,13 +2,12 @@ var express = require('express');
 var router = express.Router();
 var passport = require('passport');
 var mongoose = require('mongoose');
-var mongodb = require('../../mongodb/lukeAdb');
 /* SECURITY */
 var requiresLogin = require('../../security/requiresLogin');
 var requiresRole = require('../../security/requiresRole');
 var requiresRoles = require('../../security/requiresRoles');
-var restrictBanned = require('../../security/restrictBanned');
-
+var jwtCheck = require('../../security/jwtCheck');
+var https = require('https');
 /* MODELS */
 var UserModel = require("../../models/lukeA/UserModel");
 var ReportModel = require("../../models/lukeA/ReportModel");
@@ -64,7 +63,7 @@ router.get("/authzero",function(req,res,next){
   var lockSetup = {
     AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID,
     AUTH0_DOMAIN: process.env.AUTH0_DOMAIN,
-    AUTH0_CALLBACK_URL: process.env.AUTH0_CALLBACK_URL_DEVELOPMENT_A
+    AUTH0_CALLBACK_URL: process.env.AUTH0_CALLBACK_URL_PRODUCTION_A
   };
   res.status(200).json(lockSetup);
 });
@@ -192,5 +191,39 @@ router.get('/test/admin',requiresLogin,requiresRole('adminS'),function(req,res,n
   res.writeHead(200, {'Content-Type': 'text/html'});
   res.end("admin OK");
 });
+router.get("/test",jwtCheck,function(req,res) {
+    console.log("Header Authorization /");
+    console.log(req.headers.authorization);
+    console.log("User /");
+    console.log(req.user);
+    var returnData;
+    returnData=null;
+    var options = {
+        host: 'nikitak.eu.auth0.com',
+        path: '/userinfo',
+        method: 'GET',
+        headers: {
+            'Authorization': req.headers.authorization
+        }
+    };
 
+    var request = http.request(options, function (result) {
+        //console.log('STATUS: ' + result.statusCode);
+        //console.log('HEADERS: ' + JSON.stringify(result.headers));
+        result.setEncoding('utf8');
+
+        result.on('data', function (chunk) {
+            console.log("Data /");
+            console.log(chunk);
+            returnData = chunk;
+        });
+    });
+
+    request.on('error', function (e) {
+        console.log(e);
+    });
+
+    request.end();
+    res.status(200).json({status:"Testing",data:returnData});
+});
 module.exports = router;

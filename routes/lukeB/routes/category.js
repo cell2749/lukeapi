@@ -29,25 +29,162 @@ const MONGO_PROJECTION ={
     _id: 0,
     __v: 0
 };
-router.get("/get-all",function(req,res){
-    CategoryModel.find({}, MONGO_PROJECTION, function (err, result) {
-        if (err) throw err;
+/**
+ * @api {get} /lukeB/category Get category(ies)
+ * @apiName GetAll
+ * @apiGroup Category
+ *
+ * @apiParam {String} [id] Id of a category to be viewed
+ *
+ * @apiSuccessExample Success-Response-Multiple:
+ *      HTTP/1.1 200
+ *      [{
+ *          id:String,
+ *          title:String,
+ *          description:String,
+ *          image_url:String
+ *      }]
+ * @apiSuccessExample Success-Response-Single:
+ *      HTTP/1.1 200
+ *      {
+ *          id:String,
+ *          title:String,
+ *          description:String,
+ *          image_url:String
+ *      }
+ *
+ * @apiSuccess {String} id Category id
+ * @apiSuccess {String} title Title of the category
+ * @apiSuccess {String} description Description of the category
+ * @apiSuccess {String} image_url Link to image/icon that category uses
+ *
+ * @apiDescription
+ * Returns All categories or category by provided id. Open to all.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/category
+ */
+router.get("/",function(req,res){
+    Utility.get(CategoryModel,req.query.id,res);
+});
+/**
+ * @api {post} /lukeB/category/create Create
+ * @apiName Create
+ * @apiGroup Category
+ *
+ * @apiParam {String} title Title of the category
+ * @apiParam {String} [description] Description of the category
+ * @apiParam {File} [image] Image file that is to be used as categories image/icon
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200
+ *      {
+ *          id:String,
+ *          title:String,
+ *          description:String,
+ *          image_url:String
+ *      }
+ *
+ * @apiSuccess {String} id Category id
+ * @apiSuccess {String} title Title of the category
+ * @apiSuccess {String} description Description of the category
+ * @apiSuccess {String} image_url Link to image/icon that category uses
+ *
+ * @apiDescription
+ * Creates category using provided parameters. Title required. Returns created category.
+ *
+ * @apiExample Example URL:
+ * //POST REQUEST EXAMPLE
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiUse roleAdmin
+ * @apiErrorExample Missing title:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Missing title"
+ *      }
+ */
+router.post("/create",requiresLogin,requiresRole("admin"),function(req,res){
+    var data = req.body;
+    if (data.title) {
+        var category = new CategoryModel();
 
-        var response = result || [];
-        res.status(200).json(response);
-    });
+        for (var key in CategoryModel.schema.paths) {
+            if (Utility.allowKey(key)) {
+                category[key] = data[key];
+            }
+        }
+        var id = mongoose.Types.ObjectId();
+        category.id = id;
+        category._id = id;
+        category.save(function (err, result) {
+            if (err)throw err;
+            res.status(200).json({success: true});
+        });
+    } else {
+        res.status(422).json({error: "Missing title"});
+    }
+
 });
-router.post("/create",function(req,res){
-    var data = req.body;
-    res.status(200).send("OK");
+/**
+ * @api {post} /lukeB/category/update Update
+ * @apiName Update
+ * @apiGroup Category
+ *
+ * @apiParam {String} id Category id
+ * @apiParam {String} [title] Title of the category
+ * @apiParam {String} [description] Description of the category
+ * @apiParam {File} [image] Image file that is to be used as categories image/icon
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200
+ *      {
+ *          id:String,
+ *          title:String,
+ *          description:String,
+ *          image_url:String
+ *      }
+ *
+ * @apiSuccess {String} id Category id
+ * @apiSuccess {String} title Title of the category
+ * @apiSuccess {String} description Description of the category
+ * @apiSuccess {String} image_url Link to image/icon that category uses
+ *
+ * @apiDescription
+ * Updates category by id, using parameters provided. Returns updated category.
+ *
+ * @apiExample Example URL:
+ * //POST REQUEST EXAMPLE
+ *
+ * @apiUse error
+ * @apiUse updateStatus
+ */
+router.post("/update",requiresLogin,requiresRole("admin"),function(req,res){
+    Utility.update(CategoryModel,req.body,res);
 });
-router.post("/update",function(req,res){
-    var data = req.body;
-    res.status(200).send("OK");
-});
-router.get("/remove",function(req,res){
-    var data = req.query;
-    res.status(200).send("OK");
+/**
+ * @api {get} /lukeB/category/remove Remove
+ * @apiName Remove
+ * @apiGroup Category
+ *
+ * @apiParam {String} id Id of the category to be updated
+ *
+ * @apiDescription
+ * Remove category by id.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/category/remove?id=e2921y8998e1
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse roleAdmin
+ * @apiUse roleAdv
+ * @apiUse removeStatus
+ */
+router.get("/remove",requiresLogin,requiresRole("admin"),function(req,res){
+    Utility.remove(CategoryModel,req.query.id,res);
 });
 
 module.exports = router;

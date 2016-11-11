@@ -31,15 +31,54 @@ router.use('/place',place);
 router.use("/category",category);
 router.use("/report",report);
 router.use('/comment', comment);
-/* AUTHENTICATION SETUP */
+/**
+ * @api {get} /lukeB/authzero Get setup
+ * @apiName GetSetup
+ * @apiGroup Auth0
+ *
+ * @apiSuccessExample Success-Response-Single:
+ *      HTTP/1.1 200 OK
+ *      {
+ *           AUTH0_CLIENT_ID: String,
+ *           AUTH0_DOMAIN: String,
+ *           AUTH0_CALLBACK_URL: String
+ *      }
+ *
+ * @apiSuccess {String} AUTH0_CLIENT_ID Auth0 client id
+ * @apiSuccess {String} AUTH0_DOMAIN Auth0 domain
+ * @apiSuccess {String} AUTH0_CALLBACK_URL Callback url to server. Read more on the callback url implementation.
+ *
+ * @apiDescription
+ * Returns auth0 connection setup information.
+ *
+ * @apiExample Example:
+ * http://balticapp.fi/lukeB/authzero
+ * */
 router.get("/authzero",function(req,res,next) {
     var env = {
         AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID,
         AUTH0_DOMAIN: process.env.AUTH0_DOMAIN,
-        AUTH0_CALLBACK_URL: process.env.AUTH0_CALLBACK_URL_DEVELOPMENT_B
+        AUTH0_CALLBACK_URL: process.env.AUTH0_CALLBACK_URL_PRODUCTION_B
     };
     res.status(200).json(env);
 });
+/**
+ * @api {get} /lukeB/callback Callback
+ * @apiName Callback
+ * @apiGroup Auth0
+ *
+ * @apiParam {String} route Redirect route after successful authentication
+ *
+ * @apiSuccessExample Success-Response-Single:
+ *      HTTP/1.1 200 OK
+ *
+ * @apiSuccess Default Responds with HTTP/1.1 200 OK if route is not provided.
+ *
+ * @apiDescription
+ * Callback url for the auth0 setup. Can be used with parameters - route.
+ * After registering/checking the user in local database redirects to specified route or responds with OK 200.
+ *
+ * */
 router.get('/callback',passport.authenticate('auth0', { failureRedirect: '/url-if-something-fails' }), function(req, res) {
     var route = req.query.route;
 
@@ -78,6 +117,21 @@ router.get('/callback',passport.authenticate('auth0', { failureRedirect: '/url-i
         res.redirect(route);
     }
 });
+/**
+ * @api {get} /lukeB/login Login
+ * @apiName Login
+ * @apiGroup Auth0
+ *
+ * @apiSuccessExample Success-Response-Single:
+ *      HTTP/1.1 200 OK
+ *
+ * @apiSuccess Default Responds with HTTP/1.1 200 OK on successful authentication
+ *
+ * @apiDescription
+ * Meant to be used instead of callback in case redirection is not needed.
+ * Note that this route is not specified as a callback, therefore it has to be called manually.
+ * (!Note: token is either manipulated automatically or you will have to send it manually)
+ * */
 router.get("/login",passport.authenticate('auth0',{failureRedirect:'/url-if-something-fails'}), function(req,res) {
     if (!req.user) {
         throw new Error('user null');
@@ -100,6 +154,24 @@ router.get("/login",passport.authenticate('auth0',{failureRedirect:'/url-if-some
     }
     res.status(200).send('OK');
 });
+/**
+ * @api {get} /lukeA/logout Logout
+ * @apiName Logout
+ * @apiGroup Auth0
+ *
+ * @apiSuccessExample Success-Response-Single:
+ *      HTTP/1.1 200
+ *      {
+ *          success:true
+ *      }
+ *
+ * @apiSuccess {Boolean} success True if logout is successful
+ *
+ * @apiDescription
+ * Logout function. Call this if user wants to logout from application.
+ * (!Note: token is either manipulated automatically or you will have to send it manually)
+ *
+ * */
 router.get('/logout',requiresLogin,function(req,res){
     req.logout();
     res.status(200).json({success:true});

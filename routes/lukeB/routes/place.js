@@ -217,13 +217,17 @@ router.get("/",function(req,res) {
  * //POST REQUEST EXAMPLE
  *
  * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiUse roleAdmin
+ * @apiUse roleAdv
  * @apiErrorExample Missing title:
  *      HTTP/1.1 422
  *      {
  *          error:"Missing title"
  *      }
  */
-router.post("/create",requiresOneOfRoles(["admin","advanced","researcher"]),function(req,res) {
+router.post("/create",requiresLogin,requiresOneOfRoles(["admin","advanced","researcher"]),function(req,res) {
     var data = req.body;
     if (data.title) {
         var place = new PlaceModel();
@@ -238,7 +242,11 @@ router.post("/create",requiresOneOfRoles(["admin","advanced","researcher"]),func
         place._id = id;
         place.save(function (err, result) {
             if (err)throw err;
-            res.status(200).json({success: true});
+            var resultV = new PlaceModel();
+            for(var key in PlaceModel.schema.paths){
+                resultV[key]=result[key];
+            }
+            res.status(200).json(resultV);
         });
     } else {
         res.status(422).json({error: "Missing title"});
@@ -390,8 +398,8 @@ router.get("/downvote",requiresLogin,restrictBanned,function(req,res){
     Utility.vote(PlaceModel,req,res,false);
 });
 /**
- * @api {get} /lukeB/place/downvote Downvote
- * @apiName Downvote
+ * @api {get} /lukeB/place/vote vote
+ * @apiName Vote
  * @apiGroup Place
  *
  * @apiParam {String} id Id of the place to be upvoted

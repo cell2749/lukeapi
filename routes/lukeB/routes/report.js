@@ -266,6 +266,7 @@ router.get('/',function(req,res){
  * @apiExample Example URL:
  * //POST REQUEST EXAMPLE
  *
+ * @apiUse error
  * @apiUse loginError
  */
 router.post('/create',requiresLogin,function(req,res,next) {
@@ -356,6 +357,7 @@ router.post('/create',requiresLogin,function(req,res,next) {
  * @apiExample Example URL:
  * //POST REQUEST EXAMPLE
  *
+ * @apiUse error
  * @apiUse loginError
  * @apiErrorExample Access restriction:
  *      HTTP/1.1 401
@@ -424,8 +426,14 @@ router.post('/update',requiresLogin,function(req,res) {
  *      {
  *          error:"Restricted Access"
  *      }
+ * @apiUse error
  * @apiUse removeStatus
  * @apiUse specialAdmin
+ * @apiErrorExample Restricted access:
+ *      HTTP/1.1 401
+ *      {
+ *          error:"Restricted access"
+ *      }
  */
 router.get("/remove",requiresLogin,function(req,res) {
     var id = req.query.id;

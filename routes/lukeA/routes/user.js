@@ -72,6 +72,7 @@ const MONGO_PROJECTION ={
  * @apiUse roleAdmin
  */
 router.get('/get-all', requiresLogin, requiresRole('admin'), function(req, res, next) {
+
     UserModel.find({},MONGO_PROJECTION, function (err, result) {
         if(err) throw err;
 
@@ -114,6 +115,7 @@ router.get('/get-all', requiresLogin, requiresRole('admin'), function(req, res, 
  * @apiUse noUser
  */
 router.get('/',requiresLogin, function(req, res, next) {
+    console.log(req);
     var id=req.query.id || req.user.profile.id;
     var appMetadata = req.user.profile._json.app_metadata || {roles:[]};
 
