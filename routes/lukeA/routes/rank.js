@@ -11,6 +11,8 @@ var requiresLogin = require('../../../security/requiresLogin');
 var requiresRole = require('../../../security/requiresRole');
 var requiresRoles = require('../../../security/requiresRoles');
 var restrictBanned = require('../../../security/restrictBanned');
+var jwtCheck = require('../../../security/jwtCheck');
+var authConverter = require('../../../security/authConverter');
 /* MODELS */
 var UserModel = require("../../../models/lukeA/UserModel");
 var RankModel = require("../../../models/lukeA/RankModel");
@@ -70,7 +72,7 @@ const MONGO_PROJECTION = {
  *          error:"Missing title"
  *      }
  */
-router.post('/create', requiresLogin,requiresRole('admin'),function(req,res,next){
+router.post('/create', jwtCheck,authConverter,requiresRole('admin'),function(req,res,next){
     var data = req.body;
     var id = mongoose.Types.ObjectId();
 
@@ -146,7 +148,7 @@ router.post('/create', requiresLogin,requiresRole('admin'),function(req,res,next
  *          error:"Rank with such id doesn't exist"
  *      }
  */
-router.post("/update",requiresLogin,requiresRole("admin"),function(req,res){
+router.post("/update",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
     var data = req.body;
     if(data.id){
         RankModel.findOne({id: data.id}, function (err, doc) {
@@ -210,7 +212,7 @@ router.post("/update",requiresLogin,requiresRole("admin"),function(req,res){
  *          error:"No rank with such id"
  *      }
  */
-router.get("/remove",requiresLogin,requiresRole("admin"),function(req,res){
+router.get("/remove",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
     var data = req.query;
     var id = data.id;
     if(id) {
@@ -268,7 +270,7 @@ router.get("/remove",requiresLogin,requiresRole("admin"),function(req,res){
  * @apiUse error
  * @apiUse loginError
  */
-router.get("/",requiresLogin,function(req,res){
+router.get("/",function(req,res){
    var id = req.query.id || null;
     Utility.get(RankModel,id,res);
 });

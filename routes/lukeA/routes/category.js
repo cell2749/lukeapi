@@ -10,7 +10,8 @@ var mongodb = require('../../../mongodb/lukeAdb');
 var requiresLogin = require('../../../security/requiresLogin');
 var requiresRole = require('../../../security/requiresRole');
 var requiresRoles = require('../../../security/requiresRoles');
-var restrictBanned = require('../../../security/restrictBanned');
+var jwtCheck = require('../../../security/jwtCheck');
+var authConverter = require('../../../security/authConverter');
 /* MODELS */
 var UserModel = require("../../../models/lukeA/UserModel");
 var ReportModel = require("../../../models/lukeA/ReportModel");
@@ -73,7 +74,7 @@ const MONGO_PROJECTION = {
  * @apiUse error
  * @apiUse loginError
  */
-router.get('/',requiresLogin,function(req,res){
+router.get('/',function(req,res){
     Utility.get(ReportCategoryModel,req.query.id,res);
 });
 /**
@@ -120,7 +121,7 @@ router.get('/',requiresLogin,function(req,res){
  *          error:"Category title required"
  *      }
  */
-router.get('/create',requiresLogin,requiresRole('admin'),function(req,res){
+router.get('/create',jwtCheck,authConverter,requiresRole('admin'),function(req,res){
     var data = req.query;
     var id = mongoose.Types.ObjectId();
     if(data.title) {
@@ -202,7 +203,7 @@ router.get('/create',requiresLogin,requiresRole('admin'),function(req,res){
  *          error:"Report Category with such id doesn't exists"
  *      }
  */
-router.get("/update",requiresLogin,requiresRole("admin"),function(req,res){
+router.get("/update",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
     var data = req.query;
     if(data.id) {
         ReportCategoryModel.findOne({id: data.id}, function (err, doc) {
@@ -262,7 +263,7 @@ router.get("/update",requiresLogin,requiresRole("admin"),function(req,res){
  *          error:"No category with such id"
  *      }
  */
-router.get("/remove",requiresLogin,requiresRole("admin"),function(req,res){
+router.get("/remove",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
     var data = req.query;
     var id = data.id;
     ReportCategoryModel.find({id:id}).remove(function(err,item) {

@@ -1,9 +1,4 @@
-/**
- * 401 UNAUTHORIZED
- * 422 UNPROCESSABLE ENTITY
- * 404 NOT FOUND
- *
-* */
+var fs = require('fs');
 var Utility = function(keyes,maxFlags){
     this.omitKeyes = keyes;
     this.maxFlags = maxFlags;
@@ -240,10 +235,30 @@ Utility.hasRole = function(req,role) {
     var appMetadata = req.user.profile._json.app_metadata || {};
     var roles = appMetadata.roles || [];
 
-    if (roles.indexOf(role) != -1) {
-        return true;
-    } else {
-        return false;
+    return (roles.indexOf(role) != -1);
+};
+Utility.saveImage = function(req,path,imgName){
+    var fullpath = "/opt/balticapp/lukeapi/public/images/" + path + imgName;
+    if(req.files.image) {
+        var format = req.files.image.type.split('/')[1];
+        if(format.length<5) {
+            fullpath = fullpath + "." +format;
+
+        fs.readFile(req.files.image.path, function (err, data) {
+            if (err)throw err;
+            fs.writeFile(fullpath, data, function (err) {
+                if (err) throw err;
+
+                return fullpath;
+            });
+        });
+        }else{
+            console.log("Format too long: " + format);
+            return null;
+        }
+    }else{
+        console.log("Error: req.files.image is empty");
+        return null;
     }
 };
 module.exports = Utility;

@@ -5,12 +5,15 @@ var express = require('express');
 var router = express.Router();
 var mongoose = require('mongoose');
 var mongodb = require('../../../mongodb/lukeAdb');
+var fs = require
 /* SECURITY */
 var requiresLogin = require('../../../security/requiresLogin');
 var requiresRole = require('../../../security/requiresRole');
 var requiresRoles = require('../../../security/requiresRoles');
 var requiresOneOfRoles = require('../../../security/requiresOneOfRoles');
 var restrictBanned = require('../../../security/restrictBanned');
+var jwtCheck = require('../../../security/jwtCheck');
+var authConverter = require('../../../security/authConverter');
 var ManagementClient = require('auth0').ManagementClient;
 var management = new ManagementClient({
     token: process.env.AUTH0_API_TOKEN,
@@ -71,7 +74,7 @@ const MONGO_PROJECTION ={
  *
  * @apiUse roleAdmin
  */
-router.get('/get-all', requiresLogin, requiresRole('admin'), function(req, res, next) {
+router.get('/get-all', jwtCheck,authConverter, requiresRole('admin'), function(req, res, next) {
 
     UserModel.find({},MONGO_PROJECTION, function (err, result) {
         if(err) throw err;
@@ -114,7 +117,7 @@ router.get('/get-all', requiresLogin, requiresRole('admin'), function(req, res, 
  * @apiUse authError
  * @apiUse noUser
  */
-router.get('/',requiresLogin, function(req, res, next) {
+router.get('/',jwtCheck,authConverter, function(req, res, next) {
     console.log(req);
     var id=req.query.id || req.user.profile.id;
     var appMetadata = req.user.profile._json.app_metadata || {roles:[]};
@@ -166,7 +169,7 @@ router.get('/',requiresLogin, function(req, res, next) {
  * @apiUse authError
  * @apiUse noUser
  */
-router.get('/update',requiresLogin,function(req,res) {
+router.get('/update',jwtCheck,authConverter,function(req,res) {
     var id = req.query.id || req.user.profile.id;
     var appMetadata = req.user.profile._json.app_metadata || {roles: []};
 
@@ -222,7 +225,7 @@ router.get('/update',requiresLogin,function(req,res) {
  *          error:"Username not specified"
  *      }
  */
-router.get('/available',requiresLogin,function(req,res){
+router.get('/available',jwtCheck,authConverter,function(req,res){
     var username = req.query.username;
     if(username) {
         UserModel.findOne({username: username}, function (err, doc) {
@@ -281,7 +284,7 @@ router.get('/available',requiresLogin,function(req,res){
  *      }
  * @apiUse specialAdmin
  */
-router.get('/set-username',requiresLogin,function(req,res) {
+router.get('/set-username',jwtCheck,authConverter,function(req,res) {
     var id = req.query.id || req.user.profile.id;
     var username = req.query.username;
     var appMetadata = req.user.profile._json.app_metadata || {};
@@ -317,7 +320,7 @@ router.get('/set-username',requiresLogin,function(req,res) {
         }
     }
 });
-/*router.get("/copy-profile",requiresLogin,function(req,res) {
+/*router.get("/copy-profile",jwtCheck,authConverter,function(req,res) {
     var data = req.user.profile;
     var profile = {
         image_url: data.picture,
@@ -368,7 +371,7 @@ router.get('/set-username',requiresLogin,function(req,res) {
  * @apiUse roleSuper
  * @apiUse roleAdmin
  */
-router.get("/add-role",requiresLogin,requiresOneOfRoles(["admin","superadmin"]),function(req,res) {
+router.get("/add-role",jwtCheck,authConverter,requiresOneOfRoles(["admin","superadmin"]),function(req,res) {
     var data = req.query;
     var userId = data.id;
     var role = data.role;
@@ -441,7 +444,7 @@ router.get("/add-role",requiresLogin,requiresOneOfRoles(["admin","superadmin"]),
  * @apiUse roleAdmin
  * @apiUse roleSuper
  */
-router.get("/remove-role",requiresLogin,requiresOneOfRoles(["admin","superadmin"]),function(req,res) {
+router.get("/remove-role",jwtCheck,authConverter,requiresOneOfRoles(["admin","superadmin"]),function(req,res) {
     var data = req.query;
     var userId = data.id;
     var role = data.role;
@@ -507,7 +510,7 @@ router.get("/remove-role",requiresLogin,requiresOneOfRoles(["admin","superadmin"
  *      }
  * @apiUse specialAdmin
  */
-router.get("/roles",requiresLogin,function(req,res){
+router.get("/roles",jwtCheck,authConverter,function(req,res){
     var data = req.query;
     var userId = data.id||req.user.profile.id;
     var appMetadata = req.user.profile._json.app_metadata || {};
@@ -550,7 +553,7 @@ router.get("/roles",requiresLogin,function(req,res){
  * @apiUse authError
  * @apiUse roleAdmin
  */
-router.get('/is-admin',requiresLogin,requiresRole("admin"),function(req,res){
+router.get('/is-admin',jwtCheck,authConverter,requiresRole("admin"),function(req,res){
     res.status(200).json({success:true});
 });
 /**
@@ -577,7 +580,7 @@ router.get('/is-admin',requiresLogin,requiresRole("admin"),function(req,res){
  * @apiUse authError
  * @apiUse roleAdv
  */
-router.get('/is-advanced',requiresLogin,requiresRole("advanced"),function(req,res){
+router.get('/is-advanced',jwtCheck,authConverter,requiresRole("advanced"),function(req,res){
     res.status(200).json({success:true});
 });
 /**
@@ -610,7 +613,7 @@ router.get('/is-advanced',requiresLogin,requiresRole("advanced"),function(req,re
  *      }
  * @apiUse roleAdmin
  */
-router.get("/ban",requiresLogin,requiresRole("admin"),function(req,res) {
+router.get("/ban",jwtCheck,authConverter,requiresRole("admin"),function(req,res) {
     var data = req.query;
     var id = data.id;
     var rolesArr;
@@ -667,7 +670,7 @@ router.get("/ban",requiresLogin,requiresRole("admin"),function(req,res) {
  *
  * @apiUse roleAdmin
  */
-router.get("/unban",requiresLogin,requiresRole("admin"),function(req,res) {
+router.get("/unban",jwtCheck,authConverter,requiresRole("admin"),function(req,res) {
     var data = req.query;
     var id = data.id;
     var roles;

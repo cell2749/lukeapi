@@ -11,6 +11,8 @@ var requiresLogin = require('../../../security/requiresLogin');
 var requiresRole = require('../../../security/requiresRole');
 var requiresRoles = require('../../../security/requiresRoles');
 var restrictBanned = require('../../../security/restrictBanned');
+var jwtCheck = require('../../../security/jwtCheck');
+var authConverter = require('../../../security/authConverter');
 /* MODELS */
 var UserModel = require("../../../models/lukeA/UserModel");
 var ReportModel = require("../../../models/lukeA/ReportModel");
@@ -77,7 +79,7 @@ const MONGO_PROJECTION ={
  * @apiUse authError
  * @apiUse roleAdmin
  */
-router.get("/",requiresLogin,requiresRole("admin"),function(req,res){
+router.get("/",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
     Utility.get(ExperienceModel,req.query.id,res);
 });
 /**
@@ -120,7 +122,7 @@ router.get("/",requiresLogin,requiresRole("admin"),function(req,res){
  * @apiUse authError
  * @apiUse roleSuper
  */
-router.post("/create",requiresLogin,requiresRole("superadmin"),function(req,res) {
+router.post("/create",jwtCheck,authConverter,requiresRole("superadmin"),function(req,res) {
     var data = req.body;
     var experiencePattern = new ExperienceModel();
     for (var key in experiencePattern.schema.paths) {
@@ -186,7 +188,7 @@ router.post("/create",requiresLogin,requiresRole("superadmin"),function(req,res)
  *          error:"No pattern was found"
  *      }
  */
-router.post("/update",requiresLogin,requiresRole("superadmin"),function(req,res){
+router.post("/update",jwtCheck,authConverter,requiresRole("superadmin"),function(req,res){
     var data = req.body;
     ExperienceModel.findOne({id:data.id},function(err, doc){
         if(err) throw err;
@@ -247,7 +249,7 @@ router.post("/update",requiresLogin,requiresRole("superadmin"),function(req,res)
  *          error:"No item with such id"
  *      }
  */
-router.get("/remove",requiresLogin,requiresRole("superadmin"),function(req,res) {
+router.get("/remove",jwtCheck,authConverter,requiresRole("superadmin"),function(req,res) {
     var data = req.query;
     ExperienceModel.find({id: data.id}).remove(function (err, item) {
         if (err) throw err;
@@ -294,7 +296,7 @@ router.get("/remove",requiresLogin,requiresRole("superadmin"),function(req,res) 
  *          error:"Missing id for experience model"
  *      }
  */
-router.get("/activate",requiresLogin,requiresRole("superadmin"),function(req,res) {
+router.get("/activate",jwtCheck,authConverter,requiresRole("superadmin"),function(req,res) {
     var data = req.query;
     if(data.id) {
         ExperienceModel.update({id: data.id}, {$set: {active: true}}, function (err, doc) {
@@ -341,7 +343,7 @@ router.get("/activate",requiresLogin,requiresRole("superadmin"),function(req,res
  * @apiUse authError
  * @apiUse roleSuper
  */
-router.get("/nullify-all",requiresLogin,requiresRole("superadmin"),function(req,res){
+router.get("/nullify-all",jwtCheck,authConverter,requiresRole("superadmin"),function(req,res){
     UserModel.update({}, {$set: {score: 0, rankingId:null}}, function (err, result) {
         if(err) throw err;
         res.status(200).json({success:true});
@@ -379,7 +381,7 @@ router.get("/nullify-all",requiresLogin,requiresRole("superadmin"),function(req,
  *          error:"Missing user id"
  *      }
  */
-router.get("/nullify",requiresLogin,requiresRole("superadmin"),function(req,res){
+router.get("/nullify",jwtCheck,authConverter,requiresRole("superadmin"),function(req,res){
     var usrId = req.query.id;
     if(usrId) {
         UserModel.update({id: usrId}, {$set: {score: 0, rankingId: null}}, function (err, result) {

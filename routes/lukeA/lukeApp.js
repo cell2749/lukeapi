@@ -7,6 +7,7 @@ var requiresLogin = require('../../security/requiresLogin');
 var requiresRole = require('../../security/requiresRole');
 var requiresRoles = require('../../security/requiresRoles');
 var jwtCheck = require('../../security/jwtCheck');
+var authConverter = require('../../security/authConverter');
 var https = require('https');
 /* MODELS */
 var UserModel = require("../../models/lukeA/UserModel");
@@ -84,7 +85,7 @@ router.get("/authzero",function(req,res,next){
  * After registering/checking the user in local database redirects to specified route or responds with OK 200.
  *
  * */
-router.get('/callback',passport.authenticate('auth0', { failureRedirect: '/url-if-something-fails' }), function(req, res) {
+/*router.get('/callback',passport.authenticate('auth0', { failureRedirect: '/url-if-something-fails' }), function(req, res) {
     var route = req.query.route;
 
     if (!req.user) {
@@ -114,7 +115,7 @@ router.get('/callback',passport.authenticate('auth0', { failureRedirect: '/url-i
             }
         });
     }
-});
+});*/
 /**
  * @api {get} /lukeA/login Login
  * @apiName Login
@@ -130,7 +131,7 @@ router.get('/callback',passport.authenticate('auth0', { failureRedirect: '/url-i
  * Note that this route is not specified as a callback, therefore it has to be called manually.
  * (!Note: token is either manipulated automatically or you will have to send it manually)
  * */
-router.get("/login",passport.authenticate('auth0',{failureRedirect:'/url-if-something-fails'}), function(req,res){
+router.get("/login",jwtCheck,authConverter, function(req,res){
     if (!req.user) {
         throw new Error('user null');
     }else{
@@ -172,10 +173,10 @@ router.get("/login",passport.authenticate('auth0',{failureRedirect:'/url-if-some
  * (!Note: token is either manipulated automatically or you will have to send it manually)
  *
  * */
-router.get('/logout',requiresLogin,function(req,res){
+/*router.get('/logout',jwtCheck,authConverter,function(req,res){
     req.logout();
     res.status(200).json({success:true});
-});
+});*/
 
 /* SECURITY TESTS */
 router.get('/test/public',function(req,res,next){
@@ -200,10 +201,10 @@ router.get("/test",jwtCheck,function(req,res) {
     returnData=null;
     var options = {
         host: 'nikitak.eu.auth0.com',
-        path: '/userinfo',
+        path: '/tokeninfo',
         method: 'GET',
         headers: {
-            'Authorization': req.headers.authorization
+            'id_token': req.headers.authorization.split(" ")[1]
         }
     };
 
