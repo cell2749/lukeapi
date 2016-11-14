@@ -5,17 +5,17 @@ var https = require('https');
 var UserModel = require('../models/lukeA/UserModel');
 var mongoose = require('mongoose');
 module.exports = function(req,res,next) {
-    var id_token = {
+    /*var id_token = {
         id_token: req.headers.authorization.split(" ")[1]
-    };
+    };*/
 
-    var post_data = JSON.stringify(id_token);
+    //var post_data = JSON.stringify(id_token);
     var post_options = {
         host: 'nikitak.eu.auth0.com',
-        path: '/tokeninfo',
-        method: 'POST',
+        path: '/userinfo',
+        method: 'GET',
         headers: {
-            'Content-Type': 'application/json'
+            Authorization: 'Bearer ' + req.headers.access_token
         }
     };
     var post_req = https.request(post_options, function (res) {
@@ -23,6 +23,7 @@ module.exports = function(req,res,next) {
         console.log('HEADERS: ' + JSON.stringify(res.headers));
         res.setEncoding('utf8');
         res.on('data', function (chunk) {
+            console.log(chunk);
             req.user["profile"] = chunk;
             req.user.profile["id"] = req.user.profile.user_id;
         });
@@ -30,8 +31,6 @@ module.exports = function(req,res,next) {
     post_req.on('error', function (e) {
         console.log("HTTP CONVERTER REQUEST ERROR: " + e);
     });
-
-    post_req.write(post_data);
     post_req.end();
     next();
 };
