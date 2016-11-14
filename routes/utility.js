@@ -249,7 +249,7 @@ Utility.saveImage = function(req,path,imgName){
             fs.writeFile(fullpath, data, function (err) {
                 if (err) throw err;
 
-                return fullpath;
+                return "www.balticapp.fi/images/" + path + imgName + "." + format;
             });
         });
         }else{
@@ -259,6 +259,24 @@ Utility.saveImage = function(req,path,imgName){
     }else{
         console.log("Error: req.files.image is empty");
         return null;
+    }
+};
+Utility.deleteImage = function(url){
+    if(url.indexOf("..")==-1&&url.indexOf(".www")==-1&&url.indexOf("www.balticapp.fi/images/")!=-1) {
+        var path = "/opt/balticapp/lukeapi/public/images/" + url.substr(url.indexOf("www.balticapp.fi/images/") + "www.balticapp.fi/images/".length);
+        fs.unlink(path,function(){
+           return true;
+        });
+    }else{
+        return false;
+    }
+
+};
+Utility.copyImage = function(req,large){
+    if(!large) {
+        return req.user.profile.picture;
+    }else{
+        return req.user.profile.picture_large;
     }
 };
 module.exports = Utility;

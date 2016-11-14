@@ -36,7 +36,7 @@ const MONGO_PROJECTION = {
  *
  * @apiParam {String} title Title of rank
  * @apiParam {String} [description] Description of the rank
- * @apiParam {File} [img] Image file that is to be used as Rank icon
+ * @apiParam {File} [image] Image file that is to be used as Rank icon
  * @apiParam {Number} [score] Required score/experience for a user to get this rank
  *
  * @apiSuccessExample Success-Response:
@@ -85,13 +85,12 @@ router.post('/create', jwtCheck,authConverter,requiresRole('admin'),function(req
         }
         rank.id = id;
         rank._id = id;
+        rank.image_url=Utility.saveImage(req,"lukeA/rank/",id);
         rank.save(function (err, rank) {
             if (err) throw err;
             var returnV = {};
-            for (var key in rank) {
-                if (key != "_id" || key != "__v") {
-                    returnV[key] = rank[key];
-                }
+            for (var key in RankModel.schema.paths) {
+                returnV[key] = rank[key];
             }
             res.status(200).json(returnV);
         });
@@ -107,7 +106,7 @@ router.post('/create', jwtCheck,authConverter,requiresRole('admin'),function(req
  * @apiParam {String} id Id of a rank to be updated
  * @apiParam {String} [title] Title of rank
  * @apiParam {String} [description] Description of the rank
- * @apiParam {File} [img] Image file that is to be used as rank icon/image
+ * @apiParam {File} [image] Image file that is to be used as rank icon/image
  * @apiParam {Number} [score] Required score/experience for a user to get this rank
  *
  * @apiSuccessExample Success-Response:
@@ -159,10 +158,11 @@ router.post("/update",jwtCheck,authConverter,requiresRole("admin"),function(req,
                         doc[key] = data[key] || doc[key];
                     }
                 }
+                doc.image_url = Utility.saveImage(req,"lukeA/rank/",doc.id)||doc.image_url;
                 doc.save(function(err,result){
                     if(err) throw err;
-                    var returnV={}, pattern = new RankModel();
-                    for(var key in pattern.schema.paths){
+                    var returnV={};
+                    for(var key in RankModel.schema.paths){
                         returnV[key]=result[key];
                     }
                     res.status(200).json(returnV);
@@ -212,11 +212,17 @@ router.post("/update",jwtCheck,authConverter,requiresRole("admin"),function(req,
  *          error:"No rank with such id"
  *      }
  */
-router.get("/remove",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
+router.get("/remove",jwtCheck,authConverter,requiresRole("admin"),function(req,res) {
     var data = req.query;
     var id = data.id;
-    if(id) {
-        RankModel.find({id: id}).remove(function (err, item) {
+    if (id) {
+
+        RankModel.find({id: id}, function (err, doc) {
+            if (err) throw err;
+            if(doc.length!=0) {
+                Utility.deleteImage(doc.image_url);
+            }
+        }).remove(function (err, item) {
             if (err) throw err;
 
             if (item.result.n != 0) {
@@ -225,7 +231,7 @@ router.get("/remove",jwtCheck,authConverter,requiresRole("admin"),function(req,r
                 res.status(404).json({error: "No rank with such id"});
             }
         });
-    }else{
+    } else {
         res.status(404).json({error: "Id was not specified"});
     }
 });

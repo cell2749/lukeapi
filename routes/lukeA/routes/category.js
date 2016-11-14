@@ -85,7 +85,7 @@ router.get('/',function(req,res){
  * @apiParam {String} id Id of the category
  * @apiParam {String} title Title of the category
  * @apiParam {String} [description] Description of the category
- * @apiParam {String} [image_url] Url of image/icon used by category
+ * @apiParam {File} [image] Image file that is to be used by category
  * @apiParam {Boolean} [positive] Indicates if category is positive or negative
  *
  * @apiSuccessExample Success-Response-Single:
@@ -121,7 +121,7 @@ router.get('/',function(req,res){
  *          error:"Category title required"
  *      }
  */
-router.get('/create',jwtCheck,authConverter,requiresRole('admin'),function(req,res){
+router.post('/create',jwtCheck,authConverter,requiresRole('admin'),function(req,res){
     var data = req.query;
     var id = mongoose.Types.ObjectId();
     if(data.title) {
@@ -137,7 +137,7 @@ router.get('/create',jwtCheck,authConverter,requiresRole('admin'),function(req,r
                 }
                 reportCategory.id = id;
                 reportCategory._id = id;
-
+                reportCategory.image_url = Utility.saveImage(req,"lukeA/category/",id);
                 reportCategory.save(function (err, result) {
                     if (err)throw err;
                     var returnV = {};
@@ -162,7 +162,7 @@ router.get('/create',jwtCheck,authConverter,requiresRole('admin'),function(req,r
  * @apiParam {String} id Id of the category
  * @apiParam {String} [title] Title of the category
  * @apiParam {String} [description] Description of the category
- * @apiParam {String} [image_url] Url of image/icon used by category
+ * @apiParam {File} [image] Image file used by category
  * @apiParam {Boolean} [positive] Indicates if category is positive or negative
  *
  * @apiSuccessExample Success-Response-Single:
@@ -203,7 +203,7 @@ router.get('/create',jwtCheck,authConverter,requiresRole('admin'),function(req,r
  *          error:"Report Category with such id doesn't exists"
  *      }
  */
-router.get("/update",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
+router.post("/update",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
     var data = req.query;
     if(data.id) {
         ReportCategoryModel.findOne({id: data.id}, function (err, doc) {
@@ -214,6 +214,7 @@ router.get("/update",jwtCheck,authConverter,requiresRole("admin"),function(req,r
                         doc[key] = data[key] || doc[key];
                     }
                 }
+                doc.image_url = Utility.saveImage(req,"lukeA/category/",doc.id) || doc.image_url;
                 doc.save(function (err, result) {
                     if (err) throw err;
                     var returnV = {}, pattern = new ReportCategoryModel();
@@ -266,7 +267,12 @@ router.get("/update",jwtCheck,authConverter,requiresRole("admin"),function(req,r
 router.get("/remove",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
     var data = req.query;
     var id = data.id;
-    ReportCategoryModel.find({id:id}).remove(function(err,item) {
+    ReportCategoryModel.find({id:id},function(err,doc){
+        if(err) throw err;
+        if(doc.length!=0) {
+            Utility.deleteImage(doc.image_url);
+        }
+    }).remove(function(err,item) {
         if (err) throw err;
 
         if (item.result.n != 0) {

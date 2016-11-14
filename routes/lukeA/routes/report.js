@@ -216,14 +216,13 @@ router.get('/',function(req,res){
  * @apiName Create
  * @apiGroup Report
  *
- * @apiParam {String} title Title of the report
- * @apiParam {String} [longitude] Longitude of a point where report was made.
- * @apiParam {String} [latitude] Latitude of a point where report was made.
- * @apiParam {String} [altitude] Altitude of a point where report was made
- * @apiParam {File} [img] Image file that is bound to a report.*Not yet implemented.
- * @apiParam {String} [description] Description of a report.
- * @apiParam {String} [date] Date when report was made.*Maybe should be restricted.
- * @apiParam {Array} [categoryId] Array containing category ids of a report.
+ * @apiParam {String} [title] Title of the report
+ * @apiParam {String} longitude Longitude of a point where report was made.
+ * @apiParam {String} latitude Latitude of a point where report was made.
+ * @apiParam {String} altitude Altitude of a point where report was made
+ * @apiParam {File} [image] Image file that is bound to a report.*Not yet implemented.
+ * @apiParam {String} description Description of a report.
+ * @apiParam {Array} categoryId Array containing category ids of a report.
  *
  *
  * @apiSuccessExample Success-Response:
@@ -284,10 +283,30 @@ router.get('/',function(req,res){
  * @apiUse error
  * @apiUse loginError
  * @apiUse banned
- * @apiErrorExample Missing Title:
+ * @apiErrorExample Missing longitude:
  *      HTTP/1.1 422
  *      {
- *          error:"Missing Title"
+ *          error:"Missing longitude"
+ *      }
+ * @apiErrorExample Missing latitude:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Missing latitude"
+ *      }
+ * @apiErrorExample Missing altitude:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Missing altitude"
+ *      }
+ * @apiErrorExample Missing description:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Missing description"
+ *      }
+ * @apiErrorExample Missing categoryId:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Missing categoryId"
  *      }
  * @apiErrorExample Experience Model:
  *      HTTP/1.1 404
@@ -295,12 +314,22 @@ router.get('/',function(req,res){
  *          error:"No experience pattern active"
  *      }
  */
-router.post('/create',jwtCheck,authConverter,restrictBanned,function(req,res,next){
+router.post('/create',jwtCheck,authConverter,restrictBanned,function(req,res,next) {
     var data = req.body;
     var id = mongoose.Types.ObjectId();
 
-    if(data.title != null) {
-        ExperienceModel.findOne({active:true},function(err,exp) {
+    if (data.longitude == null) {
+        res.status(422).json({error: "Missing longitude"});
+    } else if (data.latitude == null) {
+        res.status(422).json({error: "Missing latitude"});
+    } else if (data.altitude == null) {
+        res.status(422).json({error: "Missing altitude"});
+    } else if (data.description == null) {
+        res.status(422).json({error: "Missing description"});
+    } else if (data.categoryId == null) {
+        res.status(422).json({error: "Missing categoryId"});
+    } else {
+        ExperienceModel.findOne({active: true}, function (err, exp) {
             if (err) throw err;
             if (exp) {
                 UserModel.findOne({id: req.user.profile.id}, function (err, doc) {
@@ -318,31 +347,28 @@ router.post('/create',jwtCheck,authConverter,restrictBanned,function(req,res,nex
                     }
                     //vote.report.id = id;
                     report._id = id;
-                    if (report.id == null) {
-                        report.id = id;
-                    }
+                    report.id = id;
                     report.votes = {};
                     report.approved = true;
                     report.flagged = false;
+                    report.date = new Date().toISOString();
+
+                    report.image_url = Utility.saveImage(req, "lukeA/report/", id);
                     report.submitterId = req.user.profile.id;
                     doc.save();
                     report.save(function (err, report) {
                         if (err)throw err;
                         var returnV = {};
-                        for (var key in report) {
-                            if (key != "_id" || key != "__v" || key != "votes._id") {
-                                returnV[key] = report[key];
-                            }
+                        for (var key in ReportModel.schema.paths) {
+                            returnV[key] = report[key];
                         }
                         res.status(200).json(returnV);
                     });
                 });
             } else {
-                res.status(404).json({error:"No experience pattern active"});
+                res.status(404).json({error: "No experience pattern active"});
             }
         });
-    }else{
-        res.status(422).json({error:"Missing title"});
     }
 });
 /**
@@ -449,6 +475,7 @@ router.post("/update",jwtCheck,authConverter,restrictBanned,function(req,res){
                         doc[key] = data[key] || doc[key];
                     }
                 }
+                doc.image_url = Utility.saveImage(req,"lukeA/report/",doc.id) || doc.image_url;
                 doc.save(function(err,result){
                     var returnV={}, reportPattern = new ReportModel();
                     for(var key in reportPattern.schema.paths){
@@ -504,7 +531,9 @@ router.get("/remove",jwtCheck,authConverter,function(req,res){
     var appMetadata = req.user.profile._json.app_metadata || {};
     var adminRoles = appMetadata.roles || [];
     ReportModel.findOne({id:id},{"submitterId":1},function(err,doc) {
-        if (doc.submitterId == req.user.profile.id || adminRoles.indexOf("admin")!=-1) {
+        if(err)throw err;
+        if ((doc.submitterId == req.user.profile.id || adminRoles.indexOf("admin")!=-1)&&doc.length!=0) {
+            Utility.deleteImage(doc.image_url);
             ReportModel.find({id: id}).remove(function (err, item) {
                 if (err) throw err;
 
@@ -515,7 +544,11 @@ router.get("/remove",jwtCheck,authConverter,function(req,res){
                 }
             });
         }else{
-            res.status(401).json({error:"Restricted Access"});
+            if(doc.length!=0){
+                res.status(401).json({error: "Restricted Access"});
+            }else {
+                res.status(404).json({error:"No report with such id"});
+            }
         }
     });
 });

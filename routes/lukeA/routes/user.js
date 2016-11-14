@@ -56,7 +56,7 @@ const MONGO_PROJECTION ={
  * @apiSuccess {String} rankingId Id of a rank that the User has.
  *
  * @apiSuccessExample Success-Response:
- *      HTTP/1.1 200 OK
+ *      HTTP/1.1 200
  *      [{
  *          id:String,
  *          username:String,
@@ -70,28 +70,20 @@ const MONGO_PROJECTION ={
  *
  * @apiUse error
  * @apiUse loginError
- * @apiUse authError
  *
- * @apiUse roleAdmin
  */
-router.get('/get-all', jwtCheck,authConverter, requiresRole('admin'), function(req, res, next) {
-
-    UserModel.find({},MONGO_PROJECTION, function (err, result) {
-        if(err) throw err;
-
-        var response = result || [];
-        res.status(200).json(response);
-    });
+router.get('/get-all', jwtCheck,authConverter, function(req, res, next) {
+    Utility.get(UserModel,null,res);
 });
 /**
  * @api {get} /lukeA/user Get user
  * @apiName GetUser
  * @apiGroup User
  *
- * @apiParam {String} [id="Users own id"] Users unique ID.
+ * @apiParam {String} [id] Users unique ID.
  *
  * @apiSuccessExample Success-Response:
- *      HTTP/1.1 200 OK
+ *      HTTP/1.1
  *      {
  *          id:String,
  *          username:String,
@@ -112,44 +104,43 @@ router.get('/get-all', jwtCheck,authConverter, requiresRole('admin'), function(r
  * @apiExample Example URL:
  * http://balticapp.fi/lukeA/user?id=auth0|21jeh192he921e2121
  *
+ * @apiErrorExample Wrong id:
+ *      HTTP/1.1 404
+ *      {
+ *          error:"No user with such id"
+ *      }
  * @apiUse error
  * @apiUse loginError
- * @apiUse authError
  * @apiUse noUser
  */
 router.get('/',jwtCheck,authConverter, function(req, res, next) {
-    console.log(req);
-    var id=req.query.id || req.user.profile.id;
-    var appMetadata = req.user.profile._json.app_metadata || {roles:[]};
+    var id = req.query.id || req.user.profile.id;
 
-    if(id == req.user.profile.id || appMetadata.roles.indexOf("admin")!=-1) {
-        UserModel.findOne({id: id}, MONGO_PROJECTION, function (err, result) {
-            if (err) throw err;
+    UserModel.findOne({id: id}, MONGO_PROJECTION, function (err, result) {
+        if (err) throw err;
 
-            if(result) {
-                var response = result;
-                res.status(200).json(response);
-            }else{
-                res.status(404).json({error:"No user with such id"});
-            }
-        });
-    }else{
-        res.status(401).json({error:'Proper authorization required',auth:true});
-    }
+        if (result) {
+            var response = result;
+            res.status(200).json(response);
+        } else {
+            res.status(404).json({error: "No user with such id"});
+        }
+    });
 });
 /**
- * @api {get} /lukeA/user/update Update user
+ * @api {post} /lukeA/user/update Update user
  * @apiName UpdateUser
  * @apiGroup User
  *
+ * @apiParam {File} [image] Image file that needs to be updated/uploaded
  * @apiParam (Parameters Forbidden for Update) {String} [id] Users unique ID. For admin.
  * @apiParam (Parameters Forbidden for Update) {String} [username] Username of the User.
- * @apiParam (Parameters Forbidden for Update) {String} [image_url] Url of the image that User uses.
+ * @apiParam (Parameters Forbidden for Update) {String} [image_url] URL to the image that the user is using
  * @apiParam (Parameters Forbidden for Update) {Number} [score] Experience of the User.
  * @apiParam (Parameters Forbidden for Update) {String} [rankingId] Id of a rank that the User has.
  *
  * @apiSuccessExample Success-Response:
- *      HTTP/1.1 200 OK
+ *      HTTP/1.1 200
  *      {
  *          success:Boolean
  *      }
@@ -169,8 +160,9 @@ router.get('/',jwtCheck,authConverter, function(req, res, next) {
  * @apiUse authError
  * @apiUse noUser
  */
-router.get('/update',jwtCheck,authConverter,function(req,res) {
-    var id = req.query.id || req.user.profile.id;
+router.post('/update',jwtCheck,authConverter,function(req,res) {
+    var data = req.body;
+    var id = data.id || req.user.profile.id;
     var appMetadata = req.user.profile._json.app_metadata || {roles: []};
 
     if (id == req.user.profile.id || appMetadata.roles.indexOf('admin') != -1) {
@@ -180,10 +172,11 @@ router.get('/update',jwtCheck,authConverter,function(req,res) {
                 var success = false;
                 for (var key in userPattern.schema.paths) {
                     if (Utility.allowKey(key)) {
-                        doc[key] = req.query[key] || doc[key];
+                        doc[key] = data[key] || doc[key];
                         success = true;
                     }
                 }
+                doc.image_url = Utility.saveImage(req,"lukeA/user/",doc.id);
                 doc.save(function(err,result){
                     if(err) throw err;
                     res.status(200).json({success:success});
@@ -695,4 +688,113 @@ router.get("/unban",jwtCheck,authConverter,requiresRole("admin"),function(req,re
         }
     });
 });
+/**
+ * @api {post} /lukeA/user/upload-default-image Upload default image
+ * @apiName UploadDefaultImage
+ * @apiGroup User
+ *
+ * @apiParam {String} name Id of a User
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200
+ *      {
+ *          success: true
+ *      }
+ *
+ * @apiSuccess {Boolean} success If true, user was un-banned successfully
+ *
+ * @apiDescription
+ * Uploads default image for the user to view.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeA/user/upload-default-image?id=auth0|ej21oje10e212oe12
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiErrorExample Fail:
+ *      HTTP/1.1 500
+ *      {
+ *          error:"Image upload failed"
+ *      }
+ * @apiErrorExample Missing name:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Missing name"
+ *      }
+ *
+ * @apiUse roleAdmin
+ * @apiUse roleSuper
+ */
+router.post("/upload-default-image",jwtCheck,authConverter,requiresOneOfRoles(["admin","superadmin"]),function(req,res){
+   var name = req.body.image_name;
+    if(name!=null) {
+        if (Utility.saveImage(req, "lukeA/user/default/", name) != null) {
+            res.status(200).json({success: true});
+        } else {
+            res.status(500).json({error: "Image upload failed"});
+        }
+    }else{
+        res.status(422).json({error:"Missing name"});
+    }
+});
+/**
+ * @api {get} /lukeA/user/delete-default-image Delete default image
+ * @apiName DeleteDefaultImage
+ * @apiGroup User
+ *
+ * @apiParam {String} name Id of a User
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200
+ *      {
+ *          success: true
+ *      }
+ *
+ * @apiSuccess {Boolean} success If true, user was un-banned successfully
+ *
+ * @apiDescription
+ * Deletes default image from defaults.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeA/user/delete-default-image?id=auth0|ej21oje10e212oe12
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiErrorExample Fail:
+ *      HTTP/1.1 500
+ *      {
+ *          error:"Image deletion failed"
+ *      }
+ * @apiErrorExample Missing name:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Missing name"
+ *      }
+ *
+ * @apiUse roleAdmin
+ * @apiUse roleSuper
+ */
+router.get("/delete-default-image",jwtCheck,authConverter,requiresOneOfRoles(["admin","superadmin"]),function(req,res){
+    var image_url = req.query.image_url;
+    if(image_url!=null) {
+        if (Utility.deleteImage(image_url) != null) {
+            res.status(200).json({success: true});
+        } else {
+            res.status(500).json({error: "Image deletion failed"});
+        }
+    }else{
+        res.status(422).json({error:"Missing name"});
+    }
+});
+/**
+ * @api {get} /images/lukeA/user/default
+ * @apiName GetImages
+ * @apiGroup User
+ *
+ * @apiDescription
+ * Location of default user images. Access unique image by name.
+ *
+ * @apiExample Example image_url:
+ * http://balticapp.fi/images/lukeA/user/default/redTomato.jpg
+ */
 module.exports = router;
