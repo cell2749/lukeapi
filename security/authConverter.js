@@ -2,33 +2,35 @@
  * Created by Cell on 13-Nov-16.
  */
 var https = require('https');
-module.exports = function(req,res,next){
-    var returnData;
-    returnData=null;
-    var options = {
+var UserModel = require('../models/lukeA/UserModel');
+var mongoose = require('mongoose');
+module.exports = function(req,res,next) {
+    var id_token = {
+        id_token: req.headers.authorization.split(" ")[1]
+    };
+    
+    var post_data = JSON.stringify(id_token);
+    var post_options = {
         host: 'nikitak.eu.auth0.com',
         path: '/tokeninfo',
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'id_token': req.headers.authorization.split(" ")[1]
+            'Content-Type': 'application/json'
         }
     };
-
-    var request = https.request(options, function (result) {
-        //console.log('STATUS: ' + result.statusCode);
-        //console.log('HEADERS: ' + JSON.stringify(result.headers));
-        result.setEncoding('utf8');
-
-        result.on('data', function (chunk) {
+    var post_req = https.request(post_options, function (res) {
+        console.log('STATUS: ' + res.statusCode);
+        console.log('HEADERS: ' + JSON.stringify(res.headers));
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
             req.user["profile"] = chunk;
         });
     });
-
-    request.on('error', function (e) {
+    post_req.on('error', function (e) {
         console.log("HTTP CONVERTER REQUEST ERROR: " + e);
     });
 
-    request.end();
+    post_req.write(post_data);
+    post_req.end();
     next();
 };
