@@ -11,21 +11,26 @@ module.exports = function(req,res,next) {
 
     //var post_data = JSON.stringify(id_token);
     var post_options = {
-        host: 'nikitak.eu.auth0.com',
+        host: process.env.AUTH0_DOMAIN,
         path: '/userinfo',
         method: 'GET',
         headers: {
             Authorization: 'Bearer ' + req.headers.access_token
         }
     };
+    console.log("Access Token / ");
+    console.log(req.headers.access_token);
     var post_req = https.request(post_options, function (res) {
         console.log('STATUS: ' + res.statusCode);
         console.log('HEADERS: ' + JSON.stringify(res.headers));
         res.setEncoding('utf8');
         res.on('data', function (chunk) {
+            console.log("Chunk / ")
             console.log(chunk);
-            req.user["profile"] = chunk;
-            req.user.profile["id"] = req.user.profile.user_id;
+            chunk.id = chunk.user_id;
+            req.user.profile = chunk;
+            console.log("Profile / ");
+            console.log(req.user.profile);
         });
     });
     post_req.on('error', function (e) {
