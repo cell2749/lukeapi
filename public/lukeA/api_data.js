@@ -1,49 +1,6 @@
 define({ "api": [
   {
     "type": "get",
-    "url": "/lukeA/callback",
-    "title": "Callback",
-    "name": "Callback",
-    "group": "Auth0",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "route",
-            "description": "<p>Redirect route after successful authentication</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "examples": [
-        {
-          "title": "Success-Response-Single:",
-          "content": "HTTP/1.1 200 OK",
-          "type": "json"
-        }
-      ],
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "optional": false,
-            "field": "Default",
-            "description": "<p>Responds with HTTP/1.1 200 OK if route is not provided.</p>"
-          }
-        ]
-      }
-    },
-    "description": "<p>Callback url for the auth0 setup. Can be used with parameters - route. After registering/checking the user in local database redirects to specified route or responds with OK 200.</p>",
-    "version": "0.0.0",
-    "filename": "routes/lukeA/lukeApp.js",
-    "groupTitle": "Auth0"
-  },
-  {
-    "type": "get",
     "url": "/lukeA/authzero",
     "title": "Get setup",
     "name": "GetSetup",
@@ -100,11 +57,29 @@ define({ "api": [
     "title": "Login",
     "name": "Login",
     "group": "Auth0",
+    "parameter": {
+      "fields": {
+        "Headers": [
+          {
+            "group": "Headers",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Bearer idToken</p>"
+          },
+          {
+            "group": "Headers",
+            "optional": false,
+            "field": "acstoken",
+            "description": "<p>acessToken</p>"
+          }
+        ]
+      }
+    },
     "success": {
       "examples": [
         {
           "title": "Success-Response-Single:",
-          "content": "HTTP/1.1 200 OK",
+          "content": "HTTP/1.1 200",
           "type": "json"
         }
       ],
@@ -119,38 +94,7 @@ define({ "api": [
         ]
       }
     },
-    "description": "<p>Meant to be used instead of callback in case redirection is not needed. Note that this route is not specified as a callback, therefore it has to be called manually. (!Note: token is either manipulated automatically or you will have to send it manually)</p>",
-    "version": "0.0.0",
-    "filename": "routes/lukeA/lukeApp.js",
-    "groupTitle": "Auth0"
-  },
-  {
-    "type": "get",
-    "url": "/lukeA/logout",
-    "title": "Logout",
-    "name": "Logout",
-    "group": "Auth0",
-    "success": {
-      "examples": [
-        {
-          "title": "Success-Response-Single:",
-          "content": "HTTP/1.1 200\n{\n    success:true\n}",
-          "type": "json"
-        }
-      ],
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "Boolean",
-            "optional": false,
-            "field": "success",
-            "description": "<p>True if logout is successful</p>"
-          }
-        ]
-      }
-    },
-    "description": "<p>Logout function. Call this if user wants to logout from application. (!Note: token is either manipulated automatically or you will have to send it manually)</p>",
+    "description": "<p>Registers user in local database. Requires headers.</p>",
     "version": "0.0.0",
     "filename": "routes/lukeA/lukeApp.js",
     "groupTitle": "Auth0"
@@ -187,10 +131,10 @@ define({ "api": [
           },
           {
             "group": "Parameter",
-            "type": "String",
+            "type": "File",
             "optional": true,
-            "field": "image_url",
-            "description": "<p>Url of image/icon used by category</p>"
+            "field": "image",
+            "description": "<p>Image file that is to be used by category</p>"
           },
           {
             "group": "Parameter",
@@ -540,10 +484,10 @@ define({ "api": [
           },
           {
             "group": "Parameter",
-            "type": "String",
+            "type": "File",
             "optional": true,
-            "field": "image_url",
-            "description": "<p>Url of image/icon used by category</p>"
+            "field": "image",
+            "description": "<p>Image file used by category</p>"
           },
           {
             "group": "Parameter",
@@ -1537,7 +1481,7 @@ define({ "api": [
             "group": "Parameter",
             "type": "File",
             "optional": true,
-            "field": "img",
+            "field": "image",
             "description": "<p>Image file that is to be used as Rank icon</p>"
           },
           {
@@ -1895,7 +1839,7 @@ define({ "api": [
             "group": "Parameter",
             "type": "File",
             "optional": true,
-            "field": "img",
+            "field": "image",
             "description": "<p>Image file that is to be used as rank icon/image</p>"
           },
           {
@@ -2122,28 +2066,28 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "String",
-            "optional": false,
+            "optional": true,
             "field": "title",
             "description": "<p>Title of the report</p>"
           },
           {
             "group": "Parameter",
             "type": "String",
-            "optional": true,
+            "optional": false,
             "field": "longitude",
             "description": "<p>Longitude of a point where report was made.</p>"
           },
           {
             "group": "Parameter",
             "type": "String",
-            "optional": true,
+            "optional": false,
             "field": "latitude",
             "description": "<p>Latitude of a point where report was made.</p>"
           },
           {
             "group": "Parameter",
             "type": "String",
-            "optional": true,
+            "optional": false,
             "field": "altitude",
             "description": "<p>Altitude of a point where report was made</p>"
           },
@@ -2151,27 +2095,20 @@ define({ "api": [
             "group": "Parameter",
             "type": "File",
             "optional": true,
-            "field": "img",
+            "field": "image",
             "description": "<p>Image file that is bound to a report.*Not yet implemented.</p>"
           },
           {
             "group": "Parameter",
             "type": "String",
-            "optional": true,
+            "optional": false,
             "field": "description",
             "description": "<p>Description of a report.</p>"
           },
           {
             "group": "Parameter",
-            "type": "String",
-            "optional": true,
-            "field": "date",
-            "description": "<p>Date when report was made.*Maybe should be restricted.</p>"
-          },
-          {
-            "group": "Parameter",
             "type": "Array",
-            "optional": true,
+            "optional": false,
             "field": "categoryId",
             "description": "<p>Array containing category ids of a report.</p>"
           }
@@ -2321,8 +2258,28 @@ define({ "api": [
     "error": {
       "examples": [
         {
-          "title": "Missing Title:",
-          "content": "HTTP/1.1 422\n{\n    error:\"Missing Title\"\n}",
+          "title": "Missing longitude:",
+          "content": "HTTP/1.1 422\n{\n    error:\"Missing longitude\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing latitude:",
+          "content": "HTTP/1.1 422\n{\n    error:\"Missing latitude\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing altitude:",
+          "content": "HTTP/1.1 422\n{\n    error:\"Missing altitude\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing description:",
+          "content": "HTTP/1.1 422\n{\n    error:\"Missing description\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing categoryId:",
+          "content": "HTTP/1.1 422\n{\n    error:\"Missing categoryId\"\n}",
           "type": "json"
         },
         {
@@ -3867,6 +3824,129 @@ define({ "api": [
   },
   {
     "type": "get",
+    "url": "/lukeA/user/delete-default-image",
+    "title": "Delete default image",
+    "name": "DeleteDefaultImage",
+    "group": "User",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "name",
+            "description": "<p>Id of a User</p>"
+          }
+        ],
+        "Required Role": [
+          {
+            "group": "Required Role",
+            "optional": false,
+            "field": "admin",
+            "description": ""
+          },
+          {
+            "group": "Required Role",
+            "optional": false,
+            "field": "superadmin",
+            "description": ""
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success: true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>If true, user was un-banned successfully</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Deletes default image from defaults.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeA/user/delete-default-image?id=auth0|ej21oje10e212oe12",
+        "type": "json"
+      }
+    ],
+    "error": {
+      "examples": [
+        {
+          "title": "Fail:",
+          "content": "HTTP/1.1 500\n{\n    error:\"Image deletion failed\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing name:",
+          "content": "HTTP/1.1 422\n{\n    error:\"Missing name\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Authorization Error:",
+          "content": "HTTP/1.1 401\n{\n    error:'Proper authorization required',\n    auth:true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/lukeA/routes/user.js",
+    "groupTitle": "User"
+  },
+  {
+    "type": "get",
+    "url": "/images/lukeA/user/default",
+    "title": "",
+    "name": "GetImages",
+    "group": "User",
+    "description": "<p>Location of default user images. Access unique image by name.</p>",
+    "examples": [
+      {
+        "title": "Example image_url:",
+        "content": "http://balticapp.fi/images/lukeA/user/default/redTomato.jpg",
+        "type": "json"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "routes/lukeA/routes/user.js",
+    "groupTitle": "User"
+  },
+  {
+    "type": "get",
     "url": "/lukeA/user/roles",
     "title": "Get roles",
     "name": "GetRoles",
@@ -3973,7 +4053,6 @@ define({ "api": [
             "type": "String",
             "optional": true,
             "field": "id",
-            "defaultValue": "Users own id",
             "description": "<p>Users unique ID.</p>"
           }
         ]
@@ -3983,7 +4062,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n    id:String,\n    username:String,\n    image_url:String,\n    score: Number,\n    rankingId: String\n}",
+          "content": "HTTP/1.1\n{\n    id:String,\n    username:String,\n    image_url:String,\n    score: Number,\n    rankingId: String\n}",
           "type": "json"
         }
       ],
@@ -4035,10 +4114,24 @@ define({ "api": [
         "type": "json"
       }
     ],
-    "version": "0.0.0",
-    "filename": "routes/lukeA/routes/user.js",
-    "groupTitle": "User",
     "error": {
+      "examples": [
+        {
+          "title": "Wrong id:",
+          "content": "HTTP/1.1 404\n{\n    error:\"No user with such id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Invalid id:",
+          "content": "HTTP/1.1 404\n{\n    error: 'No user with such id'\n}",
+          "type": "json"
+        }
+      ],
       "fields": {
         "Error": [
           {
@@ -4054,25 +4147,11 @@ define({ "api": [
             "description": "<p>Error message</p>"
           }
         ]
-      },
-      "examples": [
-        {
-          "title": "Login Error:",
-          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
-          "type": "json"
-        },
-        {
-          "title": "Authorization Error:",
-          "content": "HTTP/1.1 401\n{\n    error:'Proper authorization required',\n    auth:true\n}",
-          "type": "json"
-        },
-        {
-          "title": "Invalid id:",
-          "content": "HTTP/1.1 404\n{\n    error: 'No user with such id'\n}",
-          "type": "json"
-        }
-      ]
-    }
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/lukeA/routes/user.js",
+    "groupTitle": "User"
   },
   {
     "type": "get",
@@ -4123,7 +4202,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n[{\n    id:String,\n    username:String,\n    image_url:String,\n    score: Number,\n    rankingId: String\n}]",
+          "content": "HTTP/1.1 200\n[{\n    id:String,\n    username:String,\n    image_url:String,\n    score: Number,\n    rankingId: String\n}]",
           "type": "json"
         }
       ]
@@ -4154,25 +4233,8 @@ define({ "api": [
           "title": "Login Error:",
           "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
           "type": "json"
-        },
-        {
-          "title": "Authorization Error:",
-          "content": "HTTP/1.1 401\n{\n    error:'Proper authorization required',\n    auth:true\n}",
-          "type": "json"
         }
       ]
-    },
-    "parameter": {
-      "fields": {
-        "Required Role": [
-          {
-            "group": "Required Role",
-            "optional": false,
-            "field": "admin",
-            "description": ""
-          }
-        ]
-      }
     }
   },
   {
@@ -4653,13 +4715,22 @@ define({ "api": [
     "groupTitle": "User"
   },
   {
-    "type": "get",
+    "type": "post",
     "url": "/lukeA/user/update",
     "title": "Update user",
     "name": "UpdateUser",
     "group": "User",
     "parameter": {
       "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "File",
+            "optional": true,
+            "field": "image",
+            "description": "<p>Image file that needs to be updated/uploaded</p>"
+          }
+        ],
         "Parameters Forbidden for Update": [
           {
             "group": "Parameters Forbidden for Update",
@@ -4680,7 +4751,7 @@ define({ "api": [
             "type": "String",
             "optional": true,
             "field": "image_url",
-            "description": "<p>Url of the image that User uses.</p>"
+            "description": "<p>URL to the image that the user is using</p>"
           },
           {
             "group": "Parameters Forbidden for Update",
@@ -4703,7 +4774,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n    success:Boolean\n}",
+          "content": "HTTP/1.1 200\n{\n    success:Boolean\n}",
           "type": "json"
         }
       ],
@@ -4765,5 +4836,110 @@ define({ "api": [
         }
       ]
     }
+  },
+  {
+    "type": "post",
+    "url": "/lukeA/user/upload-default-image",
+    "title": "Upload default image",
+    "name": "UploadDefaultImage",
+    "group": "User",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "name",
+            "description": "<p>Id of a User</p>"
+          }
+        ],
+        "Required Role": [
+          {
+            "group": "Required Role",
+            "optional": false,
+            "field": "admin",
+            "description": ""
+          },
+          {
+            "group": "Required Role",
+            "optional": false,
+            "field": "superadmin",
+            "description": ""
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success: true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>If true, user was un-banned successfully</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Uploads default image for the user to view.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeA/user/upload-default-image?id=auth0|ej21oje10e212oe12",
+        "type": "json"
+      }
+    ],
+    "error": {
+      "examples": [
+        {
+          "title": "Fail:",
+          "content": "HTTP/1.1 500\n{\n    error:\"Image upload failed\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing name:",
+          "content": "HTTP/1.1 422\n{\n    error:\"Missing name\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Authorization Error:",
+          "content": "HTTP/1.1 401\n{\n    error:'Proper authorization required',\n    auth:true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/lukeA/routes/user.js",
+    "groupTitle": "User"
   }
 ] });

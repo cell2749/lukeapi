@@ -69,67 +69,20 @@ router.get("/authzero",function(req,res,next){
   res.status(200).json(lockSetup);
 });
 /**
- * @api {get} /lukeA/callback Callback
- * @apiName Callback
- * @apiGroup Auth0
- *
- * @apiParam {String} route Redirect route after successful authentication
- *
- * @apiSuccessExample Success-Response-Single:
- *      HTTP/1.1 200 OK
- *
- * @apiSuccess Default Responds with HTTP/1.1 200 OK if route is not provided.
- *
- * @apiDescription
- * Callback url for the auth0 setup. Can be used with parameters - route.
- * After registering/checking the user in local database redirects to specified route or responds with OK 200.
- *
- * */
-/*router.get('/callback',passport.authenticate('auth0', { failureRedirect: '/url-if-something-fails' }), function(req, res) {
-    var route = req.query.route;
-
-    if (!req.user) {
-        throw new Error('user null');
-    } else {
-        var userData = req.user.profile;
-
-        UserModel.findOne({id: userData.id}, MONGO_PROJECTION, function (err, result) {
-            if (err) throw err;
-
-            if (result == null) {
-                var user = new UserModel({
-                    id: userData.id,
-                    score: 0,
-                    rankingId: "0"
-                });
-
-                user.save(function (err, result) {
-                    if (err) throw err;
-
-                    if (route == null) {
-                        res.status(200).send("OK");
-                    } else {
-                        res.redirect(route);
-                    }
-                });
-            }
-        });
-    }
-});*/
-/**
  * @api {get} /lukeA/login Login
  * @apiName Login
  * @apiGroup Auth0
  *
+ * @apiParam (Headers) Authorization Bearer idToken
+ * @apiParam (Headers) acstoken acessToken
+ *
  * @apiSuccessExample Success-Response-Single:
- *      HTTP/1.1 200 OK
+ *      HTTP/1.1 200
  *
  * @apiSuccess Default Responds with HTTP/1.1 200 OK on successful authentication
  *
  * @apiDescription
- * Meant to be used instead of callback in case redirection is not needed.
- * Note that this route is not specified as a callback, therefore it has to be called manually.
- * (!Note: token is either manipulated automatically or you will have to send it manually)
+ * Registers user in local database. Requires headers.
  * */
 router.get("/login",jwtCheck,authConverter, function(req,res){
     if (!req.user) {
@@ -153,28 +106,7 @@ router.get("/login",jwtCheck,authConverter, function(req,res){
     }
     res.status(200).send("OK");
 });
-/**
- * @api {get} /lukeA/logout Logout
- * @apiName Logout
- * @apiGroup Auth0
- *
- * @apiSuccessExample Success-Response-Single:
- *      HTTP/1.1 200
- *      {
- *          success:true
- *      }
- *
- * @apiSuccess {Boolean} success True if logout is successful
- *
- * @apiDescription
- * Logout function. Call this if user wants to logout from application.
- * (!Note: token is either manipulated automatically or you will have to send it manually)
- *
- * */
-/*router.get('/logout',jwtCheck,authConverter,function(req,res){
-    req.logout();
-    res.status(200).json({success:true});
-});*/
+
 
 /* SECURITY TESTS */
 router.get('/test/public',function(req,res,next){
