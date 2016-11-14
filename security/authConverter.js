@@ -8,7 +8,7 @@ module.exports = function(req,res,next) {
     var id_token = {
         id_token: req.headers.authorization.split(" ")[1]
     };
-    
+
     var post_data = JSON.stringify(id_token);
     var post_options = {
         host: 'nikitak.eu.auth0.com',
@@ -24,6 +24,7 @@ module.exports = function(req,res,next) {
         res.setEncoding('utf8');
         res.on('data', function (chunk) {
             req.user["profile"] = chunk;
+            req.user.profile["id"] = req.user.profile.user_id;
         });
     });
     post_req.on('error', function (e) {
