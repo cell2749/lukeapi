@@ -136,18 +136,14 @@ router.get("/login",jwtCheck,authConverter, function(req,res){
         throw new Error('user null');
     }else{
         var userData = req.user.profile;
-        console.log("userData Profile/ ");
-        console.log(userData);
 
         UserModel.findOne({id:userData.id},MONGO_PROJECTION, function (err, result) {
             if(err) throw err;
 
             if(result==null){
-                var user = new UserModel({
-                    id: userData.id,
-                    score: 0,
-                    rankingId: "0"
-                });
+                var user = new UserModel();
+                user.id=userData.id;
+                user.score = 0;
                 user.save(function(err,result){
                     if(err) throw err;
                     console.log(result);

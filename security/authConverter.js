@@ -17,8 +17,9 @@ module.exports = function(req,res,next) {
     var post_req = https.request(post_options, function (res) {
         res.setEncoding('utf8');
         res.on('data', function (chunk) {
-            chunk.id = chunk.user_id;
-            req.user.profile = chunk;
+            var userData = JSON.parse(chunk);
+            userData.id = userData.user_id;
+            req.user.profile = userData;
             next();
         });
     });
