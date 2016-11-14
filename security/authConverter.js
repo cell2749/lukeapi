@@ -8,14 +8,15 @@ module.exports = function(req,res,next) {
     /*var id_token = {
         id_token: req.headers.authorization.split(" ")[1]
     };*/
-
+    console.log("id token /");
+    console.log(req.headers.authorization);
     //var post_data = JSON.stringify(id_token);
     var post_options = {
         host: process.env.AUTH0_DOMAIN,
         path: '/userinfo',
         method: 'GET',
         headers: {
-            Authorization: 'Bearer ' + req.headers.access_token
+            Authorization: 'Bearer ' + req.headers.acstoken
         }
     };
     console.log("Access Token / ");
