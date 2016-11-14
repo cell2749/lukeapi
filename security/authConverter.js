@@ -19,6 +19,7 @@ module.exports = function(req,res,next) {
         res.on('data', function (chunk) {
             var userData = JSON.parse(chunk);
             userData.id = userData.user_id;
+            userData._json = {app_metadata:userData.app_metadata};
             req.user.profile = userData;
             next();
         });
