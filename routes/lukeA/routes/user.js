@@ -693,20 +693,18 @@ router.get("/unban",jwtCheck,authConverter,requiresRole("admin"),function(req,re
  * @apiName UploadDefaultImage
  * @apiGroup User
  *
- * @apiParam {String} name Id of a User
+ * @apiParam {File} image Image file to be used as default image
  * @apiSuccessExample Success-Response:
  *      HTTP/1.1 200
  *      {
  *          success: true
  *      }
  *
- * @apiSuccess {Boolean} success If true, user was un-banned successfully
+ * @apiSuccess {Boolean} success If true, upload was successful
  *
  * @apiDescription
  * Uploads default image for the user to view.
  *
- * @apiExample Example URL:
- * http://balticapp.fi/lukeA/user/upload-default-image?id=auth0|ej21oje10e212oe12
  *
  * @apiUse error
  * @apiUse loginError
@@ -742,20 +740,20 @@ router.post("/upload-default-image",jwtCheck,authConverter,requiresOneOfRoles(["
  * @apiName DeleteDefaultImage
  * @apiGroup User
  *
- * @apiParam {String} name Id of a User
+ * @apiParam {String} image_url Image url to be deleted
  * @apiSuccessExample Success-Response:
  *      HTTP/1.1 200
  *      {
  *          success: true
  *      }
  *
- * @apiSuccess {Boolean} success If true, user was un-banned successfully
+ * @apiSuccess {Boolean} success If true, deletion was successful
  *
  * @apiDescription
  * Deletes default image from defaults.
  *
  * @apiExample Example URL:
- * http://balticapp.fi/lukeA/user/delete-default-image?id=auth0|ej21oje10e212oe12
+ * http://balticapp.fi/lukeA/user/delete-default-image?image_url='http://www.balticapp.fi/images/lukeA/user/default/doggy.jpg'
  *
  * @apiUse error
  * @apiUse loginError
@@ -765,10 +763,10 @@ router.post("/upload-default-image",jwtCheck,authConverter,requiresOneOfRoles(["
  *      {
  *          error:"Image deletion failed"
  *      }
- * @apiErrorExample Missing name:
+ * @apiErrorExample Missing/Incorrect url:
  *      HTTP/1.1 422
  *      {
- *          error:"Missing name"
+ *          error:"Missing/Incorrect url"
  *      }
  *
  * @apiUse roleAdmin
@@ -776,14 +774,14 @@ router.post("/upload-default-image",jwtCheck,authConverter,requiresOneOfRoles(["
  */
 router.get("/delete-default-image",jwtCheck,authConverter,requiresOneOfRoles(["admin","superadmin"]),function(req,res){
     var image_url = req.query.image_url;
-    if(image_url!=null) {
+    if(image_url!=null&&image_url.indexOf("user/default")!=-1) {
         if (Utility.deleteImage(image_url) != null) {
             res.status(200).json({success: true});
         } else {
             res.status(500).json({error: "Image deletion failed"});
         }
     }else{
-        res.status(422).json({error:"Missing name"});
+        res.status(422).json({error:"Missing/Incorrect url"});
     }
 });
 /**

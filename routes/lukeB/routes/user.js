@@ -324,6 +324,7 @@ router.post('/update',requiresLogin,function(req,res) {
                         doc[key] = data[key] || doc[key];
                     }
                 }
+                doc.image_url = Utility.saveImage(req,"lukeB/user/",doc.id)||doc.image_url;
                 doc.save(function(err,result) {
                     if (err)throw err;
                     var resultV = new UserModel();
@@ -994,5 +995,110 @@ router.get("/unban",requiresLogin,requiresRole("admin"),function(req,res) {
         }
     });
 });
-
+/**
+ * @api {post} /lukeB/user/upload-default-image Upload default image
+ * @apiName UploadDefaultImage
+ * @apiGroup User
+ *
+ * @apiParam {File} image Image file to be used as default image
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200
+ *      {
+ *          success: true
+ *      }
+ *
+ * @apiSuccess {Boolean} success If true, upload was successful
+ *
+ * @apiDescription
+ * Uploads default image for the user to view.
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiErrorExample Fail:
+ *      HTTP/1.1 500
+ *      {
+ *          error:"Image upload failed"
+ *      }
+ * @apiErrorExample Missing name:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Missing image_name"
+ *      }
+ *
+ * @apiUse roleAdmin
+ * @apiUse roleSuper
+ */
+router.post("/upload-default-image",requiresLogin,requiresOneOfRoles(["admin","superadmin"]),function(req,res){
+    var name = req.body.image_name;
+    if(name!=null) {
+        if (Utility.saveImage(req, "lukeB/user/default/", name) != null) {
+            res.status(200).json({success: true});
+        } else {
+            res.status(500).json({error: "Image upload failed"});
+        }
+    }else{
+        res.status(422).json({error:"Missing image_name"});
+    }
+});
+/**
+ * @api {get} /lukeB/user/delete-default-image Delete default image
+ * @apiName DeleteDefaultImage
+ * @apiGroup User
+ *
+ * @apiParam {String} image_url Image url to be deleted
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200
+ *      {
+ *          success: true
+ *      }
+ *
+ * @apiSuccess {Boolean} success If true, deletion was successful
+ *
+ * @apiDescription
+ * Deletes default image from defaults.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/user/delete-default-image?image_url='http://www.balticapp.fi/images/lukeB/user/default/doggy.jpg'
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ * @apiErrorExample Fail:
+ *      HTTP/1.1 500
+ *      {
+ *          error:"Image deletion failed"
+ *      }
+ * @apiErrorExample Missing/Incorrect url:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Missing/Incorrect url"
+ *      }
+ *
+ * @apiUse roleAdmin
+ * @apiUse roleSuper
+ */
+router.get("/delete-default-image",requiresLogin,requiresOneOfRoles(["admin","superadmin"]),function(req,res){
+    var image_url = req.query.image_url;
+    if(image_url!=null&&image_url.indexOf("user/default")!=-1) {
+        if (Utility.deleteImage(image_url) != null) {
+            res.status(200).json({success: true});
+        } else {
+            res.status(500).json({error: "Image deletion failed"});
+        }
+    }else{
+        res.status(422).json({error:"Missing/incorrect url"});
+    }
+});
+/**
+ * @api {get} /images/lukeB/user/default Get Default Image(s)
+ * @apiName GetImages
+ * @apiGroup User
+ *
+ * @apiDescription
+ * Location of default user images. Access unique image by name. *Requires improvement.
+ *
+ * @apiExample Example image_url:
+ * http://balticapp.fi/images/lukeB/user/default/redTomato.jpg
+ */
 module.exports = router;

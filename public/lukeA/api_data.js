@@ -3835,8 +3835,8 @@ define({ "api": [
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "name",
-            "description": "<p>Id of a User</p>"
+            "field": "image_url",
+            "description": "<p>Image url to be deleted</p>"
           }
         ],
         "Required Role": [
@@ -3870,7 +3870,7 @@ define({ "api": [
             "type": "Boolean",
             "optional": false,
             "field": "success",
-            "description": "<p>If true, user was un-banned successfully</p>"
+            "description": "<p>If true, deletion was successful</p>"
           }
         ]
       }
@@ -3879,7 +3879,7 @@ define({ "api": [
     "examples": [
       {
         "title": "Example URL:",
-        "content": "http://balticapp.fi/lukeA/user/delete-default-image?id=auth0|ej21oje10e212oe12",
+        "content": "http://balticapp.fi/lukeA/user/delete-default-image?image_url='http://www.balticapp.fi/images/lukeA/user/default/doggy.jpg'",
         "type": "json"
       }
     ],
@@ -3891,8 +3891,8 @@ define({ "api": [
           "type": "json"
         },
         {
-          "title": "Missing name:",
-          "content": "HTTP/1.1 422\n{\n    error:\"Missing name\"\n}",
+          "title": "Missing/Incorrect url:",
+          "content": "HTTP/1.1 422\n{\n    error:\"Missing/Incorrect url\"\n}",
           "type": "json"
         },
         {
@@ -4848,10 +4848,10 @@ define({ "api": [
         "Parameter": [
           {
             "group": "Parameter",
-            "type": "String",
+            "type": "File",
             "optional": false,
-            "field": "name",
-            "description": "<p>Id of a User</p>"
+            "field": "image",
+            "description": "<p>Image file to be used as default image</p>"
           }
         ],
         "Required Role": [
@@ -4885,19 +4885,12 @@ define({ "api": [
             "type": "Boolean",
             "optional": false,
             "field": "success",
-            "description": "<p>If true, user was un-banned successfully</p>"
+            "description": "<p>If true, upload was successful</p>"
           }
         ]
       }
     },
     "description": "<p>Uploads default image for the user to view.</p>",
-    "examples": [
-      {
-        "title": "Example URL:",
-        "content": "http://balticapp.fi/lukeA/user/upload-default-image?id=auth0|ej21oje10e212oe12",
-        "type": "json"
-      }
-    ],
     "error": {
       "examples": [
         {

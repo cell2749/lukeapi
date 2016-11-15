@@ -554,7 +554,7 @@ define({ "api": [
         ]
       }
     },
-    "description": "<p>Updates category by id, using parameters provided. Returns updated category.</p>",
+    "description": "<p>Updates category by id, using parameters provided. Returns updated category. *Image update requires testing.</p>",
     "examples": [
       {
         "title": "Example URL:",
@@ -4814,6 +4814,111 @@ define({ "api": [
   },
   {
     "type": "get",
+    "url": "/lukeB/user/delete-default-image",
+    "title": "Delete default image",
+    "name": "DeleteDefaultImage",
+    "group": "User",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "image_url",
+            "description": "<p>Image url to be deleted</p>"
+          }
+        ],
+        "Required Role": [
+          {
+            "group": "Required Role",
+            "optional": false,
+            "field": "admin",
+            "description": ""
+          },
+          {
+            "group": "Required Role",
+            "optional": false,
+            "field": "superadmin",
+            "description": ""
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success: true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>If true, deletion was successful</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Deletes default image from defaults.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeB/user/delete-default-image?image_url='http://www.balticapp.fi/images/lukeB/user/default/doggy.jpg'",
+        "type": "json"
+      }
+    ],
+    "error": {
+      "examples": [
+        {
+          "title": "Fail:",
+          "content": "HTTP/1.1 500\n{\n    error:\"Image deletion failed\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing/Incorrect url:",
+          "content": "HTTP/1.1 422\n{\n    error:\"Missing/Incorrect url\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Authorization Error:",
+          "content": "HTTP/1.1 401\n{\n    error:'Proper authorization required',\n    auth:true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/user.js",
+    "groupTitle": "User"
+  },
+  {
+    "type": "get",
     "url": "/lukeB/user/get-all",
     "title": "Get All",
     "name": "GetAll",
@@ -5007,6 +5112,24 @@ define({ "api": [
         }
       ]
     }
+  },
+  {
+    "type": "get",
+    "url": "/images/lukeB/user/default",
+    "title": "Get Default Image(s)",
+    "name": "GetImages",
+    "group": "User",
+    "description": "<p>Location of default user images. Access unique image by name. *Requires improvement.</p>",
+    "examples": [
+      {
+        "title": "Example image_url:",
+        "content": "http://balticapp.fi/images/lukeB/user/default/redTomato.jpg",
+        "type": "json"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/user.js",
+    "groupTitle": "User"
   },
   {
     "type": "get",
@@ -6126,6 +6249,104 @@ define({ "api": [
         {
           "title": "Wrong id:",
           "content": "HTTP/1.1 404\n{\n    error: 'No user with such id'\n}",
+          "type": "json"
+        },
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Authorization Error:",
+          "content": "HTTP/1.1 401\n{\n    error:'Proper authorization required',\n    auth:true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/user.js",
+    "groupTitle": "User"
+  },
+  {
+    "type": "post",
+    "url": "/lukeB/user/upload-default-image",
+    "title": "Upload default image",
+    "name": "UploadDefaultImage",
+    "group": "User",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "File",
+            "optional": false,
+            "field": "image",
+            "description": "<p>Image file to be used as default image</p>"
+          }
+        ],
+        "Required Role": [
+          {
+            "group": "Required Role",
+            "optional": false,
+            "field": "admin",
+            "description": ""
+          },
+          {
+            "group": "Required Role",
+            "optional": false,
+            "field": "superadmin",
+            "description": ""
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success: true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>If true, upload was successful</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Uploads default image for the user to view.</p>",
+    "error": {
+      "examples": [
+        {
+          "title": "Fail:",
+          "content": "HTTP/1.1 500\n{\n    error:\"Image upload failed\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing name:",
+          "content": "HTTP/1.1 422\n{\n    error:\"Missing image_name\"\n}",
           "type": "json"
         },
         {

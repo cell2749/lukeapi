@@ -289,6 +289,7 @@ router.post('/create',requiresLogin,function(req,res,next) {
         report.approved = false;
         report.rating = 0;
         report.rating2 = 0;
+        report.image_url = Utility.saveImage(req,"lukeB/report/",id);
         report.save(function (err, report) {
             if (err)throw err;
             var returnV = {};
@@ -392,6 +393,7 @@ router.post('/update',requiresLogin,function(req,res) {
                         doc[key] = data[key] || doc[key];
                     }
                 }
+                doc.image_url = Utility.saveImage(req,"lukeB/report/",doc.id)||doc.image_url;
                 doc.save(function (err, result) {
                     var returnV = {}, reportPattern = new ReportModel();
                     for (var key in reportPattern.schema.paths) {
@@ -441,7 +443,8 @@ router.get("/remove",requiresLogin,function(req,res) {
         if (err) throw err;
 
         if (doc.profileId == req.user.profileId || Utility.hasRole(req, "admin")) {
-            Utility.remove(ReportModel, req.query.id, res);
+            Utility.deleteImage(doc.image_url);
+            Utility.remove(ReportModel, id, res);
         } else {
             res.status(401).json({error: "Restricted access"});
         }

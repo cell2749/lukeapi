@@ -119,6 +119,7 @@ router.post("/create",requiresLogin,requiresRole("admin"),function(req,res){
         var id = mongoose.Types.ObjectId();
         category.id = id;
         category._id = id;
+        category.image_url = Utility.saveImage(req,"lukeB/category/",id);
         category.save(function (err, result) {
             if (err)throw err;
             res.status(200).json({success: true});
@@ -153,7 +154,7 @@ router.post("/create",requiresLogin,requiresRole("admin"),function(req,res){
  * @apiSuccess {String} image_url Link to image/icon that category uses
  *
  * @apiDescription
- * Updates category by id, using parameters provided. Returns updated category.
+ * Updates category by id, using parameters provided. Returns updated category. *Image update requires testing.
  *
  * @apiExample Example URL:
  * //POST REQUEST EXAMPLE
@@ -161,8 +162,16 @@ router.post("/create",requiresLogin,requiresRole("admin"),function(req,res){
  * @apiUse error
  * @apiUse updateStatus
  */
-router.post("/update",requiresLogin,requiresRole("admin"),function(req,res){
-    Utility.update(CategoryModel,req.body,res);
+router.post("/update",requiresLogin,requiresRole("admin"),function(req,res) {
+    Utility.update(CategoryModel, req.body, res);
+    if (req.body.id) {
+        CategoryModel.findOne({id: req.body.id}, function (err, doc) {
+            if (err)throw err;
+            if (doc) {
+                doc.image_url = Utility.saveImage(req,"lukeB/category/",doc.id)||doc.image_url;
+            }
+        });
+    }
 });
 /**
  * @api {get} /lukeB/category/remove Remove
@@ -184,7 +193,16 @@ router.post("/update",requiresLogin,requiresRole("admin"),function(req,res){
  * @apiUse removeStatus
  */
 router.get("/remove",requiresLogin,requiresRole("admin"),function(req,res){
-    Utility.remove(CategoryModel,req.query.id,res);
+    var id = req.query.id;
+    CategoryModel.findOne({id: id}, function (err, doc) {
+        if (err) throw err;
+
+        if (doc) {
+            Utility.deleteImage(doc.image_url);
+            Utility.remove(CategoryModel,id,res);
+        }
+    });
+
 });
 
 module.exports = router;
