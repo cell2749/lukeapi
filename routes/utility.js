@@ -1,4 +1,8 @@
 var fs = require('fs');
+const MONGO_PROJECTION = {
+    __v:0,
+    _id:0
+}
 var Utility = function(keyes,maxFlags){
     this.omitKeyes = keyes;
     this.maxFlags = maxFlags;
@@ -208,7 +212,7 @@ Utility.prototype.get = function(Model,id,res) {
     var returnV = new Model();
     var returnArray = [];
     if (id == null) {
-        Model.find({}, function (err, doc) {
+        Model.find({},MONGO_PROJECTION, function (err, doc) {
             if (err)throw err;
             for(var i=0 ;i<doc.length;i++) {
                 for (var key in Model.schema.paths) {

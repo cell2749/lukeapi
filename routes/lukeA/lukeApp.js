@@ -33,7 +33,7 @@ router.use('/user',user);
 router.use('/rank',rank);
 router.use("/category",category);
 router.use("/report",report);
-router.use('/experience-pattern', experience);
+router.use('/experience', experience);
 /*router.get('/api',function(req,res){
     res.status(200).send(apiDoc);
 });*/
