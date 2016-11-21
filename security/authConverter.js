@@ -17,12 +17,15 @@ module.exports = function(req,res,next) {
     var post_req = https.request(post_options, function (res) {
         res.setEncoding('utf8');
         res.on('data', function (chunk) {
-            console.log(chunk);
-            var userData = JSON.parse(chunk);
-            userData.id = userData.user_id;
-            userData._json = {app_metadata:userData.app_metadata};
-            req.user.profile = userData;
-            next();
+            if(chunk!="UNAUTHORIZED") {
+                var userData = JSON.parse(chunk);
+                userData.id = userData.user_id;
+                userData._json = {app_metadata: userData.app_metadata};
+                req.user.profile = userData;
+                next();
+            }else{
+                res.status(401).json({error:"Unauthorized"});
+            }
         });
     });
     post_req.on('error', function (e) {

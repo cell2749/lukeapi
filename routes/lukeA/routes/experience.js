@@ -124,8 +124,9 @@ router.get("/",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
  */
 router.post("/create",jwtCheck,authConverter,requiresRole("superadmin"),function(req,res) {
     var data = req.body;
+    console.log(data);
     var experiencePattern = new ExperienceModel();
-    for (var key in experiencePattern.schema.paths) {
+    for (var key in ExperienceModel.schema.paths) {
         if (Utility.allowKey(key)) {
             experiencePattern[key] = data[key] || experiencePattern[key];
         }
