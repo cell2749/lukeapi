@@ -235,13 +235,13 @@ Utility.prototype.get = function(Model,id,res) {
         });
     }
 };
-Utility.hasRole = function(req,role) {
+Utility.prototype.hasRole = function(req,role) {
     var appMetadata = req.user.profile._json.app_metadata || {};
     var roles = appMetadata.roles || [];
 
     return (roles.indexOf(role) != -1);
 };
-Utility.saveImage = function(req,path,imgName){
+Utility.prototype.saveImage = function(req,path,imgName){
     var fullpath = "/opt/balticapp/lukeapi/public/images/" + path + imgName;
     if(req.files.image) {
         var format = req.files.image.type.split('/')[1];
@@ -265,7 +265,7 @@ Utility.saveImage = function(req,path,imgName){
         return null;
     }
 };
-Utility.deleteImage = function(url){
+Utility.prototype.deleteImage = function(url){
     if(url.indexOf("..")==-1&&url.indexOf(".www")==-1&&url.indexOf("www.balticapp.fi/images/")!=-1) {
         var path = "/opt/balticapp/lukeapi/public/images/" + url.substr(url.indexOf("www.balticapp.fi/images/") + "www.balticapp.fi/images/".length);
         fs.unlink(path,function(){
@@ -276,7 +276,7 @@ Utility.deleteImage = function(url){
     }
 
 };
-Utility.copyImage = function(req,large){
+Utility.prototype.copyImage = function(req,large){
     if(!large) {
         return req.user.profile.picture;
     }else{

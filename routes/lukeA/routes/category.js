@@ -125,6 +125,7 @@ router.post('/create',jwtCheck,authConverter,requiresRole('admin'),function(req,
     var id = mongoose.Types.ObjectId();
     if(data.title) {
         ReportCategoryModel.findOne({title: data.title}, function (err, doc) {
+            if(err) throw err;
             if (doc) {
                 res.status(200).json({error: "Report Category with such name already exists!"});
             } else {
