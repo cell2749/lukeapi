@@ -112,13 +112,6 @@ define({ "api": [
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "id",
-            "description": "<p>Id of the category</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
             "field": "title",
             "description": "<p>Title of the category</p>"
           },

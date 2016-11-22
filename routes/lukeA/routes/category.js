@@ -82,7 +82,6 @@ router.get('/',function(req,res){
  * @apiName Create
  * @apiGroup Category
  *
- * @apiParam {String} id Id of the category
  * @apiParam {String} title Title of the category
  * @apiParam {String} [description] Description of the category
  * @apiParam {File} [image] Image file that is to be used by category
@@ -122,7 +121,7 @@ router.get('/',function(req,res){
  *      }
  */
 router.post('/create',jwtCheck,authConverter,requiresRole('admin'),function(req,res){
-    var data = req.query;
+    var data = req.body;
     var id = mongoose.Types.ObjectId();
     if(data.title) {
         ReportCategoryModel.findOne({title: data.title}, function (err, doc) {
@@ -204,7 +203,7 @@ router.post('/create',jwtCheck,authConverter,requiresRole('admin'),function(req,
  *      }
  */
 router.post("/update",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
-    var data = req.query;
+    var data = req.body;
     if(data.id) {
         ReportCategoryModel.findOne({id: data.id}, function (err, doc) {
             if (doc) {
