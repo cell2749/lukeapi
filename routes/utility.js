@@ -243,25 +243,30 @@ Utility.prototype.hasRole = function(req,role) {
 };
 Utility.prototype.saveImage = function(req,path,imgName){
     var fullpath = "/opt/balticapp/lukeapi/public/images/" + path + imgName;
-    if(req.files.image) {
-        var format = req.files.image.type.split('/')[1];
-        if(format.length<5) {
-            fullpath = fullpath + "." +format;
+    if(req.files) {
+        if (req.files.image) {
+            var format = req.files.image.type.split('/')[1];
+            if (format.length < 5) {
+                fullpath = fullpath + "." + format;
 
-        fs.readFile(req.files.image.path, function (err, data) {
-            if (err)throw err;
-            fs.writeFile(fullpath, data, function (err) {
-                if (err) throw err;
+                fs.readFile(req.files.image.path, function (err, data) {
+                    if (err)throw err;
+                    fs.writeFile(fullpath, data, function (err) {
+                        if (err) throw err;
 
-                return "www.balticapp.fi/images/" + path + imgName + "." + format;
-            });
-        });
-        }else{
-            console.log("Format too long: " + format);
+                        return "www.balticapp.fi/images/" + path + imgName + "." + format;
+                    });
+                });
+            } else {
+                console.log("Format too long: " + format);
+                return null;
+            }
+        } else {
+            console.log("Error: req.files.image is empty");
             return null;
         }
     }else{
-        console.log("Error: req.files.image is empty");
+        console.log("Error: req.files is empty");
         return null;
     }
 };
