@@ -70,7 +70,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(function(req,res,next){
   res.set('Access-Control-Allow-Origin','*');
-  res.set('Access-Control-Allow-Headers','acstoken');
+  res.set('Access-Control-Allow-Headers','Origin, X-Requested-With, Content-Type, Accept, Authorization, acstoken, accessToken, AccessToken');
   res.set('Access-Control-Allow-Methods','GET, POST');
   next();
 });

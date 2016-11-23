@@ -5,12 +5,13 @@ var https = require('https');
 var UserModel = require('../models/lukeA/UserModel');
 var mongoose = require('mongoose');
 module.exports = function(req,res,next) {
+    var acstoken = req.headers.acstoken || req.headers.accessToken;
     var post_options = {
         host: process.env.AUTH0_DOMAIN,
         path: '/userinfo',
         method: 'GET',
         headers: {
-            Authorization: 'Bearer ' + req.headers.acstoken
+            Authorization: 'Bearer ' + acstoken
         }
     };
 
