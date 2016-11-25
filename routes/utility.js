@@ -270,16 +270,19 @@ Utility.prototype.saveImage = function(req,path,imgName){
         return null;
     }
 };
-Utility.prototype.deleteImage = function(url){
-    if(url.indexOf("..")==-1&&url.indexOf(".www")==-1&&url.indexOf("www.balticapp.fi/images/")!=-1) {
-        var path = "/opt/balticapp/lukeapi/public/images/" + url.substr(url.indexOf("www.balticapp.fi/images/") + "www.balticapp.fi/images/".length);
-        fs.unlink(path,function(){
-           return true;
-        });
-    }else{
+Utility.prototype.deleteImage = function(url) {
+    if (url) {
+        if (url.indexOf("..") == -1 && url.indexOf(".www") == -1 && url.indexOf("www.balticapp.fi/images/") != -1) {
+            var path = "/opt/balticapp/lukeapi/public/images/" + url.substr(url.indexOf("www.balticapp.fi/images/") + "www.balticapp.fi/images/".length);
+            fs.unlink(path, function () {
+                return true;
+            });
+        } else {
+            return false;
+        }
+    } else {
         return false;
     }
-
 };
 Utility.prototype.copyImage = function(req,large){
     if(!large) {
