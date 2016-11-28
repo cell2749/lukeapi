@@ -8,6 +8,8 @@ var requiresLogin = require('../../security/requiresLogin');
 var requiresRole = require('../../security/requiresRole');
 var requiresRoles = require('../../security/requiresRoles');
 var restrictBanned = require('../../security/restrictBanned');
+var jwtCheck = require('../../security/jwtCheck');
+var authConverter = require('../../security/authConverter');
 /* MODELS */
 var UserModel = require("../../models/lukeB/UserModel");
 var ReportModel = require("../../models/lukeB/ReportModel");
@@ -79,7 +81,7 @@ router.get("/authzero",function(req,res,next) {
  * After registering/checking the user in local database redirects to specified route or responds with OK 200.
  *
  * */
-router.get('/callback',passport.authenticate('auth0', { failureRedirect: '/url-if-something-fails' }), function(req, res) {
+/*router.get('/callback',passport.authenticate('auth0', { failureRedirect: '/url-if-something-fails' }), function(req, res) {
     var route = req.query.route;
 
     if (!req.user) {
@@ -116,7 +118,7 @@ router.get('/callback',passport.authenticate('auth0', { failureRedirect: '/url-i
     } else {
         res.redirect(route);
     }
-});
+});*/
 /**
  * @api {get} /lukeB/login Login
  * @apiName Login
@@ -132,7 +134,7 @@ router.get('/callback',passport.authenticate('auth0', { failureRedirect: '/url-i
  * Note that this route is not specified as a callback, therefore it has to be called manually.
  * (!Note: token is either manipulated automatically or you will have to send it manually)
  * */
-router.get("/login",passport.authenticate('auth0',{failureRedirect:'/url-if-something-fails'}), function(req,res) {
+router.get("/login",jwtCheck,authConverter, function(req,res) {
     if (!req.user) {
         throw new Error('user null');
     } else {
@@ -172,10 +174,10 @@ router.get("/login",passport.authenticate('auth0',{failureRedirect:'/url-if-some
  * (!Note: token is either manipulated automatically or you will have to send it manually)
  *
  * */
-router.get('/logout',requiresLogin,function(req,res){
+/*router.get('/logout',requiresLogin,function(req,res){
     req.logout();
     res.status(200).json({success:true});
-});
+});*/
 
 /* SECURITY TESTS */
 router.get('/test/public',function(req,res,next){
@@ -183,11 +185,11 @@ router.get('/test/public',function(req,res,next){
     res.writeHead(200, {'Content-Type': 'text/html'});
     res.end("public OK");
 });
-router.get('/test/registered',requiresLogin,function(req,res,next){
+router.get('/test/registered',jwtCheck,authConverter,function(req,res,next){
     res.writeHead(200, {'Content-Type': 'text/html'});
     res.end("registered OK");
 });
-router.get('/test/admin',requiresLogin,requiresRole('adminS'),function(req,res,next){
+router.get('/test/admin',jwtCheck,authConverter,requiresRole('adminS'),function(req,res,next){
     res.writeHead(200, {'Content-Type': 'text/html'});
     res.end("admin OK");
 });

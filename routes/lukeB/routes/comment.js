@@ -11,6 +11,8 @@ var requiresLogin = require('../../../security/requiresLogin');
 var requiresRole = require('../../../security/requiresRole');
 var requiresRoles = require('../../../security/requiresRoles');
 var restrictBanned = require('../../../security/restrictBanned');
+var jwtCheck = require('../../../security/jwtCheck');
+var authConverter = require('../../../security/authConverter');
 /* MODELS */
 var UserModel = require("../../../models/lukeB/UserModel");
 var ReportModel = require("../../../models/lukeB/ReportModel");
@@ -175,7 +177,7 @@ router.get("/",function(req,res){
  *          error:"No report with such id"
  *      }
  */
-router.get("/create",requiresLogin,function(req,res) {
+router.get("/create",jwtCheck,authConverter,function(req,res) {
     var data = req.query;
     var text = req.query.text || "";
     var urls = text.match(urlRegex());
@@ -224,7 +226,7 @@ router.get("/create",requiresLogin,function(req,res) {
  * @apiUse loginError
  * @apiUse updateStatus
  */
-router.get("/update",requiresLogin,function(req,res){
+router.get("/update",jwtCheck,authConverter,function(req,res){
     Utility.update(CommentModel,req.query,res);
 });
 /**
@@ -242,7 +244,7 @@ router.get("/update",requiresLogin,function(req,res){
  * @apiUse loginError
  * @apiUse removeStatus
  */
-router.get("/remove",requiresLogin,function(req,res){
+router.get("/remove",jwtCheck,authConverter,function(req,res){
     Utility.remove(CommentModel,req.query.id,res);
 });
 /**
@@ -264,7 +266,7 @@ router.get("/remove",requiresLogin,function(req,res){
  * @apiUse missingVote
  * @apiUse banned
  */
-router.get("/vote",requiresLogin,function(req,res){
+router.get("/vote",jwtCheck,authConverter,function(req,res){
     Utility.vote(CommentModel,req,res,req.query.vote);
 });
 /**
@@ -285,7 +287,7 @@ router.get("/vote",requiresLogin,function(req,res){
  * @apiUse voteStatus
  * @apiUse banned
  */
-router.get("/upvote",requiresLogin,function(req,res){
+router.get("/upvote",jwtCheck,authConverter,function(req,res){
     Utility.vote(CommentModel,req,res,true);
 });
 /**
@@ -306,7 +308,7 @@ router.get("/upvote",requiresLogin,function(req,res){
  * @apiUse voteStatus
  * @apiUse banned
  */
-router.get("/downvote",requiresLogin,function(req,res){
+router.get("/downvote",jwtCheck,authConverter,function(req,res){
     Utility.vote(CommentModel,req,res,false);
 });
 /**

@@ -11,6 +11,8 @@ var requiresLogin = require('../../../security/requiresLogin');
 var requiresRole = require('../../../security/requiresRole');
 var requiresRoles = require('../../../security/requiresRoles');
 var restrictBanned = require('../../../security/restrictBanned');
+var jwtCheck = require('../../../security/jwtCheck');
+var authConverter = require('../../../security/authConverter');
 /* MODELS */
 var UserModel = require("../../../models/lukeB/UserModel");
 var ReportModel = require("../../../models/lukeB/ReportModel");
@@ -106,7 +108,7 @@ router.get("/",function(req,res){
  *          error:"Missing title"
  *      }
  */
-router.post("/create",requiresLogin,requiresRole("admin"),function(req,res){
+router.post("/create",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
     var data = req.body;
     if (data.title) {
         var category = new CategoryModel();
@@ -162,7 +164,7 @@ router.post("/create",requiresLogin,requiresRole("admin"),function(req,res){
  * @apiUse error
  * @apiUse updateStatus
  */
-router.post("/update",requiresLogin,requiresRole("admin"),function(req,res) {
+router.post("/update",jwtCheck,authConverter,requiresRole("admin"),function(req,res) {
     Utility.update(CategoryModel, req.body, res);
     if (req.body.id) {
         CategoryModel.findOne({id: req.body.id}, function (err, doc) {
@@ -192,7 +194,7 @@ router.post("/update",requiresLogin,requiresRole("admin"),function(req,res) {
  * @apiUse roleAdv
  * @apiUse removeStatus
  */
-router.get("/remove",requiresLogin,requiresRole("admin"),function(req,res){
+router.get("/remove",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
     var id = req.query.id;
     CategoryModel.findOne({id: id}, function (err, doc) {
         if (err) throw err;

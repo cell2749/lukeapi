@@ -14,6 +14,8 @@ var requiresLogin = require('../../../security/requiresLogin');
 var requiresRole = require('../../../security/requiresRole');
 var requiresRoles = require('../../../security/requiresRoles');
 var restrictBanned = require('../../../security/restrictBanned');
+var jwtCheck = require('../../../security/jwtCheck');
+var authConverter = require('../../../security/authConverter');
 /* MODELS */
 var UserModel = require("../../../models/lukeB/UserModel");
 var ReportModel = require("../../../models/lukeB/ReportModel");
@@ -269,7 +271,7 @@ router.get('/',function(req,res){
  * @apiUse error
  * @apiUse loginError
  */
-router.post('/create',requiresLogin,function(req,res,next) {
+router.post('/create',jwtCheck,authConverter,function(req,res,next) {
     var data = req.body;
     var id = mongoose.Types.ObjectId();
 
@@ -371,7 +373,7 @@ router.post('/create',requiresLogin,function(req,res,next) {
  *          error:"No report with such id"
  *      }
  */
-router.post('/update',requiresLogin,function(req,res) {
+router.post('/update',jwtCheck,authConverter,function(req,res) {
     var data = req.body;
 
     var allowedKeyes = [
@@ -437,7 +439,7 @@ router.post('/update',requiresLogin,function(req,res) {
  *          error:"Restricted access"
  *      }
  */
-router.get("/remove",requiresLogin,function(req,res) {
+router.get("/remove",jwtCheck,authConverter,function(req,res) {
     var id = req.query.id;
     ReportModel.findOne({id: id}, function (err, doc) {
         if (err) throw err;
@@ -467,7 +469,7 @@ router.get("/remove",requiresLogin,function(req,res) {
  * @apiUse loginError
  * @apiUse voteStatus
  */
-router.get("/upvote",requiresLogin,function(req,res){
+router.get("/upvote",jwtCheck,authConverter,function(req,res){
     Utility.vote(ReportModel,req,res,true);
 });
 /**
@@ -487,7 +489,7 @@ router.get("/upvote",requiresLogin,function(req,res){
  * @apiUse loginError
  * @apiUse voteStatus
  */
-router.get("/downvote",requiresLogin,function(req,res){
+router.get("/downvote",jwtCheck,authConverter,function(req,res){
     Utility.vote(ReportModel,req,res,false);
 });
 /**
@@ -509,7 +511,7 @@ router.get("/downvote",requiresLogin,function(req,res){
  * @apiUse voteStatus
  * @apiUse missingVote
  */
-router.get("/vote",requiresLogin,function(req,res){
+router.get("/vote",jwtCheck,authConverter,function(req,res){
     Utility.vote(ReportModel,req,res,req.query.vote);
 });
 /**
@@ -580,7 +582,7 @@ router.get("/upvote-count",function(req,res){
  *          error: "No report with such id"
  *      }
  */
-router.get("/approve",requiresLogin,requiresRole("admin"),function(req,res) {
+router.get("/approve",jwtCheck,authConverter,requiresRole("admin"),function(req,res) {
     var data = req.query;
     var id = data.id;
     ReportModel.findOne({id: id}, function (err, doc) {
@@ -626,7 +628,7 @@ router.get("/approve",requiresLogin,requiresRole("admin"),function(req,res) {
  *          error: "No report with such id"
  *      }
  */
-router.get("/disapprove",requiresLogin,requiresRole("admin"),function(req,res){
+router.get("/disapprove",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
     var data = req.query;
     var id = data.id;
     ReportModel.findOne({id:id},function(err,doc){
@@ -671,7 +673,7 @@ router.get("/disapprove",requiresLogin,requiresRole("admin"),function(req,res){
  *          error: "No report with such id"
  *      }
  */
-router.get("/flag",requiresLogin,restrictBanned,function(req,res){
+router.get("/flag",jwtCheck,authConverter,restrictBanned,function(req,res){
     var data = req.query;
     var id = data.id;
     ReportModel.findOne({id:id},function(err,doc){
@@ -717,7 +719,7 @@ router.get("/flag",requiresLogin,restrictBanned,function(req,res){
  *          error: "No report with such id"
  *      }
  */
-router.get("/unflag",requiresLogin,requiresRole("admin"),function(req,res){
+router.get("/unflag",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
     var data = req.query;
     var id = data.id;
     ReportModel.findOne({id:id},function(err,doc){

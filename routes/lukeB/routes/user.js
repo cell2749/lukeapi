@@ -8,6 +8,8 @@ var mongoose = require('mongoose');
 var mongodb = require('../../../mongodb/lukeBdb');
 /* SECURITY */
 var requiresLogin = require('../../../security/requiresLogin');
+var jwtCheck = require('../../../security/jwtCheck');
+var authConverter = require('../../../security/authConverter');
 var requiresRole = require('../../../security/requiresRole');
 var requiresRoles = require('../../../security/requiresRoles');
 var restrictBanned = require('../../../security/restrictBanned');
@@ -122,7 +124,7 @@ const MONGO_PROJECTION ={
  * @apiUse error
  * @apiUse loginError
  */
-router.get('/get-all',requiresLogin,function(req,res){
+router.get('/get-all',jwtCheck,authConverter,function(req,res){
    Utility.get(UserModel,null,res);
 });
 /**
@@ -204,7 +206,7 @@ router.get('/get-all',requiresLogin,function(req,res){
  * @apiUse error
  * @apiUse loginError
  */
-router.get('/',requiresLogin, function(req, res, next) {
+router.get('/',jwtCheck,authConverter, function(req, res, next) {
     var id = req.query.id || req.user.profile.id;
     Utility.get(UserModel,id,res);
 });
@@ -311,7 +313,7 @@ router.get('/',requiresLogin, function(req, res, next) {
  *          error: 'No user with such id'
  *      }
  */
-router.post('/update',requiresLogin,function(req,res) {
+router.post('/update',jwtCheck,authConverter,function(req,res) {
     var data = req.body;
     var id = data.id || req.user.profile.id;
     var appMetadata = req.user.profile._json.app_metadata || {roles: []};
@@ -370,7 +372,7 @@ router.post('/update',requiresLogin,function(req,res) {
  *          error:"Username not specified"
  *      }
  */
-router.get('/available',requiresLogin,function(req,res){
+router.get('/available',jwtCheck,authConverter,function(req,res){
     var username = req.query.username;
     if(username) {
         UserModel.findOne({username: username}, function (err, doc) {
@@ -429,7 +431,7 @@ router.get('/available',requiresLogin,function(req,res){
  *      }
  * @apiUse specialAdmin
  */
-router.get('/set-username',requiresLogin,function(req,res) {
+router.get('/set-username',jwtCheck,authConverter,function(req,res) {
     var id = req.query.id || req.user.profile.id;
     var username = req.query.username;
     var appMetadata = req.user.profile._json.app_metadata || {};
@@ -501,7 +503,7 @@ router.get('/set-username',requiresLogin,function(req,res) {
  *          error:"Error in reading social media profile data"
  *      }
  */
-router.get("/copy-profile",requiresLogin,function(req,res) {
+router.get("/copy-profile",jwtCheck,authConverter,function(req,res) {
     var data = req.user.profile;
     var cpyImg = true;
     if(req.query.cpyImg=="false" || req.query.cpyImg==0){
@@ -567,7 +569,7 @@ router.get("/copy-profile",requiresLogin,function(req,res) {
  *          error:"No place with such id"
  *      }
  */
-router.get("/add-favourite-place",requiresLogin,function(req,res) {
+router.get("/add-favourite-place",jwtCheck,authConverter,function(req,res) {
     var data = req.query;
 
     PlaceModel.findOne({id: data.id}, function (err, place) {
@@ -625,7 +627,7 @@ router.get("/add-favourite-place",requiresLogin,function(req,res) {
  * @apiUse loginError
  *
  */
-router.get("/remove-favourite-place",requiresLogin,function(req,res) {
+router.get("/remove-favourite-place",jwtCheck,authConverter,function(req,res) {
     var data = req.query;
     UserModel.findOne({id: req.user.profile.id}, function (err, user) {
         if (err)throw err;
@@ -678,7 +680,7 @@ router.get("/remove-favourite-place",requiresLogin,function(req,res) {
  * @apiUse roleSuper
  * @apiUse roleAdmin
  */
-router.get("/add-role",requiresLogin,requiresRole("admin"),function(req,res) {
+router.get("/add-role",jwtCheck,authConverter,requiresRole("admin"),function(req,res) {
     var data = req.query;
     var userId = data.userid;
     var role = data.role;
@@ -748,7 +750,7 @@ router.get("/add-role",requiresLogin,requiresRole("admin"),function(req,res) {
  * @apiUse roleAdmin
  * @apiUse roleSuper
  */
-router.get("/remove-role",requiresLogin,requiresRole("admin"),function(req,res) {
+router.get("/remove-role",jwtCheck,authConverter,requiresRole("admin"),function(req,res) {
     var data = req.query;
     var userId = data.userid;
     var role = data.role;
@@ -811,7 +813,7 @@ router.get("/remove-role",requiresLogin,requiresRole("admin"),function(req,res) 
  *      }
  * @apiUse specialAdmin
  */
-router.get("/roles",requiresLogin,function(req,res){
+router.get("/roles",jwtCheck,authConverter,function(req,res){
     var data = req.query;
     var userId = data.id ||req.user.profile.id;
     var appMetadata = req.user.profile._json.app_metadata || {};
@@ -853,7 +855,7 @@ router.get("/roles",requiresLogin,function(req,res){
  * @apiUse authError
  * @apiUse roleAdmin
  */
-router.get('/is-admin',requiresLogin,requiresRole("admin"),function(req,res){
+router.get('/is-admin',jwtCheck,authConverter,requiresRole("admin"),function(req,res){
     res.status(200).json({success:true});
 });
 /**
@@ -880,7 +882,7 @@ router.get('/is-admin',requiresLogin,requiresRole("admin"),function(req,res){
  * @apiUse authError
  * @apiUse roleAdv
  */
-router.get('/is-advanced',requiresLogin,requiresRole("advanced"),function(req,res){
+router.get('/is-advanced',jwtCheck,authConverter,requiresRole("advanced"),function(req,res){
     res.status(200).json({success:true});
 });
 /**
@@ -913,7 +915,7 @@ router.get('/is-advanced',requiresLogin,requiresRole("advanced"),function(req,re
  *      }
  * @apiUse roleAdmin
  */
-router.get("/ban",requiresLogin,requiresRole("admin"),function(req,res) {
+router.get("/ban",jwtCheck,authConverter,requiresRole("admin"),function(req,res) {
     var data = req.query;
     var id = data.id;
     var rolesArr;
@@ -970,7 +972,7 @@ router.get("/ban",requiresLogin,requiresRole("admin"),function(req,res) {
  *
  * @apiUse roleAdmin
  */
-router.get("/unban",requiresLogin,requiresRole("admin"),function(req,res) {
+router.get("/unban",jwtCheck,authConverter,requiresRole("admin"),function(req,res) {
     var data = req.query;
     var id = data.id;
     var roles;
@@ -1029,7 +1031,7 @@ router.get("/unban",requiresLogin,requiresRole("admin"),function(req,res) {
  * @apiUse roleAdmin
  * @apiUse roleSuper
  */
-router.post("/upload-default-image",requiresLogin,requiresOneOfRoles(["admin","superadmin"]),function(req,res){
+router.post("/upload-default-image",jwtCheck,authConverter,requiresOneOfRoles(["admin","superadmin"]),function(req,res){
     var name = req.body.image_name;
     if(name!=null) {
         if (Utility.saveImage(req, "lukeB/user/default/", name) != null) {
@@ -1078,7 +1080,7 @@ router.post("/upload-default-image",requiresLogin,requiresOneOfRoles(["admin","s
  * @apiUse roleAdmin
  * @apiUse roleSuper
  */
-router.get("/delete-default-image",requiresLogin,requiresOneOfRoles(["admin","superadmin"]),function(req,res){
+router.get("/delete-default-image",jwtCheck,authConverter,requiresOneOfRoles(["admin","superadmin"]),function(req,res){
     var image_url = req.query.image_url;
     if(image_url!=null&&image_url.indexOf("user/default")!=-1) {
         if (Utility.deleteImage(image_url) != null) {

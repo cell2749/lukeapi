@@ -12,6 +12,8 @@ var requiresRole = require('../../../security/requiresRole');
 var requiresRoles = require('../../../security/requiresRoles');
 var restrictBanned = require('../../../security/restrictBanned');
 var requiresOneOfRoles = require('../../../security/requiresOneOfRoles');
+var jwtCheck = require('../../../security/jwtCheck');
+var authConverter = require('../../../security/authConverter');
 /* MODELS */
 var UserModel = require("../../../models/lukeB/UserModel");
 var ReportModel = require("../../../models/lukeB/ReportModel");
@@ -227,7 +229,7 @@ router.get("/",function(req,res) {
  *          error:"Missing title"
  *      }
  */
-router.post("/create",requiresLogin,requiresOneOfRoles(["admin","advanced","researcher"]),function(req,res) {
+router.post("/create",jwtCheck,authConverter,requiresOneOfRoles(["admin","advanced","researcher"]),function(req,res) {
     var data = req.body;
     if (data.title) {
         var place = new PlaceModel();
@@ -330,7 +332,7 @@ router.post("/create",requiresLogin,requiresOneOfRoles(["admin","advanced","rese
  * @apiUse error
  * @apiUse updateStatus
  */
-router.post("/update",requiresOneOfRoles(["admin","advanced","researcher"]),function(req,res) {
+router.post("/update",jwtCheck,authConverter, requiresOneOfRoles(["admin","advanced","researcher"]),function(req,res) {
     Utility.update(PlaceModel, req.body,res);
 });
 /**
@@ -352,7 +354,7 @@ router.post("/update",requiresOneOfRoles(["admin","advanced","researcher"]),func
  * @apiUse roleAdv
  * @apiUse removeStatus
  */
-router.get("/remove",requiresLogin,requiresOneOfRoles(["admin","advanced","researcher"]),function(req,res) {
+router.get("/remove",jwtCheck,authConverter,requiresOneOfRoles(["admin","advanced","researcher"]),function(req,res) {
     Utility.remove(PlaceModel, req.query.id,res);
 });
 /**
@@ -373,7 +375,7 @@ router.get("/remove",requiresLogin,requiresOneOfRoles(["admin","advanced","resea
  * @apiUse voteStatus
  * @apiUse banned
  */
-router.get("/upvote",requiresLogin,restrictBanned,function(req,res){
+router.get("/upvote",jwtCheck,authConverter,restrictBanned,function(req,res){
     Utility.vote(PlaceModel,req,res,true);
 });
 /**
@@ -394,7 +396,7 @@ router.get("/upvote",requiresLogin,restrictBanned,function(req,res){
  * @apiUse voteStatus
  * @apiUse banned
  */
-router.get("/downvote",requiresLogin,restrictBanned,function(req,res){
+router.get("/downvote",jwtCheck,authConverter,restrictBanned,function(req,res){
     Utility.vote(PlaceModel,req,res,false);
 });
 /**
@@ -416,7 +418,7 @@ router.get("/downvote",requiresLogin,restrictBanned,function(req,res){
  * @apiUse missingVote
  * @apiUse banned
  */
-router.get("/vote",requiresLogin,restrictBanned,function(req,res){
+router.get("/vote",jwtCheck,authConverter,restrictBanned,function(req,res){
     Utility.vote(PlaceModel,req,res,req.query.vote);
 });
 /**
