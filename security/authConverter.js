@@ -3,7 +3,7 @@
  */
 var https = require('https');
 var UserModel = require('../models/lukeA/UserModel');
-var mongoose = require('mongoose');
+
 module.exports = function(req,res,next) {
     var acstoken = req.headers.acstoken || req.headers.accessToken;
     var post_options = {
@@ -15,9 +15,9 @@ module.exports = function(req,res,next) {
         }
     };
 
-    var post_req = https.request(post_options, function (res) {
-        res.setEncoding('utf8');
-        res.on('data', function (chunk) {
+    var post_req = https.request(post_options, function (httpResponse) {
+        httpResponse.setEncoding('utf8');
+        httpResponse.on('data', function (chunk) {
             try{
                 var userData = JSON.parse(chunk);
                 userData.id = userData.user_id;
