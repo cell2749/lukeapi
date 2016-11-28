@@ -22,7 +22,6 @@ var report = require('./routes/report');
 var rank = require('./routes/rank');
 var category = require('./routes/category');
 var experience = require('./routes/experience');
-//var apiDoc = require('../../views/apiDocA.html')
 
 const MONGO_PROJECTION ={
     _id: 0,
@@ -34,9 +33,7 @@ router.use('/rank',rank);
 router.use("/category",category);
 router.use("/report",report);
 router.use('/experience', experience);
-/*router.get('/api',function(req,res){
-    res.status(200).send(apiDoc);
-});*/
+
 /**
  * @api {get} /lukeA/authzero Get setup
  * @apiName GetSetup
@@ -74,7 +71,6 @@ router.get("/authzero",function(req,res,next){
  * @apiGroup Auth0
  *
  * @apiParam (Headers) Authorization Bearer idToken
- * @apiParam (Headers) acstoken acessToken
  *
  * @apiSuccessExample Success-Response-Single:
  *      HTTP/1.1 200
@@ -106,8 +102,6 @@ router.get("/login",jwtCheck,authConverter, function(req,res){
     }
     res.status(200).send("OK");
 });
-
-
 /* SECURITY TESTS */
 router.get('/test/public',function(req,res,next){
 
