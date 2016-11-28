@@ -25,7 +25,8 @@ module.exports = function(req,res,next) {
                 req.user.profile = userData;
                 next();
             }catch(error){
-                res.status(400).json({error:error});
+                console.log(chunk);
+                res.status(400).json({error:chunk});
             }
         });
     });
