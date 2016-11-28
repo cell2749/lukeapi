@@ -1,13 +1,25 @@
 var fs = require('fs');
 const MONGO_PROJECTION = {
-    __v:0,
-    _id:0
+    __v: 0,
+    _id: 0
 }
-var Utility = function(keyes,maxFlags){
+var Utility = function (keyes, maxFlags) {
     this.omitKeyes = keyes;
     this.maxFlags = maxFlags;
 };
-Utility.prototype.allowKey = function(key) {
+Utility.prototype.filter = function (object) {
+    var filteredObject = JSON.parse(JSON.stringify(object), function (key, value) {
+        if (key == '_id' || key == '__v') {
+            return undefined;
+        } else {
+            return value;
+        }
+    });
+
+    return filteredObject;
+
+};
+Utility.prototype.allowKey = function (key) {
     for (var i = 0; i < this.omitKeyes.length; i++) {
         if (this.omitKeyes[i] == key) {
             return false;
@@ -15,7 +27,20 @@ Utility.prototype.allowKey = function(key) {
     }
     return true;
 };
-Utility.prototype.deg2rad = function(deg) {
+Utility.prototype.getCrow = function (lat1, lon1, lat2, lon2) {
+    var R = 6371; // Radius of the earth in km
+    var dLat = lat2 - lat1;  // below
+    var dLon = lon2 - lon1;
+    var a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1) * Math.cos(lat2) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2)
+        ;
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    var d = R * c; // Distance in km
+    return d;
+}
+Utility.prototype.deg2rad = function (deg) {
     return deg * Math.PI / 180;
 };
 /**
@@ -38,8 +63,8 @@ Utility.prototype.deg2rad = function(deg) {
  *          success: "No such id"
  *      }
  * */
-Utility.prototype.remove = function(Model,id,res) {
-    if(id) {
+Utility.prototype.remove = function (Model, id, res) {
+    if (id) {
         Model.find({id: id}).remove(function (err, item) {
             if (err) throw err;
 
@@ -49,7 +74,7 @@ Utility.prototype.remove = function(Model,id,res) {
                 res.status(404).json({error: "No such id"});
             }
         });
-    }else{
+    } else {
         res.status(422).json({error: "Missing id"});
     }
 };
@@ -73,8 +98,8 @@ Utility.prototype.remove = function(Model,id,res) {
  *          success: "No such id"
  *      }
  * */
-Utility.prototype.update = function(Model,data,res) {
-    if(data.id) {
+Utility.prototype.update = function (Model, data, res) {
+    if (data.id) {
         Model.findOne({id: data.id}, function (err, doc) {
             if (doc) {
                 for (var key in Model.schema.paths) {
@@ -87,7 +112,7 @@ Utility.prototype.update = function(Model,data,res) {
                 res.status(404).json({error: "No such id"});
             }
         });
-    }else{
+    } else {
         res.status(422).json({error: "Missing id"});
     }
 };
@@ -119,7 +144,7 @@ Utility.prototype.update = function(Model,data,res) {
  *          success: "Missing vote:true or false"
  *      }
  * */
-Utility.prototype.vote = function(Model,req,res,vote) {
+Utility.prototype.vote = function (Model, req, res, vote) {
     var id = req.query.id;
     if (id) {
         if (vote != null) {
@@ -139,7 +164,7 @@ Utility.prototype.vote = function(Model,req,res,vote) {
                             doc.votes[i] = vote;
                             exists = true;
                         }
-                        if(doc.votes[i].vote==false || doc.votes[i].vote=="false" ){
+                        if (doc.votes[i].vote == false || doc.votes[i].vote == "false") {
                             flagCount++;
                         }
 
@@ -147,8 +172,8 @@ Utility.prototype.vote = function(Model,req,res,vote) {
                             if (!exists) {
                                 doc.votes.push(vote);
                             }
-                            if(this.maxFlags!=null&&flagCount>=this.maxFlags){
-                                   doc.flagged = true;
+                            if (this.maxFlags != null && flagCount >= this.maxFlags) {
+                                doc.flagged = true;
                             }
                             doc.save(function (err, result) {
                                 if (err)throw err;
@@ -186,7 +211,7 @@ Utility.prototype.vote = function(Model,req,res,vote) {
  *          success: "No such id"
  *      }
  * */
-Utility.prototype.voteCount = function(Model,id,res,vote) {
+Utility.prototype.voteCount = function (Model, id, res, vote) {
     var count = 0;
     if (id) {
         Model.findOne({id: id}, function (err, doc) {
@@ -208,19 +233,19 @@ Utility.prototype.voteCount = function(Model,id,res,vote) {
         res.status(422).json({error: "Missing report id"});
     }
 };
-Utility.prototype.get = function(Model,id,res) {
+Utility.prototype.get = function (Model, id, res) {
     var returnV = new Model();
     var returnArray = [];
     if (id == null) {
-        Model.find({},MONGO_PROJECTION, function (err, doc) {
+        Model.find({}, MONGO_PROJECTION, function (err, doc) {
             if (err)throw err;
-            for(var i=0 ;i<doc.length;i++) {
+            for (var i = 0; i < doc.length; i++) {
                 for (var key in Model.schema.paths) {
                     returnV[key] = doc[i][key];
                 }
                 returnArray.push(returnV);
-                returnV={};
-                if(i==doc.length-1){
+                returnV = {};
+                if (i == doc.length - 1) {
                     res.status(200).json(returnArray);
                 }
             }
@@ -228,22 +253,22 @@ Utility.prototype.get = function(Model,id,res) {
     } else {
         Model.findOne({id: id}, function (err, doc) {
             if (err) throw err;
-            for(var key in Model.schema.paths){
-                returnV[key]=doc[key];
+            for (var key in Model.schema.paths) {
+                returnV[key] = doc[key];
             }
             res.status(200).json(doc);
         });
     }
 };
-Utility.prototype.hasRole = function(req,role) {
+Utility.prototype.hasRole = function (req, role) {
     var appMetadata = req.user.profile._json.app_metadata || {};
     var roles = appMetadata.roles || [];
 
     return (roles.indexOf(role) != -1);
 };
-Utility.prototype.saveImage = function(req,path,imgName){
+Utility.prototype.saveImage = function (req, path, imgName) {
     var fullpath = "/opt/balticapp/lukeapi/public/images/" + path + imgName;
-    if(req.files) {
+    if (req.files) {
         if (req.files.image) {
             var format = req.files.image.type.split('/')[1];
             if (format.length < 5) {
@@ -265,12 +290,12 @@ Utility.prototype.saveImage = function(req,path,imgName){
             console.log("Error: req.files.image is empty");
             return null;
         }
-    }else{
+    } else {
         console.log("Error: req.files is empty");
         return null;
     }
 };
-Utility.prototype.deleteImage = function(url) {
+Utility.prototype.deleteImage = function (url) {
     if (url) {
         if (url.indexOf("..") == -1 && url.indexOf(".www") == -1 && url.indexOf("www.balticapp.fi/images/") != -1) {
             var path = "/opt/balticapp/lukeapi/public/images/" + url.substr(url.indexOf("www.balticapp.fi/images/") + "www.balticapp.fi/images/".length);
@@ -284,10 +309,10 @@ Utility.prototype.deleteImage = function(url) {
         return false;
     }
 };
-Utility.prototype.copyImage = function(req,large){
-    if(!large) {
+Utility.prototype.copyImage = function (req, large) {
+    if (!large) {
         return req.user.profile.picture;
-    }else{
+    } else {
         return req.user.profile.picture_large;
     }
 };

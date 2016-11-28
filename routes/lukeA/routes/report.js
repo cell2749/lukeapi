@@ -40,8 +40,8 @@ var Utility = new UtModule([
     "score",
     "rankingId",
     "submitterId"
-]);
-const MONGO_PROJECTION ={
+], 1);
+const MONGO_PROJECTION = {
     _id: 0,
     __v: 0
 };
@@ -137,16 +137,20 @@ const MONGO_PROJECTION ={
  * @apiUse specialAdmin
  * @apiUse specialAdv
  */
-router.get('/',function(req,res){
+router.get('/', function (req, res) {
     var data = req.query;
-    var returnResult=[];
+    var returnResult = [];
     var limit = data.limit || 0;
     var rating = data.rating;
 
     //deg2rad might not be necessary
+    /*var location = {
+        long: Utility.deg2rad(data.long),
+        lat: Utility.deg2rad(data.lat)
+    };*/
     var location = {
-        long : Utility.deg2rad(data.long),
-        lat : Utility.deg2rad(data.lat)
+        long: data.long,
+        lat: data.lat
     };
     var distance = data.distance || 5000;
 
@@ -164,12 +168,12 @@ router.get('/',function(req,res){
     var longlen = (p1 * Math.cos(location.lat)) + (p2 * Math.cos(3 * location.lat)) +
         (p3 * Math.cos(5 * location.lat));
 
-    var id = data.id ||{$ne:null};
-    var approved = {$ne:null};
-    var flagged = {$ne:null};
-    var submitterId = data.submitterId || {$ne:null};
+    var id = data.id || {$ne: null};
+    var approved = {$ne: null};
+    var flagged = {$ne: null};
+    var submitterId = data.submitterId || {$ne: null};
 
-    if(req.isAuthenticated()) {
+    if (req.isAuthenticated()) {
         var appMetadata = req.user.profile._json.app_metadata || {};
         var roles = appMetadata.roles || [];
         if (roles.indexOf("admin") != -1 || roles.indexOf("advanced") != -1) {
@@ -177,33 +181,39 @@ router.get('/',function(req,res){
             flagged = data.flagged || flagged;
         }
     }
-    ReportModel.find({id:id,approved:approved,submitterId:submitterId,flagged:flagged},MONGO_PROJECTION).sort({"date":-1}).limit(parseInt(limit)).exec(function(err, collection){
-        if(err) throw err;
+    ReportModel.find({
+        id: id,
+        approved: approved,
+        submitterId: submitterId,
+        flagged: flagged
+    }, MONGO_PROJECTION).sort({"date": -1}).limit(parseInt(limit)).exec(function (err, collection) {
+        if (err) throw err;
         var result = [];
-        if(rating!=null) {
+        if (rating != null) {
             for (i = 0; i < collection.length; i++) {
                 if (collection[i].rating != null && rating < collection[i].rating) {
                     result.push(collection[i]);
                 }
             }
-        }else{
-            result=collection;
+        } else {
+            result = collection;
         }
 
-        if(distance&&location.long&&location.lat) {
+        if (distance && location.long && location.lat) {
             for (var i = 0; i < result.length; i++) {
 
-                if(result[i].latitude!=null&&result[i].longitude!=null) {
-                    if (((location.long - result[i].longitude) * longlen) ^ 2 + ((location.lat - result[i].latitude) * latlen) ^ 2 <= distance ^ 2) {
+                if (result[i].latitude != null && result[i].longitude != null) {
+                    //if (((location.long - result[i].longitude) * longlen) ^ 2 + ((location.lat - result[i].latitude) * latlen) ^ 2 <= distance ^ 2) {
+                    if(Utility.getCrow(location.lat,location.long,result[i].latitude,result[i].longitude)<=distance){
                         returnResult.push(result);
                     }
                 }
-                if(i==result.length-1){
+                if (i == result.length - 1) {
                     res.status(200).json(returnResult);
                 }
                 //might require improvement right here
             }
-        }else {
+        } else {
             res.status(200).json(result);
         }
     });
@@ -249,13 +259,13 @@ router.get('/',function(req,res){
  *      }
  *
  * @apiSuccess {String} id Report id
- * @apiSuccess {Number} longitude Longtitude of a report
+ * @apiSuccess {Number} longitude Longitude of a report
  * @apiSuccess {Number} latitude Latitude of a report
  * @apiSuccess {Number} altitude Altitude of a report
  * @apiSuccess {String} image_url Url to image that report has
  * @apiSuccess {String} title Title of a report
  * @apiSuccess {String} description Description of a report
- * @apiSuccess {String} date Date when reprot was made
+ * @apiSuccess {String} date Date when report was made
  * @apiSuccess {Array} categoryId Array containing category ids of a report
  * @apiSuccess {Number} rating Rating of a report
  * @apiSuccess {String} submitterId User id of reports submitter
@@ -269,10 +279,6 @@ router.get('/',function(req,res){
  * Creates report with specified parameter. Some parameters are restricted from user to manage them.
  * Returns the created report. Adds experience to user from active experience pattern.
  * <strong>Requires active experience pattern!</strong>
- * <strong>Implementation not rady yet due to image</strong>
- *
- * @apiExample Example:
- * !!!!Example not ready yet due to image implementation!!!
  *
  * @apiUse specialAdmin
  * @apiUse specialAdv
@@ -311,7 +317,7 @@ router.get('/',function(req,res){
  *          error:"No experience pattern active"
  *      }
  */
-router.post('/create',jwtCheck,authConverter,restrictBanned,function(req,res,next) {
+router.post('/create', jwtCheck, authConverter, restrictBanned, function (req, res, next) {
     var data = req.body;
     var id = mongoose.Types.ObjectId();
     console.log(data);
@@ -346,7 +352,7 @@ router.post('/create',jwtCheck,authConverter,restrictBanned,function(req,res,nex
                     report._id = id;
                     report.id = id;
                     report.votes = {};
-                    report.approved = true;
+                    report.approved = null;
                     report.flagged = false;
                     report.date = new Date().toISOString();
 
@@ -444,7 +450,7 @@ router.post('/create',jwtCheck,authConverter,restrictBanned,function(req,res,nex
  *          error:"No report with such id"
  *      }
  */
-router.post("/update",jwtCheck,authConverter,restrictBanned,function(req,res){
+router.post("/update", jwtCheck, authConverter, restrictBanned, function (req, res) {
     var omitKeyes = [
         "_id",
         "__v",
@@ -461,9 +467,9 @@ router.post("/update",jwtCheck,authConverter,restrictBanned,function(req,res){
         "votes"
     ];
     var data = req.body;
-    ReportModel.findOne({id:data.id},function(err,doc) {
+    ReportModel.findOne({id: data.id}, function (err, doc) {
         if (doc.submitterId != req.user.profile.id) {
-            res.status(401).json({error:"Restricted Access"});
+            res.status(401).json({error: "Restricted Access"});
         } else {
             if (doc) {
                 var pattern = new ReportModel();
@@ -472,17 +478,17 @@ router.post("/update",jwtCheck,authConverter,restrictBanned,function(req,res){
                         doc[key] = data[key] || doc[key];
                     }
                 }
-                doc.image_url = Utility.saveImage(req,"lukeA/report/",doc.id) || doc.image_url;
-                doc.save(function(err,result){
-                    var returnV={}, reportPattern = new ReportModel();
-                    for(var key in reportPattern.schema.paths){
-                        returnV[key]=result[key];
+                doc.image_url = Utility.saveImage(req, "lukeA/report/", doc.id) || doc.image_url;
+                doc.save(function (err, result) {
+                    var returnV = {}, reportPattern = new ReportModel();
+                    for (var key in reportPattern.schema.paths) {
+                        returnV[key] = result[key];
                     }
                     res.status(200).json(returnV);
                 });
 
             } else {
-                res.status(404).json({error:"No report with such id"});
+                res.status(404).json({error: "No report with such id"});
             }
         }
     });
@@ -522,29 +528,29 @@ router.post("/update",jwtCheck,authConverter,restrictBanned,function(req,res){
  *      }
  * @apiUse specialAdmin
  */
-router.get("/remove",jwtCheck,authConverter,function(req,res){
+router.get("/remove", jwtCheck, authConverter, function (req, res) {
     var data = req.query;
     var id = data.id;
     var appMetadata = req.user.profile._json.app_metadata || {};
     var adminRoles = appMetadata.roles || [];
-    ReportModel.findOne({id:id},{"submitterId":1},function(err,doc) {
-        if(err)throw err;
-        if ((doc.submitterId == req.user.profile.id || adminRoles.indexOf("admin")!=-1)&&doc.length!=0) {
+    ReportModel.findOne({id: id}, {"submitterId": 1}, function (err, doc) {
+        if (err)throw err;
+        if ((doc.submitterId == req.user.profile.id || adminRoles.indexOf("admin") != -1) && doc.length != 0) {
             Utility.deleteImage(doc.image_url);
             ReportModel.find({id: id}).remove(function (err, item) {
                 if (err) throw err;
 
                 if (item.result.n != 0) {
-                    res.status(200).json({success:"Removed " + item.result.n + " items"});
+                    res.status(200).json({success: "Removed " + item.result.n + " items"});
                 } else {
-                    res.status(404).json({error:"No report with such id"});
+                    res.status(404).json({error: "No report with such id"});
                 }
             });
-        }else{
-            if(doc.length!=0){
+        } else {
+            if (doc.length != 0) {
                 res.status(401).json({error: "Restricted Access"});
-            }else {
-                res.status(404).json({error:"No report with such id"});
+            } else {
+                res.status(404).json({error: "No report with such id"});
             }
         }
     });
@@ -580,19 +586,19 @@ router.get("/remove",jwtCheck,authConverter,function(req,res){
  *      }
  * @apiUse roleAdmin
  */
-router.get("/approve",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
+router.get("/approve", jwtCheck, authConverter, requiresRole("admin"), function (req, res) {
     var data = req.query;
     var id = data.id;
-    ReportModel.findOne({id:id},function(err,doc){
-        if(err) throw err;
-        if(doc) {
+    ReportModel.findOne({id: id}, function (err, doc) {
+        if (err) throw err;
+        if (doc) {
             doc.approved = true;
-            doc.save(function(err,result){
-                if(err) throw err;
-                res.status(200).json({success:true});
+            doc.save(function (err, result) {
+                if (err) throw err;
+                res.status(200).json({success: true});
             });
-        }else{
-            res.status(404).json({error:"No report with such id"});
+        } else {
+            res.status(404).json({error: "No report with such id"});
         }
     });
 });
@@ -627,19 +633,19 @@ router.get("/approve",jwtCheck,authConverter,requiresRole("admin"),function(req,
  *      }
  * @apiUse roleAdmin
  */
-router.get("/disapprove",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
+router.get("/disapprove", jwtCheck, authConverter, requiresRole("admin"), function (req, res) {
     var data = req.query;
     var id = data.id;
-    ReportModel.findOne({id:id},function(err,doc){
-        if(err) throw err;
-        if(doc) {
+    ReportModel.findOne({id: id}, function (err, doc) {
+        if (err) throw err;
+        if (doc) {
             doc.approved = false;
-            doc.save(function(err,result){
-                if(err) throw err;
-                res.status(200).json({success:true});
+            doc.save(function (err, result) {
+                if (err) throw err;
+                res.status(200).json({success: true});
             });
-        }else{
-            res.status(200).json({error:"No report with such id"});
+        } else {
+            res.status(200).json({error: "No report with such id"});
         }
     });
 });
@@ -673,19 +679,25 @@ router.get("/disapprove",jwtCheck,authConverter,requiresRole("admin"),function(r
  *          error:"No report with such id"
  *      }
  */
-router.get("/flag",jwtCheck,authConverter,restrictBanned,function(req,res){
+router.get("/flag", jwtCheck, authConverter, restrictBanned, function (req, res) {
     var data = req.query;
     var id = data.id;
-    ReportModel.findOne({id:id},function(err,doc){
-        if(err) throw err;
-        if(doc) {
-            doc.flagged = true;
-            doc.save(function(err,result){
-                if(err) throw err;
-                res.status(200).json({success:true});
+    ReportModel.findOne({id: id}, function (err, doc) {
+        if (err) throw err;
+        if (doc) {
+            if (doc.flags.indexOf(req.user.profile.id) == -1) {
+                doc.flags.push(req.user.profile.id);
+            }
+            if (doc.flags.length >= Utility.maxFlags) {
+                doc.flagged = true;
+                doc.approved = false;
+            }
+            doc.save(function (err, result) {
+                if (err) throw err;
+                res.status(200).json({success: true});
             });
-        }else{
-            res.status(200).json({error:"No report with such id"});
+        } else {
+            res.status(200).json({error: "No report with such id"});
         }
     });
 });
@@ -719,19 +731,27 @@ router.get("/flag",jwtCheck,authConverter,restrictBanned,function(req,res){
  *          error:"No report with such id"
  *      }
  */
-router.get("/unflag",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
+router.get("/unflag", jwtCheck, authConverter, requiresRole("admin"), function (req, res) {
     var data = req.query;
     var id = data.id;
-    ReportModel.findOne({id:id},function(err,doc){
-        if(err) throw err;
-        if(doc) {
-            doc.flagged = false;
-            doc.save(function(err,result){
-                if(err) throw err;
-                res.status(200).json({success:true});
+    ReportModel.findOne({id: id}, function (err, doc) {
+        if (err) throw err;
+        if (doc) {
+            if (doc.flags.indexOf(req.user.profile.id) != -1) {
+                doc.flags.splice(doc.flags.indexOf(req.user.profile.id), 1);
+            }
+            if (doc.flags.length < Utility.maxFlags) {
+                doc.flagged = false;
+                if (doc.approved == false) {
+                    doc.approved = null;
+                }
+            }
+            doc.save(function (err, result) {
+                if (err) throw err;
+                res.status(200).json({success: true});
             });
-        }else{
-            res.status(200).json({error:"No report with such id"});
+        } else {
+            res.status(200).json({error: "No report with such id"});
         }
     });
 });
@@ -777,7 +797,7 @@ router.get("/unflag",jwtCheck,authConverter,requiresRole("admin"),function(req,r
  *          error:"No report id was provided"
  *      }
  */
-router.get("/upvote",jwtCheck,authConverter,restrictBanned,function(req,res) {
+router.get("/upvote", jwtCheck, authConverter, restrictBanned, function (req, res) {
     var userId = req.user.profile.id;
     var reportId = req.query.id;
     if (reportId != null) {
@@ -874,7 +894,7 @@ router.get("/upvote",jwtCheck,authConverter,restrictBanned,function(req,res) {
  *          error:"No report id was provided"
  *      }
  */
-router.get("/downvote",jwtCheck,authConverter,restrictBanned,function(req,res) {
+router.get("/downvote", jwtCheck, authConverter, restrictBanned, function (req, res) {
     var userId = req.user.profile.id;
     var reportId = req.query.id;
     if (reportId != null) {
@@ -972,7 +992,7 @@ router.get("/downvote",jwtCheck,authConverter,restrictBanned,function(req,res) {
  *          error:"Report id or vote was not specified"
  *      }
  */
-router.get("/vote",jwtCheck,authConverter,restrictBanned,function(req,res) {
+router.get("/vote", jwtCheck, authConverter, restrictBanned, function (req, res) {
     var data = req.query;
     var userId = req.user.profile.id;
     var reportId = data.id;
@@ -1091,27 +1111,27 @@ router.get("/vote",jwtCheck,authConverter,restrictBanned,function(req,res) {
  *          error:"Report id or vote was not specified"
  *      }
  */
-router.get("/downvote-count",function(req,res){
+router.get("/downvote-count", function (req, res) {
     var data = req.query;
-    var count=0;
-    if(data.id) {
+    var count = 0;
+    if (data.id) {
         ReportModel.findOne({id: data.id}, function (err, doc) {
-            if(err)throw err;
-            if(doc){
-                for(var i=0;i<doc.votes.length;i++){
-                    if(!doc.votes[i].vote){
+            if (err)throw err;
+            if (doc) {
+                for (var i = 0; i < doc.votes.length; i++) {
+                    if (!doc.votes[i].vote) {
                         count++;
                     }
-                    if(i==doc.votes.length-1){
-                        res.status(200).json({count:count});
+                    if (i == doc.votes.length - 1) {
+                        res.status(200).json({count: count});
                     }
                 }
-            }else{
-                res.status(404).json({error:"No report with such id"});
+            } else {
+                res.status(404).json({error: "No report with such id"});
             }
         });
-    }else{
-        res.status(422).json({error:"Missing report id"});
+    } else {
+        res.status(422).json({error: "Missing report id"});
     }
 });
 /**
@@ -1146,27 +1166,27 @@ router.get("/downvote-count",function(req,res){
  *          error:"Report id or vote was not specified"
  *      }
  */
-router.get("/upvote-count",function(req,res){
+router.get("/upvote-count", function (req, res) {
     var data = req.query;
-    var count=0;
-    if(data.id) {
+    var count = 0;
+    if (data.id) {
         ReportModel.findOne({id: data.id}, function (err, doc) {
-            if(err)throw err;
-            if(doc){
-                for(var i=0;i<doc.votes.length;i++){
-                    if(doc.votes[i].vote){
+            if (err)throw err;
+            if (doc) {
+                for (var i = 0; i < doc.votes.length; i++) {
+                    if (doc.votes[i].vote) {
                         count++;
                     }
-                    if(i==doc.votes.length-1){
-                        res.status(200).json({count:count});
+                    if (i == doc.votes.length - 1) {
+                        res.status(200).json({count: count});
                     }
                 }
-            }else{
-                res.status(200).json({error:"No report with such id"});
+            } else {
+                res.status(200).json({error: "No report with such id"});
             }
         });
-    }else{
-        res.status(200).json({error:"Missing report id"});
+    } else {
+        res.status(200).json({error: "Missing report id"});
     }
 });
 module.exports = router;

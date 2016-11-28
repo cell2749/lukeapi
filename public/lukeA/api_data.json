@@ -1,5 +1,475 @@
 [
   {
+    "type": "post",
+    "url": "/lukeA/marker/create",
+    "title": "Create",
+    "name": "Create",
+    "group": "AdminMarker",
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "longitude",
+            "description": "<p>Longitude of a marker</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "latitude",
+            "description": "<p>Latitude of a marker</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "title",
+            "description": "<p>Title of marker</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "description",
+            "description": "<p>Description of marker</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": true,
+            "field": "owner",
+            "description": "<p>Third party owner of the marker</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Marker unique id</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "date",
+            "description": "<p>Date when marker was made</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n    id: {type: String, required: '{PATH} is required!'},\n    longitude: Number,\n    latitude: Number,\n    title: String,\n    description: String,\n    date: String,\n    owner: String\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "description": "<p>Creates marker with specified parameter. Some parameters are restricted from user to manage them. Returns the created marker.</p>",
+    "error": {
+      "examples": [
+        {
+          "title": "Missing longitude:",
+          "content": "HTTP/1.1 422\n{\n    error:\"Missing longitude\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing latitude:",
+          "content": "HTTP/1.1 422\n{\n    error:\"Missing latitude\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing description:",
+          "content": "HTTP/1.1 422\n{\n    error:\"Missing description\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing title:",
+          "content": "HTTP/1.1 422\n{\n    error:\"Missing title\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Authorization Error:",
+          "content": "HTTP/1.1 401\n{\n    error:'Proper authorization required',\n    auth:true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/lukeA/routes/adminMarker.js",
+    "groupTitle": "AdminMarker",
+    "parameter": {
+      "fields": {
+        "Required Role": [
+          {
+            "group": "Required Role",
+            "optional": false,
+            "field": "admin",
+            "description": ""
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "get",
+    "url": "/lukeA/marker",
+    "title": "Get marker(s)",
+    "name": "Get",
+    "group": "AdminMarker",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "id",
+            "description": "<p>Id of the marker. If specified return only single marker.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "owner",
+            "description": "<p>Name of the owner of the marker (Third party user). Returns all markers belonging to the owner.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": true,
+            "field": "limit",
+            "description": "<p>Limit the amount of returned objects.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n[{\n    id: {type: String, required: '{PATH} is required!'},\n    longitude: Number,\n    latitude: Number,\n    title: String,\n    description: String,\n    date: String,\n    owner: String\n}]",
+          "type": "json"
+        },
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n    id: {type: String, required: '{PATH} is required!'},\n    longitude: Number,\n    latitude: Number,\n    title: String,\n    description: String,\n    date: String,\n    owner: String\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Marker unique id</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "longitude",
+            "description": "<p>Longitude of a marker</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "latitude",
+            "description": "<p>Latitude of a marker</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "title",
+            "description": "<p>Title of marker</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "description",
+            "description": "<p>Description of marker</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "date",
+            "description": "<p>Date when marker was made</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "owner",
+            "description": "<p>Third party owner of the marker</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Open to everyone Location filter is available for public. Returns single marker in case id is specified.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeA/marker?owner=Cthulhu&limit=10",
+        "type": "json"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "routes/lukeA/routes/adminMarker.js",
+    "groupTitle": "AdminMarker"
+  },
+  {
+    "type": "get",
+    "url": "/lukeA/marker/remove",
+    "title": "Remove",
+    "name": "Remove",
+    "group": "AdminMarker",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of a report to be removed</p>"
+          }
+        ],
+        "Required Role": [
+          {
+            "group": "Required Role",
+            "optional": false,
+            "field": "admin",
+            "description": ""
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n    success:\"Removed N items\"\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "success",
+            "description": "<p>Contains information on amount of reports removed. Should be 1.</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Removes the specified marker.</p>",
+    "examples": [
+      {
+        "title": "Example:",
+        "content": "http://balticapp.fi/lukeA/marker/remove?id=e1921e921e9219",
+        "type": "json"
+      }
+    ],
+    "error": {
+      "examples": [
+        {
+          "title": "Id is missing or wrong:",
+          "content": "HTTP/1.1 404\n{\n    error:\"No marker with such id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Authorization Error:",
+          "content": "HTTP/1.1 401\n{\n    error:'Proper authorization required',\n    auth:true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/lukeA/routes/adminMarker.js",
+    "groupTitle": "AdminMarker"
+  },
+  {
+    "type": "post",
+    "url": "/lukeA/marker/update",
+    "title": "Update",
+    "name": "Update",
+    "group": "AdminMarker",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the marker</p>"
+          }
+        ],
+        "Required Role": [
+          {
+            "group": "Required Role",
+            "optional": false,
+            "field": "admin",
+            "description": ""
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": true,
+            "field": "longitude",
+            "description": "<p>Longitude of a marker</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": true,
+            "field": "latitude",
+            "description": "<p>Latitude of a marker</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": true,
+            "field": "title",
+            "description": "<p>Title of marker</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": true,
+            "field": "description",
+            "description": "<p>Description of marker</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": true,
+            "field": "owner",
+            "description": "<p>Third party owner of the marker</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Marker unique id</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "date",
+            "description": "<p>Date when marker was made</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n    id: {type: String, required: '{PATH} is required!'},\n    longitude: Number,\n    latitude: Number,\n    title: String,\n    description: String,\n    date: String,\n    owner: String\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "description": "<p>Updates the marker with new values. Certain properties are forbidden from being updated. All allowed are listed in parameters list.</p>",
+    "error": {
+      "examples": [
+        {
+          "title": "Id is missing or wrong:",
+          "content": "HTTP/1.1 404\n{\n    error:\"No marker with such id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Authorization Error:",
+          "content": "HTTP/1.1 401\n{\n    error:'Proper authorization required',\n    auth:true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/lukeA/routes/adminMarker.js",
+    "groupTitle": "AdminMarker"
+  },
+  {
     "type": "get",
     "url": "/lukeA/authzero",
     "title": "Get setup",
@@ -65,12 +535,6 @@
             "optional": false,
             "field": "Authorization",
             "description": "<p>Bearer idToken</p>"
-          },
-          {
-            "group": "Headers",
-            "optional": false,
-            "field": "acstoken",
-            "description": "<p>acessToken</p>"
           }
         ]
       }
@@ -2144,7 +2608,7 @@
             "type": "Number",
             "optional": false,
             "field": "longitude",
-            "description": "<p>Longtitude of a report</p>"
+            "description": "<p>Longitude of a report</p>"
           },
           {
             "group": "Success 200",
@@ -2186,7 +2650,7 @@
             "type": "String",
             "optional": false,
             "field": "date",
-            "description": "<p>Date when reprot was made</p>"
+            "description": "<p>Date when report was made</p>"
           },
           {
             "group": "Success 200",
@@ -2240,14 +2704,7 @@
         ]
       }
     },
-    "description": "<p>Creates report with specified parameter. Some parameters are restricted from user to manage them. Returns the created report. Adds experience to user from active experience pattern. <strong>Requires active experience pattern!</strong> <strong>Implementation not rady yet due to image</strong></p>",
-    "examples": [
-      {
-        "title": "Example:",
-        "content": "!!!!Example not ready yet due to image implementation!!!",
-        "type": "json"
-      }
-    ],
+    "description": "<p>Creates report with specified parameter. Some parameters are restricted from user to manage them. Returns the created report. Adds experience to user from active experience pattern. <strong>Requires active experience pattern!</strong></p>",
     "error": {
       "examples": [
         {
