@@ -131,11 +131,11 @@ router.get('/', function (req, res) {
  * @apiName Create
  * @apiGroup AdminMarker
  *
- * @apiSuccess {Number} longitude Longitude of a marker
- * @apiSuccess {Number} latitude Latitude of a marker
- * @apiSuccess {String} title Title of marker
- * @apiSuccess {String} description Description of marker
- * @apiSuccess {String} [owner] Third party owner of the marker
+ * @apiParam {Number} longitude Longitude of a marker
+ * @apiParam {Number} latitude Latitude of a marker
+ * @apiParam {String} title Title of marker
+ * @apiParam {String} description Description of marker
+ * @apiParam {String} [owner] Third party owner of the marker
  *
  *
  * @apiSuccessExample Success-Response:

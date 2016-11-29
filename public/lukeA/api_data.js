@@ -5,9 +5,72 @@ define({ "api": [
     "title": "Create",
     "name": "Create",
     "group": "AdminMarker",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "longitude",
+            "description": "<p>Longitude of a marker</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "latitude",
+            "description": "<p>Latitude of a marker</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "title",
+            "description": "<p>Title of marker</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "description",
+            "description": "<p>Description of marker</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "owner",
+            "description": "<p>Third party owner of the marker</p>"
+          }
+        ],
+        "Required Role": [
+          {
+            "group": "Required Role",
+            "optional": false,
+            "field": "admin",
+            "description": ""
+          }
+        ]
+      }
+    },
     "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n    id: {type: String, required: '{PATH} is required!'},\n    longitude: Number,\n    latitude: Number,\n    title: String,\n    description: String,\n    date: String,\n    owner: String\n}",
+          "type": "json"
+        }
+      ],
       "fields": {
         "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Marker unique id</p>"
+          },
           {
             "group": "Success 200",
             "type": "Number",
@@ -39,33 +102,19 @@ define({ "api": [
           {
             "group": "Success 200",
             "type": "String",
-            "optional": true,
-            "field": "owner",
-            "description": "<p>Third party owner of the marker</p>"
-          },
-          {
-            "group": "Success 200",
-            "type": "String",
-            "optional": false,
-            "field": "id",
-            "description": "<p>Marker unique id</p>"
-          },
-          {
-            "group": "Success 200",
-            "type": "String",
             "optional": false,
             "field": "date",
             "description": "<p>Date when marker was made</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "owner",
+            "description": "<p>Third party owner of the marker</p>"
           }
         ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n    id: {type: String, required: '{PATH} is required!'},\n    longitude: Number,\n    latitude: Number,\n    title: String,\n    description: String,\n    date: String,\n    owner: String\n}",
-          "type": "json"
-        }
-      ]
+      }
     },
     "description": "<p>Creates marker with specified parameter. Some parameters are restricted from user to manage them. Returns the created marker.</p>",
     "error": {
@@ -120,19 +169,7 @@ define({ "api": [
     },
     "version": "0.0.0",
     "filename": "routes/lukeA/routes/adminMarker.js",
-    "groupTitle": "AdminMarker",
-    "parameter": {
-      "fields": {
-        "Required Role": [
-          {
-            "group": "Required Role",
-            "optional": false,
-            "field": "admin",
-            "description": ""
-          }
-        ]
-      }
-    }
+    "groupTitle": "AdminMarker"
   },
   {
     "type": "get",

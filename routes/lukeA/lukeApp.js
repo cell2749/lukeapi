@@ -1,3 +1,4 @@
+var fs = require('fs');
 var express = require('express');
 var router = express.Router();
 var passport = require('passport');
@@ -24,15 +25,15 @@ var category = require('./routes/category');
 var experience = require('./routes/experience');
 var marker = require('./routes/adminMarker');
 
-const MONGO_PROJECTION ={
+const MONGO_PROJECTION = {
     _id: 0,
     __v: 0
 };
 /* DATABASE HTTP REQUESTS*/
-router.use('/user',user);
-router.use('/rank',rank);
-router.use("/category",category);
-router.use("/report",report);
+router.use('/user', user);
+router.use('/rank', rank);
+router.use("/category", category);
+router.use("/report", report);
 router.use('/experience', experience);
 router.use('/marker', marker);
 /**
@@ -58,13 +59,13 @@ router.use('/marker', marker);
  * @apiExample Example:
  * http://balticapp.fi/lukeA/authzero
  * */
-router.get("/authzero",function(req,res,next){
-  var lockSetup = {
-    AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID,
-    AUTH0_DOMAIN: process.env.AUTH0_DOMAIN,
-    AUTH0_CALLBACK_URL: process.env.AUTH0_CALLBACK_URL_PRODUCTION_A
-  };
-  res.status(200).json(lockSetup);
+router.get("/authzero", function (req, res, next) {
+    var lockSetup = {
+        AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID,
+        AUTH0_DOMAIN: process.env.AUTH0_DOMAIN,
+        AUTH0_CALLBACK_URL: process.env.AUTH0_CALLBACK_URL_PRODUCTION_A
+    };
+    res.status(200).json(lockSetup);
 });
 /**
  * @api {get} /lukeA/login Login
@@ -81,21 +82,21 @@ router.get("/authzero",function(req,res,next){
  * @apiDescription
  * Registers user in local database. Requires headers.
  * */
-router.get("/login",jwtCheck,authConverter, function(req,res){
+router.get("/login", jwtCheck, authConverter, function (req, res) {
     if (!req.user) {
         throw new Error('user null');
-    }else{
+    } else {
         var userData = req.user.profile;
 
-        UserModel.findOne({id:userData.id},MONGO_PROJECTION, function (err, result) {
-            if(err) throw err;
+        UserModel.findOne({id: userData.id}, MONGO_PROJECTION, function (err, result) {
+            if (err) throw err;
 
-            if(result==null){
+            if (result == null) {
                 var user = new UserModel();
-                user.id=userData.id;
+                user.id = userData.id;
                 user.score = 0;
-                user.save(function(err,result){
-                    if(err) throw err;
+                user.save(function (err, result) {
+                    if (err) throw err;
                     console.log(result);
                 });
             }
@@ -104,26 +105,26 @@ router.get("/login",jwtCheck,authConverter, function(req,res){
     res.status(200).send("OK");
 });
 /* SECURITY TESTS */
-router.get('/test/public',function(req,res,next){
+router.get('/test/public', function (req, res, next) {
 
-  res.writeHead(200, {'Content-Type': 'text/html'});
-  res.end("public OK");
+    res.writeHead(200, {'Content-Type': 'text/html'});
+    res.end("public OK");
 });
-router.get('/test/registered',requiresLogin,function(req,res,next){
-  res.writeHead(200, {'Content-Type': 'text/html'});
-  res.end("registered OK");
+router.get('/test/registered', requiresLogin, function (req, res, next) {
+    res.writeHead(200, {'Content-Type': 'text/html'});
+    res.end("registered OK");
 });
-router.get('/test/admin',requiresLogin,requiresRole('adminS'),function(req,res,next){
-  res.writeHead(200, {'Content-Type': 'text/html'});
-  res.end("admin OK");
+router.get('/test/admin', requiresLogin, requiresRole('adminS'), function (req, res, next) {
+    res.writeHead(200, {'Content-Type': 'text/html'});
+    res.end("admin OK");
 });
-router.get("/test",jwtCheck,function(req,res) {
+router.get("/test", jwtCheck, function (req, res) {
     console.log("Header Authorization /");
     console.log(req.headers.authorization);
     console.log("User /");
     console.log(req.user);
     var returnData;
-    returnData=null;
+    returnData = null;
     var options = {
         host: 'nikitak.eu.auth0.com',
         path: '/tokeninfo',
@@ -150,6 +151,18 @@ router.get("/test",jwtCheck,function(req,res) {
     });
 
     request.end();
-    res.status(200).json({status:"Testing",data:returnData});
+    res.status(200).json({status: "Testing", data: returnData});
 });
+/*router.post("/ts", function (req, res) {
+    var data = req;
+    console.log(data);
+    var fullpath = __dirname + "../../../public/images/" + data.name + "." + data.format;
+    var imageBuffer = new Buffer(data.image,'base64');
+
+    fs.writeFile(fullpath, imageBuffer, function (err) {
+        if (err) throw err;
+
+        res.status(200).send("OK");
+    });
+});*/
 module.exports = router;

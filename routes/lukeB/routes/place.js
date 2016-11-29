@@ -21,6 +21,7 @@ var PlaceModel = require("../../../models/lukeB/PlaceModel");
 var CommentModel = require("../../../models/lukeB/CommentModel");
 var CategoryModel = require("../../../models/lukeB/CategoryModel");
 /*Utility*/
+var WEATHER_UPDATE;
 var UtModule = require("../../utility");
 var Utility = new UtModule([
     "id",
@@ -38,7 +39,7 @@ var Utility = new UtModule([
     "weatherData.seaTemperature",
     "weatherData.wind"
 ]);
-const MONGO_PROJECTION ={
+const MONGO_PROJECTION = {
     _id: 0,
     __v: 0
 };
@@ -141,7 +142,7 @@ const MONGO_PROJECTION ={
  * @apiExample Example URL:
  * http://balticapp.fi/lukeB/place
  */
-router.get("/",function(req,res) {
+router.get("/", function (req, res) {
     Utility.get(PlaceModel, req.query.id, res);
 });
 /**
@@ -229,7 +230,7 @@ router.get("/",function(req,res) {
  *          error:"Missing title"
  *      }
  */
-router.post("/create",jwtCheck,authConverter,requiresOneOfRoles(["admin","advanced","researcher"]),function(req,res) {
+router.post("/create", jwtCheck, authConverter, requiresOneOfRoles(["admin", "advanced", "researcher"]), function (req, res) {
     var data = req.body;
     if (data.title) {
         var place = new PlaceModel();
@@ -245,8 +246,8 @@ router.post("/create",jwtCheck,authConverter,requiresOneOfRoles(["admin","advanc
         place.save(function (err, result) {
             if (err)throw err;
             var resultV = new PlaceModel();
-            for(var key in PlaceModel.schema.paths){
-                resultV[key]=result[key];
+            for (var key in PlaceModel.schema.paths) {
+                resultV[key] = result[key];
             }
             res.status(200).json(resultV);
         });
@@ -332,8 +333,8 @@ router.post("/create",jwtCheck,authConverter,requiresOneOfRoles(["admin","advanc
  * @apiUse error
  * @apiUse updateStatus
  */
-router.post("/update",jwtCheck,authConverter, requiresOneOfRoles(["admin","advanced","researcher"]),function(req,res) {
-    Utility.update(PlaceModel, req.body,res);
+router.post("/update", jwtCheck, authConverter, requiresOneOfRoles(["admin", "advanced", "researcher"]), function (req, res) {
+    Utility.update(PlaceModel, req.body, res);
 });
 /**
  * @api {get} /lukeB/place/remove Remove
@@ -354,8 +355,8 @@ router.post("/update",jwtCheck,authConverter, requiresOneOfRoles(["admin","advan
  * @apiUse roleAdv
  * @apiUse removeStatus
  */
-router.get("/remove",jwtCheck,authConverter,requiresOneOfRoles(["admin","advanced","researcher"]),function(req,res) {
-    Utility.remove(PlaceModel, req.query.id,res);
+router.get("/remove", jwtCheck, authConverter, requiresOneOfRoles(["admin", "advanced", "researcher"]), function (req, res) {
+    Utility.remove(PlaceModel, req.query.id, res);
 });
 /**
  * @api {get} /lukeB/place/upvote Upvote
@@ -375,8 +376,8 @@ router.get("/remove",jwtCheck,authConverter,requiresOneOfRoles(["admin","advance
  * @apiUse voteStatus
  * @apiUse banned
  */
-router.get("/upvote",jwtCheck,authConverter,restrictBanned,function(req,res){
-    Utility.vote(PlaceModel,req,res,true);
+router.get("/upvote", jwtCheck, authConverter, restrictBanned, function (req, res) {
+    Utility.vote(PlaceModel, req, res, true);
 });
 /**
  * @api {get} /lukeB/place/downvote Downvote
@@ -396,8 +397,8 @@ router.get("/upvote",jwtCheck,authConverter,restrictBanned,function(req,res){
  * @apiUse voteStatus
  * @apiUse banned
  */
-router.get("/downvote",jwtCheck,authConverter,restrictBanned,function(req,res){
-    Utility.vote(PlaceModel,req,res,false);
+router.get("/downvote", jwtCheck, authConverter, restrictBanned, function (req, res) {
+    Utility.vote(PlaceModel, req, res, false);
 });
 /**
  * @api {get} /lukeB/place/vote vote
@@ -418,8 +419,8 @@ router.get("/downvote",jwtCheck,authConverter,restrictBanned,function(req,res){
  * @apiUse missingVote
  * @apiUse banned
  */
-router.get("/vote",jwtCheck,authConverter,restrictBanned,function(req,res){
-    Utility.vote(PlaceModel,req,res,req.query.vote);
+router.get("/vote", jwtCheck, authConverter, restrictBanned, function (req, res) {
+    Utility.vote(PlaceModel, req, res, req.query.vote);
 });
 /**
  * @api {get} /lukeA/place/downvote-count Downvote count
@@ -437,8 +438,8 @@ router.get("/vote",jwtCheck,authConverter,restrictBanned,function(req,res){
  * @apiUse error
  * @apiUse voteCountStatus
  */
-router.get("/downvote-count",function(req,res){
-    Utility.voteCount(PlaceModel,req.query.id,res,false);
+router.get("/downvote-count", function (req, res) {
+    Utility.voteCount(PlaceModel, req.query.id, res, false);
 });
 /**
  * @api {get} /lukeA/place/upvote-count Upvote count
@@ -456,8 +457,33 @@ router.get("/downvote-count",function(req,res){
  * @apiUse error
  * @apiUse voteCountStatus
  */
-router.get("/upvote-count",function(req,res){
-    Utility.voteCount(PlaceModel,req.query.id,res,true);
+router.get("/upvote-count", function (req, res) {
+    Utility.voteCount(PlaceModel, req.query.id, res, true);
+});
+
+
+/*
+ * */
+router.get("/start-weather-update", jwtCheck, authConverter, requiresOneOfRoles(["admin", "superadmin"]), function (req, res) {
+    if (WEATHER_UPDATE) {
+        res.status(200).json({status:"Already running"});
+    } else {
+
+        //WEATHER_UPDATE = setInterval(function weatherUpdate(trigger) {
+
+
+        //}, period);
+        res.status(200).json({status: "Started"});
+    }
+});
+router.get("/stop-weather-update",jwtCheck,authConverter,requiresOneOfRoles(["admin","superadmin"]), function(req,res){
+    if(WEATHER_UPDATE) {
+        clearInterval(WEATHER_UPDATE);
+        WEATHER_UPDATE = null;
+        res.status(200).json({status: "Stopped"});
+    }else{
+        res.status(200).json({status: "Nothing was running"});
+    }
 });
 
 module.exports = router;
