@@ -349,7 +349,7 @@ router.post('/create', jwtCheck, authConverter, restrictBanned, function (req, r
                     report.flagged = false;
                     report.date = new Date().toISOString();
 
-                    report.image_url = Utility.saveImage(data.image, "lukeA/report/", id);
+                    report.image_url = Utility.saveImageBase64(data.image, "lukeA/report/", id);
                     report.submitterId = req.user.profile.id;
                     doc.save();
                     report.save(function (err, report) {
