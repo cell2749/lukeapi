@@ -2581,7 +2581,7 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "String",
-            "optional": false,
+            "optional": true,
             "field": "altitude",
             "description": "<p>Altitude of a point where report was made</p>"
           },
@@ -2752,11 +2752,6 @@ define({ "api": [
         {
           "title": "Missing latitude:",
           "content": "HTTP/1.1 422\n{\n    error:\"Missing latitude\"\n}",
-          "type": "json"
-        },
-        {
-          "title": "Missing altitude:",
-          "content": "HTTP/1.1 422\n{\n    error:\"Missing altitude\"\n}",
           "type": "json"
         },
         {
@@ -3421,8 +3416,13 @@ define({ "api": [
           "type": "json"
         },
         {
-          "title": "Id is missing or wrong:",
+          "title": "Id is missing :",
           "content": "HTTP/1.1 404\n{\n    error:\"No report with such id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Wrong Id:",
+          "content": "HTTP/1.1 422\n{\n    error:\"No report with such id\"\n}",
           "type": "json"
         },
         {

@@ -145,9 +145,9 @@ router.get('/', function (req, res) {
 
     //deg2rad might not be necessary
     /*var location = {
-        long: Utility.deg2rad(data.long),
-        lat: Utility.deg2rad(data.lat)
-    };*/
+     long: Utility.deg2rad(data.long),
+     lat: Utility.deg2rad(data.lat)
+     };*/
     var location = {
         long: data.long,
         lat: data.lat
@@ -204,7 +204,7 @@ router.get('/', function (req, res) {
 
                 if (result[i].latitude != null && result[i].longitude != null) {
                     //if (((location.long - result[i].longitude) * longlen) ^ 2 + ((location.lat - result[i].latitude) * latlen) ^ 2 <= distance ^ 2) {
-                    if(Utility.getCrow(location.lat,location.long,result[i].latitude,result[i].longitude)<=distance){
+                    if (Utility.getCrow(location.lat, location.long, result[i].latitude, result[i].longitude) <= distance) {
                         returnResult.push(result[i]);
                     }
                 }
@@ -226,7 +226,7 @@ router.get('/', function (req, res) {
  * @apiParam {String} [title] Title of the report
  * @apiParam {String} longitude Longitude of a point where report was made.
  * @apiParam {String} latitude Latitude of a point where report was made.
- * @apiParam {String} altitude Altitude of a point where report was made
+ * @apiParam {String} [altitude] Altitude of a point where report was made
  * @apiParam {File} [image] Image file that is bound to a report.*Not yet implemented.
  * @apiParam {String} description Description of a report.
  * @apiParam {Array} categoryId Array containing category ids of a report.
@@ -296,11 +296,6 @@ router.get('/', function (req, res) {
  *      {
  *          error:"Missing latitude"
  *      }
- * @apiErrorExample Missing altitude:
- *      HTTP/1.1 422
- *      {
- *          error:"Missing altitude"
- *      }
  * @apiErrorExample Missing description:
  *      HTTP/1.1 422
  *      {
@@ -325,8 +320,6 @@ router.post('/create', jwtCheck, authConverter, restrictBanned, function (req, r
         res.status(422).json({error: "Missing longitude"});
     } else if (data.latitude == null) {
         res.status(422).json({error: "Missing latitude"});
-    } else if (data.altitude == null) {
-        res.status(422).json({error: "Missing altitude"});
     } else if (data.description == null) {
         res.status(422).json({error: "Missing description"});
     } else if (data.categoryId == null) {
@@ -521,8 +514,13 @@ router.post("/update", jwtCheck, authConverter, restrictBanned, function (req, r
  *      {
  *          error:"Restricted Access"
  *      }
- * @apiErrorExample Id is missing or wrong:
+ * @apiErrorExample Id is missing :
  *      HTTP/1.1 404
+ *      {
+ *          error:"No report with such id"
+ *      }
+ * @apiErrorExample Wrong Id:
+ *      HTTP/1.1 422
  *      {
  *          error:"No report with such id"
  *      }
@@ -535,23 +533,23 @@ router.get("/remove", jwtCheck, authConverter, function (req, res) {
     var adminRoles = appMetadata.roles || [];
     ReportModel.findOne({id: id}, {"submitterId": 1}, function (err, doc) {
         if (err)throw err;
-        if ((doc.submitterId == req.user.profile.id || adminRoles.indexOf("admin") != -1) && doc.length != 0) {
-            Utility.deleteImage(doc.image_url);
-            ReportModel.find({id: id}).remove(function (err, item) {
-                if (err) throw err;
+        if (doc != null) {
+            if ((doc.submitterId == req.user.profile.id || adminRoles.indexOf("admin") != -1)) {
+                Utility.deleteImage(doc.image_url);
+                ReportModel.find({id: id}).remove(function (err, item) {
+                    if (err) throw err;
 
-                if (item.result.n != 0) {
-                    res.status(200).json({success: "Removed " + item.result.n + " items"});
-                } else {
-                    res.status(404).json({error: "No report with such id"});
-                }
-            });
-        } else {
-            if (doc.length != 0) {
-                res.status(401).json({error: "Restricted Access"});
+                    if (item.result.n != 0) {
+                        res.status(200).json({success: "Removed " + item.result.n + " items"});
+                    } else {
+                        res.status(404).json({error: "No report with such id"});
+                    }
+                });
             } else {
-                res.status(404).json({error: "No report with such id"});
+                res.status(401).json({error: "Restricted Access"});
             }
+        } else {
+            res.status(422).json({error: "No report with such id"});
         }
     });
 });

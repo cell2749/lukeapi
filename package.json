@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "docsA": "apidoc -i ./routes/lukeA/ -o ./public/lukeA/ -c ./public/lukeA/",
+    "docsB": "apidoc -i ./routes/lukeB/ -o ./public/lukeB/ -c ./public/lukeB/"
   },
   "dependencies": {
     "auth0": "^2.5.0",
