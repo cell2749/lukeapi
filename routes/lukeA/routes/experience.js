@@ -28,7 +28,7 @@ var Utility = new UtModule([
     "_id",
     "__v"
 ]);
-const MONGO_PROJECTION ={
+const MONGO_PROJECTION = {
     _id: 0,
     __v: 0
 };
@@ -79,8 +79,8 @@ const MONGO_PROJECTION ={
  * @apiUse authError
  * @apiUse roleAdmin
  */
-router.get("/",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
-    Utility.get(ExperienceModel,req.query.id,res);
+router.get("/", jwtCheck, authConverter, requiresRole("admin"), function (req, res) {
+    Utility.get(ExperienceModel, req.query.id, res);
 });
 /**
  * @api {post} /lukeA/experience/create Create
@@ -91,7 +91,6 @@ router.get("/",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
  * @apiParam {Number} reportGain Experience gain on report
  * @apiParam {Number} upvoteGain Experience gain on upvote
  * @apiParam {Number} downvoteGain Experience gain on downvote
- * @apiParam {Boolean} active Indicates if current pattern is active. Only one pattern can be active at a time.
  *
  * @apiSuccessExample Success-Response:
  *      HTTP/1.1 200 OK
@@ -109,9 +108,10 @@ router.get("/",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
  * @apiSuccess {Number} reportGain Experience gain on report
  * @apiSuccess {Number} upvoteGain Experience gain on upvote
  * @apiSuccess {Number} downvoteGain Experience gain on downvote
+ * @apiSuccess {Boolean} active Indicates if current pattern is active. Only one pattern can be active at a time.
  *
  * @apiDescription
- * Creates experience pattern. Returns created experience pattern. Call activate in order to activate experiance pattern.
+ * Creates experience pattern. Returns created experience pattern. Call activate in order to activate experience pattern.
  *
  * @apiExample Example:
  * //POST REQUEST EXAMPLE
@@ -121,23 +121,32 @@ router.get("/",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
  * @apiUse authError
  * @apiUse roleSuper
  */
-router.post("/create",jwtCheck,authConverter,requiresRole("superadmin"),function(req,res) {
+router.post("/create", jwtCheck, authConverter, requiresRole("superadmin"), function (req, res) {
     var data = req.body;
-    console.log(data);
-    var experiencePattern = new ExperienceModel();
-    for (var key in ExperienceModel.schema.paths) {
-        if (Utility.allowKey(key)) {
-            experiencePattern[key] = data[key] || experiencePattern[key];
+    if (!data.title) {
+        res.status(422).json({error: "Missing title"});
+    } else if (!data.reportGain) {
+        res.status(422).json({error: "Missing reportGain"});
+    } else if (!data.upvoteGain) {
+        res.status(422).json({error: "Missing upvoteGain"});
+    } else if (!data.downvoteGain) {
+        res.status(422).json({error: "Missing downvoteGain"});
+    } else {
+        var experiencePattern = new ExperienceModel();
+        for (var key in ExperienceModel.schema.paths) {
+            if (Utility.allowKey(key)) {
+                experiencePattern[key] = data[key] || experiencePattern[key];
+            }
         }
+        var id = mongoose.Types.ObjectId();
+        experiencePattern.id = id;
+        experiencePattern._id = id;
+        experiencePattern.active = false;
+        experiencePattern.save(function (err, result) {
+            if (err) throw err;
+            res.status(200).json(Utility.filter(result));
+        });
     }
-    var id = mongoose.Types.ObjectId();
-    experiencePattern.id = id;
-    experiencePattern._id = id;
-    experiencePattern.active = false;
-    experiencePattern.save(function (err, result) {
-        if (err) throw err;
-        res.status(200).json(Utility.filter(result));
-    });
 });
 /**
  * @api {post} /lukeA/experience/update Update
@@ -184,28 +193,28 @@ router.post("/create",jwtCheck,authConverter,requiresRole("superadmin"),function
  *          error:"No pattern was found"
  *      }
  */
-router.post("/update",jwtCheck,authConverter,requiresRole("superadmin"),function(req,res){
+router.post("/update", jwtCheck, authConverter, requiresRole("superadmin"), function (req, res) {
     var data = req.body;
-    ExperienceModel.findOne({id:data.id},function(err, doc){
-        if(err) throw err;
-        if(doc) {
+    ExperienceModel.findOne({id: data.id}, function (err, doc) {
+        if (err) throw err;
+        if (doc) {
             var experiencePattern = new ExperienceModel();
-            for(var key in experiencePattern.schema.paths){
-                if(Utility.allowKey(key)){
-                    doc[key]= data[key] || doc[key];
+            for (var key in experiencePattern.schema.paths) {
+                if (Utility.allowKey(key)) {
+                    doc[key] = data[key] || doc[key];
                 }
             }
-            doc.save(function(err,result){
-                if(err) throw err;
-                var returnV={}, pattern = new ExperienceModel();
-                for(var key in pattern.schema.paths){
-                    returnV[key]=result[key];
+            doc.save(function (err, result) {
+                if (err) throw err;
+                var returnV = {}, pattern = new ExperienceModel();
+                for (var key in pattern.schema.paths) {
+                    returnV[key] = result[key];
                 }
                 res.status(200).json(returnV);
             });
 
-        }else{
-            res.status(404).json({error:"No pattern was found"});
+        } else {
+            res.status(404).json({error: "No pattern was found"});
         }
     });
 });
@@ -245,14 +254,14 @@ router.post("/update",jwtCheck,authConverter,requiresRole("superadmin"),function
  *          error:"No item with such id"
  *      }
  */
-router.get("/remove",jwtCheck,authConverter,requiresRole("superadmin"),function(req,res) {
+router.get("/remove", jwtCheck, authConverter, requiresRole("superadmin"), function (req, res) {
     var data = req.query;
     ExperienceModel.find({id: data.id}).remove(function (err, item) {
         if (err) throw err;
         if (item.result.n != 0) {
-            res.status(200).json({success:"Removed " + item.result.n + "items"});
+            res.status(200).json({success: "Removed " + item.result.n + "items"});
         } else {
-            res.status(404).json({error:"No item with such id"});
+            res.status(404).json({error: "No item with such id"});
         }
     });
 });
@@ -292,12 +301,12 @@ router.get("/remove",jwtCheck,authConverter,requiresRole("superadmin"),function(
  *          error:"Missing id for experience model"
  *      }
  */
-router.get("/activate",jwtCheck,authConverter,requiresRole("superadmin"),function(req,res) {
+router.get("/activate", jwtCheck, authConverter, requiresRole("superadmin"), function (req, res) {
     var data = req.query;
-    if(data.id) {
+    if (data.id) {
         ExperienceModel.update({id: data.id}, {$set: {active: true}}, function (err, doc) {
             if (err) throw err;
-            if(doc.n!=0) {
+            if (doc.n != 0) {
                 ExperienceModel.update({
                     id: {$ne: data.id},
                     active: true
@@ -306,12 +315,12 @@ router.get("/activate",jwtCheck,authConverter,requiresRole("superadmin"),functio
 
                     res.status(200).json({success: true});
                 });
-            }else{
-                res.status(404).json({error:"No experience model with such id"});
+            } else {
+                res.status(404).json({error: "No experience model with such id"});
             }
         });
-    }else{
-        res.status(422).json({error:"Missing id for experience model"});
+    } else {
+        res.status(422).json({error: "Missing id for experience model"});
     }
 });
 /**
@@ -339,10 +348,10 @@ router.get("/activate",jwtCheck,authConverter,requiresRole("superadmin"),functio
  * @apiUse authError
  * @apiUse roleSuper
  */
-router.get("/nullify-all",jwtCheck,authConverter,requiresRole("superadmin"),function(req,res){
-    UserModel.update({}, {$set: {score: 0, rankingId:null}}, function (err, result) {
-        if(err) throw err;
-        res.status(200).json({success:true});
+router.get("/nullify-all", jwtCheck, authConverter, requiresRole("superadmin"), function (req, res) {
+    UserModel.update({}, {$set: {score: 0, rankingId: null}}, function (err, result) {
+        if (err) throw err;
+        res.status(200).json({success: true});
     });
 });
 /**
@@ -377,15 +386,15 @@ router.get("/nullify-all",jwtCheck,authConverter,requiresRole("superadmin"),func
  *          error:"Missing user id"
  *      }
  */
-router.get("/nullify",jwtCheck,authConverter,requiresRole("superadmin"),function(req,res){
+router.get("/nullify", jwtCheck, authConverter, requiresRole("superadmin"), function (req, res) {
     var usrId = req.query.id;
-    if(usrId) {
+    if (usrId) {
         UserModel.update({id: usrId}, {$set: {score: 0, rankingId: null}}, function (err, result) {
             if (err) throw err;
             res.status(200).json({success: true});
         });
-    }else{
-        res.status(422).json({error:"Missing user id"});
+    } else {
+        res.status(422).json({error: "Missing user id"});
     }
 });
 module.exports = router;

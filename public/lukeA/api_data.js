@@ -1236,13 +1236,6 @@ define({ "api": [
             "optional": false,
             "field": "downvoteGain",
             "description": "<p>Experience gain on downvote</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Boolean",
-            "optional": false,
-            "field": "active",
-            "description": "<p>Indicates if current pattern is active. Only one pattern can be active at a time.</p>"
           }
         ],
         "Required Role": [
@@ -1299,11 +1292,18 @@ define({ "api": [
             "optional": false,
             "field": "downvoteGain",
             "description": "<p>Experience gain on downvote</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "active",
+            "description": "<p>Indicates if current pattern is active. Only one pattern can be active at a time.</p>"
           }
         ]
       }
     },
-    "description": "<p>Creates experience pattern. Returns created experience pattern. Call activate in order to activate experiance pattern.</p>",
+    "description": "<p>Creates experience pattern. Returns created experience pattern. Call activate in order to activate experience pattern.</p>",
     "examples": [
       {
         "title": "Example:",
