@@ -72,11 +72,11 @@ const MONGO_PROJECTION = {
  *          error:"Missing title"
  *      }
  */
-router.post('/create', jwtCheck,authConverter,requiresRole('admin'),function(req,res,next){
+router.post('/create', jwtCheck, authConverter, requiresRole('admin'), function (req, res, next) {
     var data = req.body;
     var id = mongoose.Types.ObjectId();
 
-    if(data.title != null) {
+    if (data.title != null) {
         var rank = new RankModel();
         for (var key in rank.schema.paths) {
             if (Utility.allowKey(key)) {
@@ -85,17 +85,17 @@ router.post('/create', jwtCheck,authConverter,requiresRole('admin'),function(req
         }
         rank.id = id;
         rank._id = id;
-        rank.image_url=Utility.saveImage(req,"lukeA/rank/",id);
+        rank.image_url = Utility.saveImage(req, "lukeA/rank/", id);
         rank.save(function (err, rank) {
-            if (err) throw err;
+            if (err) console.log(err);
             var returnV = {};
             for (var key in RankModel.schema.paths) {
                 returnV[key] = rank[key];
             }
             res.status(200).json(returnV);
         });
-    }else{
-        res.status(422).json({error:"Missing title"});
+    } else {
+        res.status(422).json({error: "Missing title"});
     }
 });
 /**
@@ -147,32 +147,32 @@ router.post('/create', jwtCheck,authConverter,requiresRole('admin'),function(req
  *          error:"Rank with such id doesn't exist"
  *      }
  */
-router.post("/update",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
+router.post("/update", jwtCheck, authConverter, requiresRole("admin"), function (req, res) {
     var data = req.body;
-    if(data.id){
+    if (data.id) {
         RankModel.findOne({id: data.id}, function (err, doc) {
             if (doc) {
                 var rank = new RankModel();
-                for (var key in rank.schema.paths){
-                    if(Utility.allowKey(key)) {
+                for (var key in rank.schema.paths) {
+                    if (Utility.allowKey(key)) {
                         doc[key] = data[key] || doc[key];
                     }
                 }
-                doc.image_url = Utility.saveImage(req,"lukeA/rank/",doc.id)||doc.image_url;
-                doc.save(function(err,result){
-                    if(err) throw err;
-                    var returnV={};
-                    for(var key in RankModel.schema.paths){
-                        returnV[key]=result[key];
+                doc.image_url = Utility.saveImage(req, "lukeA/rank/", doc.id) || doc.image_url;
+                doc.save(function (err, result) {
+                    if (err) console.log(err);
+                    var returnV = {};
+                    for (var key in RankModel.schema.paths) {
+                        returnV[key] = result[key];
                     }
                     res.status(200).json(returnV);
                 });
             } else {
-                res.status(404).json({error:"Rank with such id doesn't exist"});
+                res.status(404).json({error: "Rank with such id doesn't exist"});
             }
         });
-    }else {
-        res.status(422).json({error:"Id was not specified"});
+    } else {
+        res.status(422).json({error: "Id was not specified"});
     }
 });
 /**
@@ -212,18 +212,18 @@ router.post("/update",jwtCheck,authConverter,requiresRole("admin"),function(req,
  *          error:"No rank with such id"
  *      }
  */
-router.get("/remove",jwtCheck,authConverter,requiresRole("admin"),function(req,res) {
+router.get("/remove", jwtCheck, authConverter, requiresRole("admin"), function (req, res) {
     var data = req.query;
     var id = data.id;
     if (id) {
 
         RankModel.find({id: id}, function (err, doc) {
-            if (err) throw err;
-            if(doc.length!=0) {
+            if (err) console.log(err);
+            if (doc.length != 0) {
                 Utility.deleteImage(doc.image_url);
             }
         }).remove(function (err, item) {
-            if (err) throw err;
+            if (err) console.log(err);
 
             if (item.result.n != 0) {
                 res.status(200).json({success: "Removed " + item.result.n + " items"});
@@ -276,8 +276,8 @@ router.get("/remove",jwtCheck,authConverter,requiresRole("admin"),function(req,r
  * @apiUse error
  * @apiUse loginError
  */
-router.get("/",function(req,res){
-   var id = req.query.id || null;
-    Utility.get(RankModel,id,res);
+router.get("/", function (req, res) {
+    var id = req.query.id || null;
+    Utility.get(RankModel, id, res);
 });
 module.exports = router;

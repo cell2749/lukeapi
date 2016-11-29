@@ -101,7 +101,7 @@ router.get('/', function (req, res) {
         }
     }
     AdminMarkerModel.find(query, MONGO_PROJECTION).sort({"date": -1}).limit(parseInt(limit)).exec(function (err, collection) {
-        if (err) throw err;
+        if (err) console.log(err);
         var result = collection;
 
         if (distance && location.long && location.lat) {
@@ -209,7 +209,7 @@ router.post('/create', jwtCheck, authConverter, requiresRole("admin"), function 
         marker.date = new Date().toISOString();
 
         marker.save(function (err, marker) {
-            if (err)throw err;
+            if (err)console.log(err);
 
             res.status(200).json(Utility.filter(marker));
         });
@@ -266,7 +266,7 @@ router.post('/create', jwtCheck, authConverter, requiresRole("admin"), function 
 router.post("/update", jwtCheck, authConverter, restrictBanned, function (req, res) {
     var data = req.body;
     AdminMarkerModel.findOne({id: data.id}, function (err, doc) {
-        if (err)throw err;
+        if (err)console.log(err);
         if (doc) {
             for (var key in AdminMarkerModel.schema.paths) {
                 if (Utility.allowKey(key)) {
@@ -274,7 +274,7 @@ router.post("/update", jwtCheck, authConverter, restrictBanned, function (req, r
                 }
             }
             doc.save(function (err, result) {
-                if (err)throw err;
+                if (err)console.log(err);
                 res.status(200).json(Utility.filter(result));
             });
 
@@ -321,7 +321,7 @@ router.get("/remove", jwtCheck, authConverter,requiresRole("admin"), function (r
     var id = data.id;
 
     AdminMarkerModel.find({id: id}).remove(function (err, item) {
-        if (err) throw err;
+        if (err) console.log(err);
 
         if (item.result.n != 0) {
             res.status(200).json({success: "Removed " + item.result.n + " items"});

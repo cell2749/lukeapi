@@ -187,7 +187,7 @@ router.get('/', function (req, res) {
         submitterId: submitterId,
         flagged: flagged
     }, MONGO_PROJECTION).sort({"date": -1}).limit(parseInt(limit)).exec(function (err, collection) {
-        if (err) throw err;
+        if (err) console.log(err);
         var result = [];
         if (rating != null) {
             for (i = 0; i < collection.length; i++) {
@@ -326,7 +326,7 @@ router.post('/create', jwtCheck, authConverter, restrictBanned, function (req, r
         res.status(422).json({error: "Missing categoryId"});
     } else {
         ExperienceModel.findOne({active: true}, function (err, exp) {
-            if (err) throw err;
+            if (err) console.log(err);
             if (exp) {
                 UserModel.findOne({id: req.user.profile.id}, function (err, doc) {
                     doc.score = doc.score + exp.reportGain;
@@ -353,7 +353,7 @@ router.post('/create', jwtCheck, authConverter, restrictBanned, function (req, r
                     report.submitterId = req.user.profile.id;
                     doc.save();
                     report.save(function (err, report) {
-                        if (err)throw err;
+                        if (err)console.log(err);
                         var returnV = {};
                         for (var key in ReportModel.schema.paths) {
                             returnV[key] = report[key];
@@ -532,12 +532,12 @@ router.get("/remove", jwtCheck, authConverter, function (req, res) {
     var appMetadata = req.user.profile._json.app_metadata || {};
     var adminRoles = appMetadata.roles || [];
     ReportModel.findOne({id: id}, {"submitterId": 1}, function (err, doc) {
-        if (err)throw err;
+        if (err)console.log(err);
         if (doc != null) {
             if ((doc.submitterId == req.user.profile.id || adminRoles.indexOf("admin") != -1)) {
                 Utility.deleteImage(doc.image_url);
                 ReportModel.find({id: id}).remove(function (err, item) {
-                    if (err) throw err;
+                    if (err) console.log(err);
 
                     if (item.result.n != 0) {
                         res.status(200).json({success: "Removed " + item.result.n + " items"});
@@ -588,11 +588,11 @@ router.get("/approve", jwtCheck, authConverter, requiresRole("admin"), function 
     var data = req.query;
     var id = data.id;
     ReportModel.findOne({id: id}, function (err, doc) {
-        if (err) throw err;
+        if (err) console.log(err);
         if (doc) {
             doc.approved = true;
             doc.save(function (err, result) {
-                if (err) throw err;
+                if (err) console.log(err);
                 res.status(200).json({success: true});
             });
         } else {
@@ -635,117 +635,11 @@ router.get("/disapprove", jwtCheck, authConverter, requiresRole("admin"), functi
     var data = req.query;
     var id = data.id;
     ReportModel.findOne({id: id}, function (err, doc) {
-        if (err) throw err;
+        if (err) console.log(err);
         if (doc) {
             doc.approved = false;
             doc.save(function (err, result) {
-                if (err) throw err;
-                res.status(200).json({success: true});
-            });
-        } else {
-            res.status(200).json({error: "No report with such id"});
-        }
-    });
-});
-/**
- * @api {get} /lukeA/report/flag Flag
- * @apiName Flag
- * @apiGroup Report
- *
- * @apiParam {String} id Id of a report to be flagged
- *
- * @apiSuccessExample Success-Response:
- *      HTTP/1.1 200 OK
- *      {
- *          success: true
- *      }
- *
- * @apiSuccess {Boolean} success If true, flagging was successful
- *
- * @apiDescription
- * Flag the report with specified id. Currently there is no role restriction on the use of this function.
- *
- * @apiExample Example:
- * http://balticapp.fi/lukeA/report/flag?id=2121ge921ed123d1
- *
- * @apiUse error
- * @apiUse loginError
- * @apiUse banned
- * @apiErrorExample Id is missing or wrong:
- *      HTTP/1.1 404
- *      {
- *          error:"No report with such id"
- *      }
- */
-router.get("/flag", jwtCheck, authConverter, restrictBanned, function (req, res) {
-    var data = req.query;
-    var id = data.id;
-    ReportModel.findOne({id: id}, function (err, doc) {
-        if (err) throw err;
-        if (doc) {
-            if (doc.flags.indexOf(req.user.profile.id) == -1) {
-                doc.flags.push(req.user.profile.id);
-            }
-            if (doc.flags.length >= Utility.maxFlags) {
-                doc.flagged = true;
-                doc.approved = false;
-            }
-            doc.save(function (err, result) {
-                if (err) throw err;
-                res.status(200).json({success: true});
-            });
-        } else {
-            res.status(200).json({error: "No report with such id"});
-        }
-    });
-});
-/**
- * @api {get} /lukeA/report/unflag Unflag
- * @apiName Unflag
- * @apiGroup Report
- *
- * @apiParam {String} id Id of a report to be unflagged
- *
- * @apiSuccessExample Success-Response:
- *      HTTP/1.1 200 OK
- *      {
- *          success: true
- *      }
- *
- * @apiSuccess {Boolean} success If true, unflagging was successful
- *
- * @apiDescription
- * Unflag the report with specified id. Only admin can unflag the report.
- *
- * @apiExample Example:
- * http://balticapp.fi/lukeA/report/unflag?id=2121ge921ed123d1
- *
- * @apiUse error
- * @apiUse loginError
- * @apiUse roleAdmin
- * @apiErrorExample Id is missing or wrong:
- *      HTTP/1.1 404
- *      {
- *          error:"No report with such id"
- *      }
- */
-router.get("/unflag", jwtCheck, authConverter, requiresRole("admin"), function (req, res) {
-    var data = req.query;
-    var id = data.id;
-    ReportModel.findOne({id: id}, function (err, doc) {
-        if (err) throw err;
-        if (doc) {
-            if (doc.flags.indexOf(req.user.profile.id) != -1) {
-                doc.flags.splice(doc.flags.indexOf(req.user.profile.id), 1);
-            }
-            if (doc.flags.length < Utility.maxFlags) {
-                doc.flagged = false;
-                if (doc.approved == false) {
-                    doc.approved = null;
-                }
-            }
-            doc.save(function (err, result) {
-                if (err) throw err;
+                if (err) console.log(err);
                 res.status(200).json({success: true});
             });
         } else {
@@ -800,13 +694,13 @@ router.get("/upvote", jwtCheck, authConverter, restrictBanned, function (req, re
     var reportId = req.query.id;
     if (reportId != null) {
         ExperienceModel.findOne({active: true}, function (err, exp) {
-            if (err) throw err;
+            if (err) console.log(err);
             if (exp) {
                 ReportModel.findOne({id: reportId}, function (err, doc) {
-                    if (err) throw err;
+                    if (err) console.log(err);
                     if (doc) {
                         UserModel.findOne({id: doc.submitterId}, function (err, usr) {
-                            if (err) throw err;
+                            if (err) console.log(err);
                             if (usr) {
                                 usr.score = usr.score + exp.upvoteGain;
                                 var exists = false;
@@ -897,13 +791,13 @@ router.get("/downvote", jwtCheck, authConverter, restrictBanned, function (req, 
     var reportId = req.query.id;
     if (reportId != null) {
         ExperienceModel.findOne({active: true}, function (err, exp) {
-            if (err) throw err;
+            if (err) console.log(err);
             if (exp) {
                 ReportModel.findOne({id: reportId}, function (err, doc) {
-                    if (err) throw err;
+                    if (err) console.log(err);
                     if (doc) {
                         UserModel.findOne({id: doc.submitterId}, function (err, usr) {
-                            if (err) throw err;
+                            if (err) console.log(err);
                             if (usr) {
                                 usr.score = usr.score + exp.downvoteGain;
 
@@ -997,14 +891,14 @@ router.get("/vote", jwtCheck, authConverter, restrictBanned, function (req, res)
     var vote = data.vote;
     if (reportId != null && vote != null) {
         ExperienceModel.findOne({active: true}, function (err, exp) {
-            if (err) throw err;
+            if (err) console.log(err);
 
             if (exp) {
                 ReportModel.findOne({id: reportId}, function (err, doc) {
-                    if (err) throw err;
+                    if (err) console.log(err);
                     if (doc) {
                         UserModel.findOne({id: doc.submitterId}, function (err, usr) {
-                            if (err) throw err;
+                            if (err) console.log(err);
 
                             if (usr) {
                                 if (vote == "true" || vote == 1) {
@@ -1114,7 +1008,7 @@ router.get("/downvote-count", function (req, res) {
     var count = 0;
     if (data.id) {
         ReportModel.findOne({id: data.id}, function (err, doc) {
-            if (err)throw err;
+            if (err)console.log(err);
             if (doc) {
                 for (var i = 0; i < doc.votes.length; i++) {
                     if (!doc.votes[i].vote) {
@@ -1169,7 +1063,7 @@ router.get("/upvote-count", function (req, res) {
     var count = 0;
     if (data.id) {
         ReportModel.findOne({id: data.id}, function (err, doc) {
-            if (err)throw err;
+            if (err)console.log(err);
             if (doc) {
                 for (var i = 0; i < doc.votes.length; i++) {
                     if (doc.votes[i].vote) {

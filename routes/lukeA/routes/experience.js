@@ -143,7 +143,7 @@ router.post("/create", jwtCheck, authConverter, requiresRole("superadmin"), func
         experiencePattern._id = id;
         experiencePattern.active = false;
         experiencePattern.save(function (err, result) {
-            if (err) throw err;
+            if (err) console.log(err);
             res.status(200).json(Utility.filter(result));
         });
     }
@@ -196,7 +196,7 @@ router.post("/create", jwtCheck, authConverter, requiresRole("superadmin"), func
 router.post("/update", jwtCheck, authConverter, requiresRole("superadmin"), function (req, res) {
     var data = req.body;
     ExperienceModel.findOne({id: data.id}, function (err, doc) {
-        if (err) throw err;
+        if (err) console.log(err);
         if (doc) {
             var experiencePattern = new ExperienceModel();
             for (var key in experiencePattern.schema.paths) {
@@ -205,7 +205,7 @@ router.post("/update", jwtCheck, authConverter, requiresRole("superadmin"), func
                 }
             }
             doc.save(function (err, result) {
-                if (err) throw err;
+                if (err) console.log(err);
                 var returnV = {}, pattern = new ExperienceModel();
                 for (var key in pattern.schema.paths) {
                     returnV[key] = result[key];
@@ -257,7 +257,7 @@ router.post("/update", jwtCheck, authConverter, requiresRole("superadmin"), func
 router.get("/remove", jwtCheck, authConverter, requiresRole("superadmin"), function (req, res) {
     var data = req.query;
     ExperienceModel.find({id: data.id}).remove(function (err, item) {
-        if (err) throw err;
+        if (err) console.log(err);
         if (item.result.n != 0) {
             res.status(200).json({success: "Removed " + item.result.n + "items"});
         } else {
@@ -305,7 +305,7 @@ router.get("/activate", jwtCheck, authConverter, requiresRole("superadmin"), fun
     var data = req.query;
     if (data.id) {
         ExperienceModel.update({id: data.id}, {$set: {active: true}}, function (err, doc) {
-            if (err) throw err;
+            if (err) console.log(err);
             if (doc.n != 0) {
                 ExperienceModel.update({
                     id: {$ne: data.id},
@@ -350,7 +350,7 @@ router.get("/activate", jwtCheck, authConverter, requiresRole("superadmin"), fun
  */
 router.get("/nullify-all", jwtCheck, authConverter, requiresRole("superadmin"), function (req, res) {
     UserModel.update({}, {$set: {score: 0, rankingId: null}}, function (err, result) {
-        if (err) throw err;
+        if (err) console.log(err);
         res.status(200).json({success: true});
     });
 });
@@ -390,7 +390,7 @@ router.get("/nullify", jwtCheck, authConverter, requiresRole("superadmin"), func
     var usrId = req.query.id;
     if (usrId) {
         UserModel.update({id: usrId}, {$set: {score: 0, rankingId: null}}, function (err, result) {
-            if (err) throw err;
+            if (err) console.log(err);
             res.status(200).json({success: true});
         });
     } else {

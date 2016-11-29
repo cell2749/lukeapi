@@ -125,7 +125,7 @@ router.post('/create',jwtCheck,authConverter,requiresRole('admin'),function(req,
     var id = mongoose.Types.ObjectId();
     if(data.title) {
         ReportCategoryModel.findOne({title: data.title}, function (err, doc) {
-            if(err) throw err;
+            if(err) console.log(err);
             if (doc) {
                 res.status(200).json({error: "Report Category with such name already exists!"});
             } else {
@@ -139,7 +139,7 @@ router.post('/create',jwtCheck,authConverter,requiresRole('admin'),function(req,
                 reportCategory._id = id;
                 reportCategory.image_url = Utility.saveImage(req,"lukeA/category/",id);
                 reportCategory.save(function (err, result) {
-                    if (err)throw err;
+                    if (err)console.log(err);
                     var returnV = {};
                     for (var key in result) {
                         if (key != "_id" || key != "__v") {
@@ -216,7 +216,7 @@ router.post("/update",jwtCheck,authConverter,requiresRole("admin"),function(req,
                 }
                 doc.image_url = Utility.saveImage(req,"lukeA/category/",doc.id) || doc.image_url;
                 doc.save(function (err, result) {
-                    if (err) throw err;
+                    if (err) console.log(err);
                     var returnV = {}, pattern = new ReportCategoryModel();
                     for (var key in pattern.schema.paths) {
                         returnV[key] = result[key];
@@ -268,12 +268,12 @@ router.get("/remove",jwtCheck,authConverter,requiresRole("admin"),function(req,r
     var data = req.query;
     var id = data.id;
     ReportCategoryModel.find({id:id},function(err,doc){
-        if(err) throw err;
+        if(err) console.log(err);
         if(doc.length!=0) {
             Utility.deleteImage(doc.image_url);
         }
     }).remove(function(err,item) {
-        if (err) throw err;
+        if (err) console.log(err);
 
         if (item.result.n != 0) {
             res.status(200).json({success:"Removed " + item.result.n + " items"});

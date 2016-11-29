@@ -40,7 +40,7 @@ var Utility = new UtModule([
     "submitterId",
     "submitterRating"
 ]);
-const MONGO_PROJECTION ={
+const MONGO_PROJECTION = {
     _id: 0,
     __v: 0
 };
@@ -72,8 +72,8 @@ const MONGO_PROJECTION ={
  * @apiUse loginError
  *
  */
-router.get('/get-all', jwtCheck,authConverter, function(req, res, next) {
-    Utility.get(UserModel,null,res);
+router.get('/get-all', jwtCheck, authConverter, function (req, res, next) {
+    Utility.get(UserModel, null, res);
 });
 /**
  * @api {get} /lukeA/user Get user
@@ -113,11 +113,11 @@ router.get('/get-all', jwtCheck,authConverter, function(req, res, next) {
  * @apiUse loginError
  * @apiUse noUser
  */
-router.get('/',jwtCheck,authConverter, function(req, res, next) {
+router.get('/', jwtCheck, authConverter, function (req, res, next) {
     var id = req.query.id || req.user.profile.id;
 
     UserModel.findOne({id: id}, MONGO_PROJECTION, function (err, result) {
-        if (err) throw err;
+        if (err) console.log(err);
 
         if (result) {
             var response = result;
@@ -160,7 +160,7 @@ router.get('/',jwtCheck,authConverter, function(req, res, next) {
  * @apiUse authError
  * @apiUse noUser
  */
-router.post('/update',jwtCheck,authConverter,function(req,res) {
+router.post('/update', jwtCheck, authConverter, function (req, res) {
     var data = req.body;
     var id = data.id || req.user.profile.id;
     var appMetadata = req.user.profile._json.app_metadata || {roles: []};
@@ -176,10 +176,10 @@ router.post('/update',jwtCheck,authConverter,function(req,res) {
                         success = true;
                     }
                 }
-                doc.image_url = Utility.saveImage(req,"lukeA/user/",doc.id);
-                doc.save(function(err,result){
-                    if(err) throw err;
-                    res.status(200).json({success:success});
+                doc.image_url = Utility.saveImage(req, "lukeA/user/", doc.id);
+                doc.save(function (err, result) {
+                    if (err) console.log(err);
+                    res.status(200).json({success: success});
                 });
 
             } else {
@@ -218,11 +218,11 @@ router.post('/update',jwtCheck,authConverter,function(req,res) {
  *          error:"Username not specified"
  *      }
  */
-router.get('/available',jwtCheck,authConverter,function(req,res){
+router.get('/available', jwtCheck, authConverter, function (req, res) {
     var username = req.query.username;
-    if(username) {
+    if (username) {
         UserModel.findOne({username: username}, function (err, doc) {
-            if (err) throw err;
+            if (err) console.log(err);
 
             if (doc) {
                 res.status(200).json({exists: true})
@@ -230,8 +230,8 @@ router.get('/available',jwtCheck,authConverter,function(req,res){
                 res.status(200).json({exists: false});
             }
         });
-    }else{
-        res.status(422).json({error:"Username not specified"});
+    } else {
+        res.status(422).json({error: "Username not specified"});
     }
 });
 /**
@@ -277,7 +277,7 @@ router.get('/available',jwtCheck,authConverter,function(req,res){
  *      }
  * @apiUse specialAdmin
  */
-router.get('/set-username',jwtCheck,authConverter,function(req,res) {
+router.get('/set-username', jwtCheck, authConverter, function (req, res) {
     var id = req.query.id || req.user.profile.id;
     var username = req.query.username;
     var appMetadata = req.user.profile._json.app_metadata || {};
@@ -287,20 +287,20 @@ router.get('/set-username',jwtCheck,authConverter,function(req,res) {
     } else {
         if (username) {
             UserModel.findOne({username: username}, function (err, doc) {
-                if (err) throw err;
+                if (err) console.log(err);
 
                 if (doc) {
                     res.status(422).json({error: "Username already exists"});
                 } else {
                     UserModel.findOne({id: id}, function (err, doc) {
-                        if (err) throw err;
+                        if (err) console.log(err);
 
                         if (doc.username && roles.indexOf("admin") == -1) {
                             res.status(401).json({error: "Cannot modify existing value.", auth: true});
                         } else {
                             doc.username = username;
                             doc.save(function (err, result) {
-                                if (err)throw err;
+                                if (err)console.log(err);
                                 res.status(200).json({success: true});
                             });
 
@@ -314,19 +314,19 @@ router.get('/set-username',jwtCheck,authConverter,function(req,res) {
     }
 });
 /*router.get("/copy-profile",jwtCheck,authConverter,function(req,res) {
-    var data = req.user.profile;
-    var profile = {
-        image_url: data.picture,
-        provider: data.provider,
-        link: data._json.link
-    };
-    console.log(data);
-    console.log("WOW / ");
-    console.log(data.picture);
-    console.log(data.provider);
-    console.log(data._json.link);
-    res.status(200).json(profile);
-});*/
+ var data = req.user.profile;
+ var profile = {
+ image_url: data.picture,
+ provider: data.provider,
+ link: data._json.link
+ };
+ console.log(data);
+ console.log("WOW / ");
+ console.log(data.picture);
+ console.log(data.provider);
+ console.log(data._json.link);
+ res.status(200).json(profile);
+ });*/
 /**
  * @api {get} /lukeA/user/add-role Add role
  * @apiName AddRole
@@ -364,14 +364,14 @@ router.get('/set-username',jwtCheck,authConverter,function(req,res) {
  * @apiUse roleSuper
  * @apiUse roleAdmin
  */
-router.get("/add-role",jwtCheck,authConverter,requiresOneOfRoles(["admin","superadmin"]),function(req,res) {
+router.get("/add-role", jwtCheck, authConverter, requiresOneOfRoles(["admin", "superadmin"]), function (req, res) {
     var data = req.query;
     var userId = data.id;
     var role = data.role;
     var rolesArr;
     var appMetadata = req.user.profile._json.app_metadata || {};
     var adminRoles = appMetadata.roles || [];
-    if(role!=null) {
+    if (role != null) {
         if (role != "superadmin" && (role != "admin" || adminRoles.indexOf("superadmin") != -1)) {
             management.users.get({id: userId}, function (err, user) {
                 if (err) {
@@ -396,7 +396,7 @@ router.get("/add-role",jwtCheck,authConverter,requiresOneOfRoles(["admin","super
         } else {
             res.status(401).json({error: 'Proper authorization required', auth: true});
         }
-    }else{
+    } else {
         res.status(422).json({error: 'Role not specified'});
     }
 });
@@ -437,7 +437,7 @@ router.get("/add-role",jwtCheck,authConverter,requiresOneOfRoles(["admin","super
  * @apiUse roleAdmin
  * @apiUse roleSuper
  */
-router.get("/remove-role",jwtCheck,authConverter,requiresOneOfRoles(["admin","superadmin"]),function(req,res) {
+router.get("/remove-role", jwtCheck, authConverter, requiresOneOfRoles(["admin", "superadmin"]), function (req, res) {
     var data = req.query;
     var userId = data.id;
     var role = data.role;
@@ -503,23 +503,23 @@ router.get("/remove-role",jwtCheck,authConverter,requiresOneOfRoles(["admin","su
  *      }
  * @apiUse specialAdmin
  */
-router.get("/roles",jwtCheck,authConverter,function(req,res){
+router.get("/roles", jwtCheck, authConverter, function (req, res) {
     var data = req.query;
-    var userId = data.id||req.user.profile.id;
+    var userId = data.id || req.user.profile.id;
     var appMetadata = req.user.profile._json.app_metadata || {};
     var adminRoles = appMetadata.roles || [];
 
-    if(userId==req.user.profile.id || adminRoles.indexOf("admin")!=-1) {
+    if (userId == req.user.profile.id || adminRoles.indexOf("admin") != -1) {
         management.users.get({id: userId}, function (err, user) {
             if (err) {
                 res.status(404).json({error: "Invalid user id"});
             } else {
-                var result = user.app_metadata.roles||[];
+                var result = user.app_metadata.roles || [];
                 res.status(200).json(result);
             }
         });
-    }else{
-        res.status(401).json({error:'Proper authorization required',auth:true});
+    } else {
+        res.status(401).json({error: 'Proper authorization required', auth: true});
     }
 });
 /**
@@ -546,8 +546,8 @@ router.get("/roles",jwtCheck,authConverter,function(req,res){
  * @apiUse authError
  * @apiUse roleAdmin
  */
-router.get('/is-admin',jwtCheck,authConverter,requiresRole("admin"),function(req,res){
-    res.status(200).json({success:true});
+router.get('/is-admin', jwtCheck, authConverter, requiresRole("admin"), function (req, res) {
+    res.status(200).json({success: true});
 });
 /**
  * @api {get} /lukeA/user/is-advanced Is Advanced
@@ -573,8 +573,8 @@ router.get('/is-admin',jwtCheck,authConverter,requiresRole("admin"),function(req
  * @apiUse authError
  * @apiUse roleAdv
  */
-router.get('/is-advanced',jwtCheck,authConverter,requiresRole("advanced"),function(req,res){
-    res.status(200).json({success:true});
+router.get('/is-advanced', jwtCheck, authConverter, requiresRole("advanced"), function (req, res) {
+    res.status(200).json({success: true});
 });
 /**
  * @api {get} /lukeA/user/ban Ban
@@ -606,7 +606,7 @@ router.get('/is-advanced',jwtCheck,authConverter,requiresRole("advanced"),functi
  *      }
  * @apiUse roleAdmin
  */
-router.get("/ban",jwtCheck,authConverter,requiresRole("admin"),function(req,res) {
+router.get("/ban", jwtCheck, authConverter, requiresRole("admin"), function (req, res) {
     var data = req.query;
     var id = data.id;
     var rolesArr;
@@ -617,7 +617,7 @@ router.get("/ban",jwtCheck,authConverter,requiresRole("admin"),function(req,res)
         } else {
             rolesArr = user.app_metadata.roles || [];
 
-            if (rolesArr.indexOf("ban") == -1 && rolesArr.indexOf("admin")==-1 && rolesArr.indexOf("superadmin")==-1) {
+            if (rolesArr.indexOf("ban") == -1 && rolesArr.indexOf("admin") == -1 && rolesArr.indexOf("superadmin") == -1) {
                 rolesArr.push("ban");
             }
 
@@ -663,7 +663,7 @@ router.get("/ban",jwtCheck,authConverter,requiresRole("admin"),function(req,res)
  *
  * @apiUse roleAdmin
  */
-router.get("/unban",jwtCheck,authConverter,requiresRole("admin"),function(req,res) {
+router.get("/unban", jwtCheck, authConverter, requiresRole("admin"), function (req, res) {
     var data = req.query;
     var id = data.id;
     var roles;
@@ -723,16 +723,16 @@ router.get("/unban",jwtCheck,authConverter,requiresRole("admin"),function(req,re
  * @apiUse roleAdmin
  * @apiUse roleSuper
  */
-router.post("/upload-default-image",jwtCheck,authConverter,requiresOneOfRoles(["admin","superadmin"]),function(req,res){
-   var name = req.body.image_name;
-    if(name!=null) {
+router.post("/upload-default-image", jwtCheck, authConverter, requiresOneOfRoles(["admin", "superadmin"]), function (req, res) {
+    var name = req.body.image_name;
+    if (name != null) {
         if (Utility.saveImage(req, "lukeA/user/default/", name) != null) {
             res.status(200).json({success: true});
         } else {
             res.status(500).json({error: "Image upload failed"});
         }
-    }else{
-        res.status(422).json({error:"Missing name"});
+    } else {
+        res.status(422).json({error: "Missing name"});
     }
 });
 /**
@@ -772,16 +772,16 @@ router.post("/upload-default-image",jwtCheck,authConverter,requiresOneOfRoles(["
  * @apiUse roleAdmin
  * @apiUse roleSuper
  */
-router.get("/delete-default-image",jwtCheck,authConverter,requiresOneOfRoles(["admin","superadmin"]),function(req,res){
+router.get("/delete-default-image", jwtCheck, authConverter, requiresOneOfRoles(["admin", "superadmin"]), function (req, res) {
     var image_url = req.query.image_url;
-    if(image_url!=null&&image_url.indexOf("user/default")!=-1) {
+    if (image_url != null && image_url.indexOf("user/default") != -1) {
         if (Utility.deleteImage(image_url) != null) {
             res.status(200).json({success: true});
         } else {
             res.status(500).json({error: "Image deletion failed"});
         }
-    }else{
-        res.status(422).json({error:"Missing/Incorrect url"});
+    } else {
+        res.status(422).json({error: "Missing/Incorrect url"});
     }
 });
 /**

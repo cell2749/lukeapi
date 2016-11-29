@@ -67,7 +67,7 @@ Utility.prototype.getCrow = function (lat1, lon1, lat2, lon2) {
 Utility.prototype.remove = function (Model, id, res) {
     if (id) {
         Model.find({id: id}).remove(function (err, item) {
-            if (err) throw err;
+            if (err) console.log(err);
 
             if (item.result.n != 0) {
                 res.status(200).json({success: "Removed " + item.result.n + " items"});
@@ -150,7 +150,7 @@ Utility.prototype.vote = function (Model, req, res, vote) {
     if (id) {
         if (vote != null) {
             Model.findOne({id: id}, function (err, doc) {
-                if (err)throw err;
+                if (err)console.log(err);
 
                 if (doc) {
                     var exists = false;
@@ -177,7 +177,7 @@ Utility.prototype.vote = function (Model, req, res, vote) {
                                 doc.flagged = true;
                             }
                             doc.save(function (err, result) {
-                                if (err)throw err;
+                                if (err)console.log(err);
                                 res.status(200).json({success: true});
                             });
                         }
@@ -216,7 +216,7 @@ Utility.prototype.voteCount = function (Model, id, res, vote) {
     var count = 0;
     if (id) {
         Model.findOne({id: id}, function (err, doc) {
-            if (err)throw err;
+            if (err)console.log(err);
             if (doc) {
                 for (var i = 0; i < doc.votes.length; i++) {
                     if (doc.votes[i].vote == vote) {
@@ -239,7 +239,7 @@ Utility.prototype.get = function (Model, id, res) {
     var returnArray = [];
     if (id == null) {
         Model.find({}, MONGO_PROJECTION, function (err, doc) {
-            if (err)throw err;
+            if (err)console.log(err);
             for (var i = 0; i < doc.length; i++) {
                 for (var key in Model.schema.paths) {
                     returnV[key] = doc[i][key];
@@ -253,7 +253,7 @@ Utility.prototype.get = function (Model, id, res) {
         });
     } else {
         Model.findOne({id: id}, function (err, doc) {
-            if (err) throw err;
+            if (err) console.log(err);
             for (var key in Model.schema.paths) {
                 returnV[key] = doc[key];
             }
@@ -276,9 +276,9 @@ Utility.prototype.saveImage = function (req, path, imgName) {
                 fullpath = fullpath + "." + format;
 
                 fs.readFile(req.files.image.path, function (err, data) {
-                    if (err)throw err;
+                    if (err)console.log(err);
                     fs.writeFile(fullpath, data, function (err) {
-                        if (err) throw err;
+                        if (err) console.log(err);
 
                         return "www.balticapp.fi/images/" + path + imgName + "." + format;
                     });
