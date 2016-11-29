@@ -32,14 +32,14 @@ Utility.prototype.deg2rad = function (deg) {
 };
 Utility.prototype.getCrow = function (lat1, lon1, lat2, lon2) {
     var R = 6371; // Radius of the earth in km
-    var dLat = this.deg2rad(lat2-lat1);
-    var dLon = this.deg2rad(lon2-lon1);
+    var dLat = this.deg2rad(lat2 - lat1);
+    var dLon = this.deg2rad(lon2 - lon1);
     var a =
-            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
             Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
-            Math.sin(dLon/2) * Math.sin(dLon/2)
+            Math.sin(dLon / 2) * Math.sin(dLon / 2)
         ;
-    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     var d = R * c; // Distance in km
     return d;
 };
@@ -150,7 +150,7 @@ Utility.prototype.vote = function (Model, req, res, vote) {
     if (id) {
         if (vote != null) {
             Model.findOne({id: id}, function (err, doc) {
-                if (err)console.log(err);
+                if (err) console.log(err);
 
                 if (doc) {
                     var exists = false;
@@ -177,7 +177,7 @@ Utility.prototype.vote = function (Model, req, res, vote) {
                                 doc.flagged = true;
                             }
                             doc.save(function (err, result) {
-                                if (err)console.log(err);
+                                if (err) console.log(err);
                                 res.status(200).json({success: true});
                             });
                         }
@@ -216,7 +216,7 @@ Utility.prototype.voteCount = function (Model, id, res, vote) {
     var count = 0;
     if (id) {
         Model.findOne({id: id}, function (err, doc) {
-            if (err)console.log(err);
+            if (err) console.log(err);
             if (doc) {
                 for (var i = 0; i < doc.votes.length; i++) {
                     if (doc.votes[i].vote == vote) {
@@ -239,7 +239,7 @@ Utility.prototype.get = function (Model, id, res) {
     var returnArray = [];
     if (id == null) {
         Model.find({}, MONGO_PROJECTION, function (err, doc) {
-            if (err)console.log(err);
+            if (err) console.log(err);
             for (var i = 0; i < doc.length; i++) {
                 for (var key in Model.schema.paths) {
                     returnV[key] = doc[i][key];
@@ -276,7 +276,7 @@ Utility.prototype.saveImage = function (req, path, imgName) {
                 fullpath = fullpath + "." + format;
 
                 fs.readFile(req.files.image.path, function (err, data) {
-                    if (err)console.log(err);
+                    if (err) console.log(err);
                     fs.writeFile(fullpath, data, function (err) {
                         if (err) console.log(err);
 
@@ -315,6 +315,25 @@ Utility.prototype.copyImage = function (req, large) {
         return req.user.profile.picture;
     } else {
         return req.user.profile.picture_large;
+    }
+};
+Utility.prototype.saveImageBase64 = function (base, path, name) {
+    var prePath = "/opt/balticapp/lukeapi/public/images/";
+    var url = "http://www.balticapp.fi/images/";
+    if (base == null) {
+        var format = ".jpeg";
+
+        var fullpath = prePath + path + name + format;
+
+        var imageBuffer = new Buffer(base, 'base64');
+
+        fs.writeFile(fullpath, imageBuffer, function (err) {
+            if (err) console.log(err);
+            return url + path + name + format;
+        });
+    } else {
+        console.log("Error: base is empty");
+        return null;
     }
 };
 module.exports = Utility;
