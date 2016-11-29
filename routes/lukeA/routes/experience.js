@@ -109,10 +109,9 @@ router.get("/",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
  * @apiSuccess {Number} reportGain Experience gain on report
  * @apiSuccess {Number} upvoteGain Experience gain on upvote
  * @apiSuccess {Number} downvoteGain Experience gain on downvote
- * @apiSuccess {Boolean} active Indicates if current pattern is active. Only one pattern can be active at a time.
  *
  * @apiDescription
- * Creates experience pattern. Returns created experience pattern.
+ * Creates experience pattern. Returns created experience pattern. Call activate in order to activate experiance pattern.
  *
  * @apiExample Example:
  * //POST REQUEST EXAMPLE
@@ -134,13 +133,10 @@ router.post("/create",jwtCheck,authConverter,requiresRole("superadmin"),function
     var id = mongoose.Types.ObjectId();
     experiencePattern.id = id;
     experiencePattern._id = id;
+    experiencePattern.active = false;
     experiencePattern.save(function (err, result) {
         if (err) throw err;
-        var returnV = new ExperienceModel();
-        for (var key in ExperienceModel.schema.paths) {
-            returnV[key] = result[key];
-        }
-        res.status(200).json(returnV);
+        res.status(200).json(Utility.filter(result));
     });
 });
 /**
@@ -153,7 +149,6 @@ router.post("/create",jwtCheck,authConverter,requiresRole("superadmin"),function
  * @apiParam {Number} [reportGain] Experience gain on report
  * @apiParam {Number} [upvoteGain] Experience gain on upvote
  * @apiParam {Number} [downvoteGain] Experience gain on downvote
- * @apiParam {Boolean} [active] Indicates if current pattern is active. Only one pattern can be active at a time.
  *
  * @apiSuccessExample Success-Response:
  *      HTTP/1.1 200 OK
@@ -307,7 +302,7 @@ router.get("/activate",jwtCheck,authConverter,requiresRole("superadmin"),functio
                     id: {$ne: data.id},
                     active: true
                 }, {$set: {active: false}}, function (err, result) {
-                    if (err) throw err;
+                    if (err) console.log(err);
 
                     res.status(200).json({success: true});
                 });
