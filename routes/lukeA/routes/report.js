@@ -169,7 +169,7 @@ router.get('/', function (req, res) {
         (p3 * Math.cos(5 * location.lat));
 
     var id = data.id || {$ne: null};
-    var approved = {$ne: null};
+    var approved = {$ne: false};
     var flagged = {$ne: null};
     var submitterId = data.submitterId || {$ne: null};
 
