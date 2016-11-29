@@ -26,7 +26,7 @@ var PlaceModel = require("../../../models/lukeB/PlaceModel");
 var CommentModel = require("../../../models/lukeB/CommentModel");
 var CategoryModel = require("../../../models/lukeB/CategoryModel");
 /*Utility*/
-var WEATHER_UPDATE = [];
+var WEATHER_UPDATE = {};
 var WEATHER_UPDATE_PERIOD;
 var UtModule = require("../../utility");
 var Utility = new UtModule([
@@ -470,59 +470,46 @@ router.get("/upvote-count", function (req, res) {
 
 /*
 router.get("/start-weather-update", jwtCheck, authConverter, requiresOneOfRoles(["admin", "superadmin"]), function (req, res) {
-    if (WEATHER_UPDATE) {
-        res.status(200).json({status: "Already running"});
-    } else {
-        PlaceModel.find({}, {location: 1}, function (err, places) {
-            if (err) {
-                console.log(err);
-                res.status(500).json({error: "BEWARE THE WRATH OF A QUIET MAN!"})
-            } else {
-                places.forEach(function (item) {
-                    WEATHER_UPDATE.push(setInterval(function () {
-                        var options = {
-                            hostname: 'api.openweathermap.org',
-                            port: 80,
-                            path: "data/2.5/weather?lat=" +item.location.lat +"&lon=" + item.location.long,
-                            method: 'GET'
-                        };
-                        http.get(options, function (res) {
-                            var buffer = new Buffer(0)
-                            res.on('readable', function () {
-                                return buffer += this.read().toString('utf8');
-                            });
-                            return res.on('end', function () {
-                                return callback(buffer);
-                            });
+
+    PlaceModel.find({}, {location: 1, id: 1}, function (err, places) {
+        if (err) {
+            console.log(err);
+            res.status(500).json({error: "BEWARE THE WRATH OF A QUIET MAN!"})
+        } else {
+            WEATHER_UPDATE_PERIOD = places.length * 2000;
+            places.forEach(function (item) {
+                WEATHER_UPDATE[item.id] = setInterval(function () {
+                    var options = {
+                        hostname: 'api.openweathermap.org',
+                        port: 80,
+                        path: "data/2.5/weather?lat=" + item.location.lat + "&lon=" + item.location.long,
+                        method: 'GET'
+                    };
+                    http.get(options, function (res) {
+                        var buffer = new Buffer(0)
+                        res.on('readable', function () {
+                            return buffer += this.read().toString('utf8');
                         });
-
-                        openWeather.now({}, function (err, data) {
-                            if (err) {
-                                console.log("Open-weather update ERROR: ");
-                                console.log(err);
-                            } else {
-                                var weatherData = {
-                                    temperature: data.getDegreeTemp(),
-                                    seaTemperature: null,
-                                    wind: data.getWea
-                                };
-                                PlaceModel.update({_id: places[i].id}, {$set: {weatherData: weatherData}}, callback);
-
-                            }
+                        return res.on('end', function () {
+                            ////RAKANISHU!!
+                            return callback(buffer);
                         });
+                    });
 
-                    }, WEATHER_UPDATE_PERIOD));
-                });
-                res.status(200).json({status: "Started"});
-            }
-        });
-    }
+                }, WEATHER_UPDATE_PERIOD);
+
+            });
+            res.status(200).json({status: "Started"});
+        }
+    });
 });
 //*/
 router.get("/stop-weather-update", jwtCheck, authConverter, requiresOneOfRoles(["admin", "superadmin"]), function (req, res) {
-    if (WEATHER_UPDATE) {
-        clearInterval(WEATHER_UPDATE);
-        WEATHER_UPDATE = null;
+    if (WEATHER_UPDATE.length != 0) {
+        WEATHER_UPDATE.forEach(function (item) {
+            clearInterval(WEATHER_UPDATE);
+            WEATHER_UPDATE = null;
+        });
         res.status(200).json({status: "Stopped"});
     } else {
         res.status(200).json({status: "Nothing was running"});
