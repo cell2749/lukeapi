@@ -205,7 +205,7 @@ router.get('/', function (req, res) {
                 if (result[i].latitude != null && result[i].longitude != null) {
                     //if (((location.long - result[i].longitude) * longlen) ^ 2 + ((location.lat - result[i].latitude) * latlen) ^ 2 <= distance ^ 2) {
                     if(Utility.getCrow(location.lat,location.long,result[i].latitude,result[i].longitude)<=distance){
-                        returnResult.push(result);
+                        returnResult.push(result[i]);
                     }
                 }
                 if (i == result.length - 1) {

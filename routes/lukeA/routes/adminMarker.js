@@ -89,31 +89,27 @@ router.get('/', function (req, res) {
     };
     var distance = data.distance || 5000;
 
-    var id = data.id || {$ne: null};
-    var owner = data.owner || {$ne: null};
-
-    AdminMarkerModel.find({
-        id: id,
-        owner: owner
-    }, MONGO_PROJECTION).sort({"date": -1}).limit(parseInt(limit)).exec(function (err, collection) {
-        if (err) throw err;
-        var result = [];
-        if (rating != null) {
-            for (i = 0; i < collection.length; i++) {
-                if (collection[i].rating != null && rating < collection[i].rating) {
-                    result.push(collection[i]);
-                }
-            }
-        } else {
-            result = collection;
+    var query;
+    if(data.owner){
+        query = {
+            id: data.id || {$ne: null},
+            owner: data.owner
         }
+    }else{
+        query = {
+            id: data.id || {$ne: null}
+        }
+    }
+    AdminMarkerModel.find(query, MONGO_PROJECTION).sort({"date": -1}).limit(parseInt(limit)).exec(function (err, collection) {
+        if (err) throw err;
+        var result = collection;
 
         if (distance && location.long && location.lat) {
             for (var i = 0; i < result.length; i++) {
 
                 if (result[i].latitude != null && result[i].longitude != null) {
                     if (Utility.getCrow(location.lat, location.long, result[i].latitude, result[i].longitude) <= distance) {
-                        returnResult.push(result);
+                        returnResult.push(result[i]);
                     }
                 }
                 if (i == result.length - 1) {

@@ -6,6 +6,7 @@ var router = express.Router();
 var passport = require('passport');
 var mongoose = require('mongoose');
 var mongodb = require('../../../mongodb/lukeBdb');
+var openWeather = require('openweather-node');
 /* SECURITY */
 var requiresLogin = require('../../../security/requiresLogin');
 var requiresRole = require('../../../security/requiresRole');
@@ -469,10 +470,12 @@ router.get("/start-weather-update", jwtCheck, authConverter, requiresOneOfRoles(
         res.status(200).json({status:"Already running"});
     } else {
 
-        //WEATHER_UPDATE = setInterval(function weatherUpdate(trigger) {
+        WEATHER_UPDATE = setInterval(function weatherUpdate(trigger) {
+            openWeather.now({},function(err,data){
 
+            });
 
-        //}, period);
+        }, period);
         res.status(200).json({status: "Started"});
     }
 });
