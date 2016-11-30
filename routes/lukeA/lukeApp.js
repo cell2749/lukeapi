@@ -104,6 +104,10 @@ router.get("/login", jwtCheck, authConverter, function (req, res) {
     }
     res.status(200).send("OK");
 });
+router.get('/callback',function(req,res){
+    var idToken = req.query.id_token
+   res.status(200).send("OK");
+});
 /* SECURITY TESTS */
 router.get('/test/public', function (req, res, next) {
 

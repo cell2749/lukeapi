@@ -32,14 +32,14 @@ Utility.prototype.deg2rad = function (deg) {
 };
 Utility.prototype.getCrow = function (lat1, lon1, lat2, lon2) {
     var R = 6371; // Radius of the earth in km
-    var dLat = this.deg2rad(lat2-lat1);
-    var dLon = this.deg2rad(lon2-lon1);
+    var dLat = this.deg2rad(lat2 - lat1);
+    var dLon = this.deg2rad(lon2 - lon1);
     var a =
-            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
             Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
-            Math.sin(dLon/2) * Math.sin(dLon/2)
+            Math.sin(dLon / 2) * Math.sin(dLon / 2)
         ;
-    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     var d = R * c; // Distance in km
     return d;
 };
@@ -150,7 +150,7 @@ Utility.prototype.vote = function (Model, req, res, vote) {
     if (id) {
         if (vote != null) {
             Model.findOne({id: id}, function (err, doc) {
-                if (err)console.log(err);
+                if (err) console.log(err);
 
                 if (doc) {
                     var exists = false;
@@ -177,7 +177,7 @@ Utility.prototype.vote = function (Model, req, res, vote) {
                                 doc.flagged = true;
                             }
                             doc.save(function (err, result) {
-                                if (err)console.log(err);
+                                if (err) console.log(err);
                                 res.status(200).json({success: true});
                             });
                         }
@@ -216,7 +216,7 @@ Utility.prototype.voteCount = function (Model, id, res, vote) {
     var count = 0;
     if (id) {
         Model.findOne({id: id}, function (err, doc) {
-            if (err)console.log(err);
+            if (err) console.log(err);
             if (doc) {
                 for (var i = 0; i < doc.votes.length; i++) {
                     if (doc.votes[i].vote == vote) {
@@ -239,7 +239,7 @@ Utility.prototype.get = function (Model, id, res) {
     var returnArray = [];
     if (id == null) {
         Model.find({}, MONGO_PROJECTION, function (err, doc) {
-            if (err)console.log(err);
+            if (err) console.log(err);
             for (var i = 0; i < doc.length; i++) {
                 for (var key in Model.schema.paths) {
                     returnV[key] = doc[i][key];
@@ -276,7 +276,7 @@ Utility.prototype.saveImage = function (req, path, imgName) {
                 fullpath = fullpath + "." + format;
 
                 fs.readFile(req.files.image.path, function (err, data) {
-                    if (err)console.log(err);
+                    if (err) console.log(err);
                     fs.writeFile(fullpath, data, function (err) {
                         if (err) console.log(err);
 
@@ -316,5 +316,55 @@ Utility.prototype.copyImage = function (req, large) {
     } else {
         return req.user.profile.picture_large;
     }
+};
+Utility.prototype.populate = function (paths, data) {
+    var newJson = {};
+    console.log("POPULATE KEYES");
+    console.log("paths:", paths);
+    for (var pKey in paths) {
+        console.log("pkeuy: ", pKey);
+    }
+    for (var tKey in data) {
+        console.log("tKey: ", tKey);
+    }
+    newJson = JSON.parse(JSON.stringify(data), function (key, value) {
+        /*for (var pKey in paths) {
+
+         }*/
+        console.log(key);
+        return value;
+
+
+    });
+    //newJson[key] = data[key];
+
+    return new paths(data);
+};
+Utility.prototype.setKey = function (obj, key, value) {
+    var keys = key.split(".");
+    var ret = obj;
+    for (var i = 0; i < keys.length-1; i++) {
+        ret = ret[keys[i]];
+    }
+    ret[keys[i]] = value;
+
+    return ret;
+};
+Utility.prototype.getKey = function (obj, key) {
+    var keys = key.split(".");
+
+    var ret = obj[keys[0]];
+    for (var i = 1; i < keys.length; i++) {
+        if (i == 0) {
+            ret = obj[keys[0]];
+        } else {
+            if (ret == null) {
+                return null;
+            } else {
+                ret = ret[keys[i]];
+            }
+        }
+    }
+    return ret;
 };
 module.exports = Utility;

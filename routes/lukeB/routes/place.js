@@ -36,6 +36,8 @@ var Utility = new UtModule([
     "rating",
     "profileId",
     "nearReports",
+    "votes",
+    "reportLog",
     "visitLog",
     "visitLog.id",
     "visitLog.date",
@@ -241,9 +243,10 @@ router.post("/create", jwtCheck, authConverter, requiresOneOfRoles(["admin", "ad
     if (data.title) {
         var place = new PlaceModel();
 
-        for (var key in place.schema.paths) {
+        for (var key in PlaceModel.schema.paths) {
             if (Utility.allowKey(key)) {
-                place[key] = data[key];
+                var value = Utility.getKey(data, key) || Utility.getKey(place, key);
+                Utility.setKey(place, key,value);
             }
         }
         var id = mongoose.Types.ObjectId();
@@ -251,11 +254,9 @@ router.post("/create", jwtCheck, authConverter, requiresOneOfRoles(["admin", "ad
         place._id = id;
         place.save(function (err, result) {
             if (err)throw err;
-            var resultV = new PlaceModel();
-            for (var key in PlaceModel.schema.paths) {
-                resultV[key] = result[key];
-            }
-            res.status(200).json(resultV);
+
+            res.status(200).json(Utility.filter(result));
+            weatherUpdate(id);
         });
     } else {
         res.status(422).json({error: "Missing title"});
@@ -341,6 +342,9 @@ router.post("/create", jwtCheck, authConverter, requiresOneOfRoles(["admin", "ad
  */
 router.post("/update", jwtCheck, authConverter, requiresOneOfRoles(["admin", "advanced", "researcher"]), function (req, res) {
     Utility.update(PlaceModel, req.body, res);
+    if (req.body.id) {
+        weatherUpdate(req.body.id);
+    }
 });
 /**
  * @api {get} /lukeB/place/remove Remove
@@ -467,17 +471,65 @@ router.get("/upvote-count", function (req, res) {
     Utility.voteCount(PlaceModel, req.query.id, res, true);
 });
 
+function weatherUpdate(id) {
+    PlaceModel.find({id: id}, {location: 1, id: 1}, function (err, places) {
+        if (err) {
+            console.log(err);
+            //res.status(500).json({error: "BEWARE THE WRATH OF A QUIET MAN!"})
+        } else {
+            var weatherUpdatePeriod = places.length * 2000;
+            places.forEach(function (item) {
+                if (WEATHER_UPDATE[item.id] != null) {
+                    clearInterval(WEATHER_UPDATE[item.id]);
+                    WEATHER_UPDATE[item.id] = null;
+                }
+                WEATHER_UPDATE[item.id] = setInterval(function () {
+                    var options = {
+                        hostname: 'api.openweathermap.org',
+                        path: "/data/2.5/weather?lat=" + item.location.lat + "&lon=" + item.location.long +"&APPID="+process.env.OPEN_WEATHER_API_KEY,
+                        method: 'GET'
+                    };
+                    http.request(options, function (response) {
+                        var str = "";
+                        response.on('data',function(chunk){
+                            console.log('chunk / ', chunk);
+                            str = str + chunk;
+                        });
+                        response.on("end",function(){
+                           console.log("END : ", str);
+                        });
+                        /*var buffer = new Buffer(0);
+                        res.on('readable', function () {
+                            console.log(buffer += this.read().toString('utf8'));
+                        });
+                        return res.on('end', function () {
+                            ////RAKANISHU!!
+                            console.log("Done /");
+                            console.log(buffer);
+                        });*/
+                    }).end();
 
-/*
+                }, weatherUpdatePeriod);
+
+            });
+            //res.status(200).json({status: "Started"});
+        }
+    });
+}
+
 router.get("/start-weather-update", jwtCheck, authConverter, requiresOneOfRoles(["admin", "superadmin"]), function (req, res) {
-
-    PlaceModel.find({}, {location: 1, id: 1}, function (err, places) {
+    var placeId = req.query.id || {$ne: null};
+    PlaceModel.find({id: placeId}, {location: 1, id: 1}, function (err, places) {
         if (err) {
             console.log(err);
             res.status(500).json({error: "BEWARE THE WRATH OF A QUIET MAN!"})
         } else {
-            WEATHER_UPDATE_PERIOD = places.length * 2000;
+            var weatherUpdatePeriod = places.length * 2000;
             places.forEach(function (item) {
+                if (WEATHER_UPDATE[item.id] != null) {
+                    clearInterval(WEATHER_UPDATE[item.id]);
+                    WEATHER_UPDATE[item.id] = null;
+                }
                 WEATHER_UPDATE[item.id] = setInterval(function () {
                     var options = {
                         hostname: 'api.openweathermap.org',
@@ -496,20 +548,21 @@ router.get("/start-weather-update", jwtCheck, authConverter, requiresOneOfRoles(
                         });
                     });
 
-                }, WEATHER_UPDATE_PERIOD);
+                }, weatherUpdatePeriod);
 
             });
             res.status(200).json({status: "Started"});
         }
     });
+
 });
-//*/
+
 router.get("/stop-weather-update", jwtCheck, authConverter, requiresOneOfRoles(["admin", "superadmin"]), function (req, res) {
     if (WEATHER_UPDATE.length != 0) {
-        WEATHER_UPDATE.forEach(function (item) {
-            clearInterval(WEATHER_UPDATE);
-            WEATHER_UPDATE = null;
-        });
+        for (var key in WEATHER_UPDATE) {
+            clearInterval(WEATHER_UPDATE[key]);
+            WEATHER_UPDATE[key] = null;
+        }
         res.status(200).json({status: "Stopped"});
     } else {
         res.status(200).json({status: "Nothing was running"});
