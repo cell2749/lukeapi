@@ -367,6 +367,61 @@ router.post('/create', jwtCheck, authConverter, restrictBanned, function (req, r
         });
     }
 });
+router.post('/createBase', jwtCheck, authConverter, restrictBanned, function (req, res, next) {
+    var data = req.body;
+    var id = mongoose.Types.ObjectId();
+    console.log(data);
+    if (data.longitude == null) {
+        res.status(422).json({error: "Missing longitude"});
+    } else if (data.latitude == null) {
+        res.status(422).json({error: "Missing latitude"});
+    } else if (data.description == null) {
+        res.status(422).json({error: "Missing description"});
+    } else if (data.categoryId == null) {
+        res.status(422).json({error: "Missing categoryId"});
+    } else {
+        ExperienceModel.findOne({active: true}, function (err, exp) {
+            if (err) console.log(err);
+            if (exp) {
+                UserModel.findOne({id: req.user.profile.id}, function (err, doc) {
+                    doc.score = doc.score + exp.reportGain;
+                    var report = new ReportModel();
+                    //var vote = new VoteModel();
+
+                    for (var key in report.schema.paths) {
+                        if (Utility.allowKey(key)) {
+                            report[key] = data[key] || report[key];
+                        }
+                    }
+                    if (report.date == null) {
+                        report.date = new Date().toISOString();
+                    }
+                    //vote.report.id = id;
+                    report._id = id;
+                    report.id = id;
+                    report.votes = {};
+                    report.approved = null;
+                    report.flagged = false;
+                    report.date = new Date().toISOString();
+
+                    report.image_url = Utility.saveImageBase64(data.image, "lukeA/report/", id);
+                    report.submitterId = req.user.profile.id;
+                    doc.save();
+                    report.save(function (err, report) {
+                        if (err)console.log(err);
+                        var returnV = {};
+                        for (var key in ReportModel.schema.paths) {
+                            returnV[key] = report[key];
+                        }
+                        res.status(200).json(returnV);
+                    });
+                });
+            } else {
+                res.status(404).json({error: "No experience pattern active"});
+            }
+        });
+    }
+});
 /**
  * @api {post} /lukeA/report/update Update
  * @apiName Update

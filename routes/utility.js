@@ -317,6 +317,7 @@ Utility.prototype.copyImage = function (req, large) {
         return req.user.profile.picture_large;
     }
 };
+
 Utility.prototype.populate = function (paths, data) {
     var newJson = {};
     console.log("POPULATE KEYES");
@@ -367,4 +368,25 @@ Utility.prototype.getKey = function (obj, key) {
     }
     return ret;
 };
+
+Utility.prototype.saveImageBase64 = function (base, path, name) {
+    var prePath = "/opt/balticapp/lukeapi/public/images/";
+    var url = "http://www.balticapp.fi/images/";
+    if (base == null) {
+        var format = ".jpeg";
+
+        var fullpath = prePath + path + name + format;
+
+        var imageBuffer = new Buffer(base, 'base64');
+
+        fs.writeFile(fullpath, imageBuffer, function (err) {
+            if (err) console.log(err);
+            return url + path + name + format;
+        });
+    } else {
+        console.log("Error: base is empty");
+        return null;
+    }
+};
+
 module.exports = Utility;

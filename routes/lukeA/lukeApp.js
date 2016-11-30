@@ -157,8 +157,8 @@ router.get("/test", jwtCheck, function (req, res) {
     request.end();
     res.status(200).json({status: "Testing", data: returnData});
 });
-/*router.post("/ts", function (req, res) {
-    var data = req;
+/*router.post("/test", function (req, res) {
+    var data = req.body;
     console.log(data);
     var fullpath = __dirname + "../../../public/images/" + data.name + "." + data.format;
     var imageBuffer = new Buffer(data.image,'base64');
