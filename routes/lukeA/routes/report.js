@@ -632,7 +632,7 @@ router.get("/disapprove", jwtCheck, authConverter, requiresRole("admin"), functi
     ReportModel.findOne({id: id}, function (err, doc) {
         if (err) console.log(err);
         if (doc) {
-            doc.approved = false;
+            doc.approved = "false";
             doc.save(function (err, result) {
                 if (err) console.log(err);
                 res.status(200).json({success: true});

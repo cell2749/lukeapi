@@ -246,7 +246,7 @@ router.post("/create", jwtCheck, authConverter, requiresOneOfRoles(["admin", "ad
         for (var key in PlaceModel.schema.paths) {
             if (Utility.allowKey(key)) {
                 var value = Utility.getKey(data, key) || Utility.getKey(place, key);
-                Utility.setKey(place, key,value);
+                Utility.setKey(place, key, value);
             }
         }
         var id = mongoose.Types.ObjectId();
@@ -472,46 +472,53 @@ router.get("/upvote-count", function (req, res) {
 });
 
 function weatherUpdate(id) {
-    PlaceModel.find({id: id}, {location: 1, id: 1}, function (err, places) {
+    PlaceModel.find({}, {location: 1, id: 1}, function (err, places) {
         if (err) {
             console.log(err);
             //res.status(500).json({error: "BEWARE THE WRATH OF A QUIET MAN!"})
         } else {
-            var weatherUpdatePeriod = places.length * 2000;
-            places.forEach(function (item) {
-                if (WEATHER_UPDATE[item.id] != null) {
-                    clearInterval(WEATHER_UPDATE[item.id]);
-                    WEATHER_UPDATE[item.id] = null;
-                }
-                WEATHER_UPDATE[item.id] = setInterval(function () {
+            var weatherUpdatePeriod = places.length * (5000 + Math.floor(Math.random() * 5000));
+
+            if (WEATHER_UPDATE[id] != null) {
+                clearInterval(WEATHER_UPDATE[id]);
+                WEATHER_UPDATE[id] = null;
+            }
+            WEATHER_UPDATE[id] = setInterval(function () {
+                PlaceModel.findOne({id: id}, function (err, doc) {
+                    if (err) console.log(err);
+
                     var options = {
                         hostname: 'api.openweathermap.org',
-                        path: "/data/2.5/weather?lat=" + item.location.lat + "&lon=" + item.location.long +"&APPID="+process.env.OPEN_WEATHER_API_KEY,
+                        path: "/data/2.5/weather?lat=" + doc.location.lat + "&lon=" + doc.location.long + "&APPID=" + process.env.OPEN_WEATHER_API_KEY,
                         method: 'GET'
                     };
                     http.request(options, function (response) {
                         var str = "";
-                        response.on('data',function(chunk){
-                            console.log('chunk / ', chunk);
+                        response.on('data', function (chunk) {
+
                             str = str + chunk;
                         });
-                        response.on("end",function(){
-                           console.log("END : ", str);
+                        response.on("end", function () {
+                            var weatherData = JSON.parse(str);
+
+                            var temperature = weatherData.main.temp - 273.15;
+                            var wind = weatherData.wind.speed;
+                            doc.weatherData = {
+                                temperature: temperature,
+                                wind: wind
+                            };
+                            doc.save(function (err, result) {
+                                if (err) console.log(err);
+                                console.log("Updated : ", result.id);
+                            });
+
                         });
-                        /*var buffer = new Buffer(0);
-                        res.on('readable', function () {
-                            console.log(buffer += this.read().toString('utf8'));
-                        });
-                        return res.on('end', function () {
-                            ////RAKANISHU!!
-                            console.log("Done /");
-                            console.log(buffer);
-                        });*/
+
                     }).end();
+                });
 
-                }, weatherUpdatePeriod);
+            }, weatherUpdatePeriod);
 
-            });
             //res.status(200).json({status: "Started"});
         }
     });
