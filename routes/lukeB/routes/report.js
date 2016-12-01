@@ -197,12 +197,12 @@ router.get('/',function(req,res){
                     }
                 }
                 if(i==result.length-1){
-                    res.status(200).json(returnResult);
+                    res.status(200).json(Utility.filter(returnResult));
                 }
                 //might require improvement right here
             }
         }else {
-            res.status(200).json(result);
+            res.status(200).json(Utility.filter(result));
         }
     });
 });
@@ -294,11 +294,8 @@ router.post('/create',jwtCheck,authConverter,function(req,res,next) {
         report.image_url = Utility.saveImage(req,"lukeB/report/",id);
         report.save(function (err, report) {
             if (err)throw err;
-            var returnV = {};
-            for (var key in ReportModel.schema.paths) {
-                returnV[key] = report[key];
-            }
-            res.status(200).json(returnV);
+
+            res.status(200).json(Utility.filter(report));
         });
     });
 
@@ -397,11 +394,8 @@ router.post('/update',jwtCheck,authConverter,function(req,res) {
                 }
                 doc.image_url = Utility.saveImage(req,"lukeB/report/",doc.id)||doc.image_url;
                 doc.save(function (err, result) {
-                    var returnV = {}, reportPattern = new ReportModel();
-                    for (var key in reportPattern.schema.paths) {
-                        returnV[key] = result[key];
-                    }
-                    res.status(200).json(returnV);
+
+                    res.status(200).json(Utility.filter(result));
                 });
 
             } else {

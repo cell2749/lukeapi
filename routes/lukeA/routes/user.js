@@ -120,8 +120,7 @@ router.get('/', jwtCheck, authConverter, function (req, res, next) {
         if (err) console.log(err);
 
         if (result) {
-            var response = result;
-            res.status(200).json(response);
+            res.status(200).json(Utility.filter(result));
         } else {
             res.status(404).json({error: "No user with such id"});
         }
@@ -142,13 +141,21 @@ router.get('/', jwtCheck, authConverter, function (req, res, next) {
  * @apiSuccessExample Success-Response:
  *      HTTP/1.1 200
  *      {
- *          success:Boolean
+ *          id:String,
+ *          username:String,
+ *          image_url:String,
+ *          score: Number,
+ *          rankingId: String
  *      }
  *
- * @apiSuccess {Boolean} success If true, then at least one of the specified parameters was updated
+ * @apiSuccess {String} id Id of the User.
+ * @apiSuccess {String} username Username of the User.
+ * @apiSuccess {String} image_url Url of the image that User uses.
+ * @apiSuccess {Number} score Experience of the User.
+ * @apiSuccess {String} rankingId Id of a rank that the User has.
  *
  * @apiDescription
- * <strong>Currently user can't update any of his own parameters.</strong>
+ * <strong>Currently user can update only image by uploading it.</strong>
  * Update function available for user to update his own profile. Id is optional.
  * If id is specified and doesn't belong to the user, the user is checked for admin rights.
  *
@@ -176,10 +183,10 @@ router.post('/update', jwtCheck, authConverter, function (req, res) {
                         success = true;
                     }
                 }
-                doc.image_url = Utility.saveImage(req, "lukeA/user/", doc.id);
+                doc.image_url = Utility.saveImageBase64(data.image, "lukeA/user/", doc.id);
                 doc.save(function (err, result) {
                     if (err) console.log(err);
-                    res.status(200).json({success: success});
+                    res.status(200).json(Utility.filter(result));
                 });
 
             } else {

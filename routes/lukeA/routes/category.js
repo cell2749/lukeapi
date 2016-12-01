@@ -140,13 +140,8 @@ router.post('/create',jwtCheck,authConverter,requiresRole('admin'),function(req,
                 reportCategory.image_url = Utility.saveImage(req,"lukeA/category/",id);
                 reportCategory.save(function (err, result) {
                     if (err)console.log(err);
-                    var returnV = {};
-                    for (var key in result) {
-                        if (key != "_id" || key != "__v") {
-                            returnV[key] = result[key];
-                        }
-                    }
-                    res.status(200).json(returnV);
+
+                    res.status(200).json(Utility.filter(result));
                 });
             }
         });
@@ -217,11 +212,8 @@ router.post("/update",jwtCheck,authConverter,requiresRole("admin"),function(req,
                 doc.image_url = Utility.saveImage(req,"lukeA/category/",doc.id) || doc.image_url;
                 doc.save(function (err, result) {
                     if (err) console.log(err);
-                    var returnV = {}, pattern = new ReportCategoryModel();
-                    for (var key in pattern.schema.paths) {
-                        returnV[key] = result[key];
-                    }
-                    res.status(200).json(returnV);
+
+                    res.status(200).json(Utility.filter(result));
                 });
             } else {
                 res.status(404).json({error: "Report Category with such id doesn't exists"});

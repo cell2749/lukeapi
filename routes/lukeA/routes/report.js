@@ -256,6 +256,7 @@ router.get('/', function (req, res) {
  *                  vote: Boolean
  *              }
  *          ]
+ *          positive: Boolean
  *      }
  *
  * @apiSuccess {String} id Report id
@@ -274,6 +275,7 @@ router.get('/', function (req, res) {
  * @apiSuccess {Array} votes Array containing json objects (Below details)
  * @apiSuccess {String} votes[].userId Id of user who voted on this report
  * @apiSuccess {Boolean} votes[].vote False if downvote. True if upvote.
+ * @apiSuccess {Boolean} positive Indicates if the report is positive, negative or neutral. If the positive parameter is not present, then it is neutral;
  *
  * @apiDescription
  * Creates report with specified parameter. Some parameters are restricted from user to manage them.
@@ -349,62 +351,12 @@ router.post('/create', jwtCheck, authConverter, restrictBanned, function (req, r
                     report.flagged = false;
                     report.date = new Date().toISOString();
 
-                    report.image_url = Utility.saveImage(req, "lukeA/report/", id);
-                    report.submitterId = req.user.profile.id;
-                    doc.save();
-                    report.save(function (err, report) {
-                        if (err)console.log(err);
-                        
-                        res.status(200).json(Utility.filter(report));
-                    });
-                });
-            } else {
-                res.status(404).json({error: "No experience pattern active"});
-            }
-        });
-    }
-});
-router.post('/createBase', jwtCheck, authConverter, restrictBanned, function (req, res, next) {
-    var data = req.body;
-    var id = mongoose.Types.ObjectId();
-    console.log(data);
-    if (data.longitude == null) {
-        res.status(422).json({error: "Missing longitude"});
-    } else if (data.latitude == null) {
-        res.status(422).json({error: "Missing latitude"});
-    } else if (data.description == null) {
-        res.status(422).json({error: "Missing description"});
-    } else if (data.categoryId == null) {
-        res.status(422).json({error: "Missing categoryId"});
-    } else {
-        ExperienceModel.findOne({active: true}, function (err, exp) {
-            if (err) console.log(err);
-            if (exp) {
-                UserModel.findOne({id: req.user.profile.id}, function (err, doc) {
-                    doc.score = doc.score + exp.reportGain;
-                    var report = new ReportModel();
-                    //var vote = new VoteModel();
-
-                    for (var key in report.schema.paths) {
-                        if (Utility.allowKey(key)) {
-                            report[key] = data[key] || report[key];
-                        }
-                    }
-                    if (report.date == null) {
-                        report.date = new Date().toISOString();
-                    }
-                    //vote.report.id = id;
-                    report._id = id;
-                    report.id = id;
-                    report.votes = {};
-                    report.approved = null;
-                    report.flagged = false;
-                    report.date = new Date().toISOString();
-
                     report.image_url = Utility.saveImageBase64(data.image, "lukeA/report/", id);
                     report.submitterId = req.user.profile.id;
                     doc.save();
                     report.save(function (err, report) {
+                        if (err)console.log(err);
+
                         res.status(200).json(Utility.filter(report));
                     });
                 });
@@ -520,11 +472,7 @@ router.post("/update", jwtCheck, authConverter, restrictBanned, function (req, r
                 }
                 doc.image_url = Utility.saveImage(req, "lukeA/report/", doc.id) || doc.image_url;
                 doc.save(function (err, result) {
-                    var returnV = {}, reportPattern = new ReportModel();
-                    for (var key in reportPattern.schema.paths) {
-                        returnV[key] = result[key];
-                    }
-                    res.status(200).json(returnV);
+                    res.status(200).json(Utility.filter(result));
                 });
 
             } else {

@@ -329,11 +329,8 @@ router.post('/update',jwtCheck,authConverter,function(req,res) {
                 doc.image_url = Utility.saveImage(req,"lukeB/user/",doc.id)||doc.image_url;
                 doc.save(function(err,result) {
                     if (err)throw err;
-                    var resultV = new UserModel();
-                    for (var key in UserModel.schem.paths) {
-                        resultV[key]=result[key];
-                    }
-                    res.status(200).json(resultV);
+
+                    res.status(200).json(Utility.filter(result));
                 });
 
             } else {

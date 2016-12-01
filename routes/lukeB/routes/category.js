@@ -171,6 +171,9 @@ router.post("/update",jwtCheck,authConverter,requiresRole("admin"),function(req,
             if (err)throw err;
             if (doc) {
                 doc.image_url = Utility.saveImage(req,"lukeB/category/",doc.id)||doc.image_url;
+                doc.save(function(err,result){
+                   res.status(200).json(Utility.filter(result));
+                });
             }
         });
     }

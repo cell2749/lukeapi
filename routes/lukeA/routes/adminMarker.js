@@ -81,7 +81,6 @@ router.get('/', function (req, res) {
     var data = req.query;
     var returnResult = [];
     var limit = data.limit || 0;
-    var rating = data.rating;
 
     var location = {
         long: data.long,
@@ -113,12 +112,12 @@ router.get('/', function (req, res) {
                     }
                 }
                 if (i == result.length - 1) {
-                    res.status(200).json(returnResult);
+                    res.status(200).json(Utility.filter(returnResult));
                 }
                 //might require improvement right here
             }
         } else {
-            res.status(200).json(result);
+            res.status(200).json(Utility.filter(result));
         }
     });
 });

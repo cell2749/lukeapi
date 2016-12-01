@@ -108,7 +108,10 @@ Utility.prototype.update = function (Model, data, res) {
                         doc[key] = data[key] || doc[key];
                     }
                 }
-                res.status(200).json({success: true});
+                doc.save(function(err,item){
+                    res.status(200).json({success: true});
+                });
+
             } else {
                 res.status(404).json({error: "No such id"});
             }
@@ -237,6 +240,7 @@ Utility.prototype.voteCount = function (Model, id, res, vote) {
 Utility.prototype.get = function (Model, id, res) {
     var returnV = new Model();
     var returnArray = [];
+    var that = this;
     if (id == null) {
         Model.find({}, MONGO_PROJECTION, function (err, doc) {
             if (err) console.log(err);
@@ -247,17 +251,14 @@ Utility.prototype.get = function (Model, id, res) {
                 returnArray.push(returnV);
                 returnV = {};
                 if (i == doc.length - 1) {
-                    res.status(200).json(returnArray);
+                    res.status(200).json(that.filter(returnArray));
                 }
             }
         });
     } else {
         Model.findOne({id: id}, function (err, doc) {
             if (err) console.log(err);
-            for (var key in Model.schema.paths) {
-                returnV[key] = doc[key];
-            }
-            res.status(200).json(doc);
+            res.status(200).json(that.filter(doc));
         });
     }
 };
@@ -318,29 +319,6 @@ Utility.prototype.copyImage = function (req, large) {
     }
 };
 
-Utility.prototype.populate = function (paths, data) {
-    var newJson = {};
-    console.log("POPULATE KEYES");
-    console.log("paths:", paths);
-    for (var pKey in paths) {
-        console.log("pkeuy: ", pKey);
-    }
-    for (var tKey in data) {
-        console.log("tKey: ", tKey);
-    }
-    newJson = JSON.parse(JSON.stringify(data), function (key, value) {
-        /*for (var pKey in paths) {
-
-         }*/
-        console.log(key);
-        return value;
-
-
-    });
-    //newJson[key] = data[key];
-
-    return new paths(data);
-};
 Utility.prototype.setKey = function (obj, key, value) {
     var keys = key.split(".");
     var ret = obj;

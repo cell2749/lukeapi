@@ -206,11 +206,7 @@ router.post("/update", jwtCheck, authConverter, requiresRole("superadmin"), func
             }
             doc.save(function (err, result) {
                 if (err) console.log(err);
-                var returnV = {}, pattern = new ExperienceModel();
-                for (var key in pattern.schema.paths) {
-                    returnV[key] = result[key];
-                }
-                res.status(200).json(returnV);
+                res.status(200).json(Utility.filter(result));
             });
 
         } else {
