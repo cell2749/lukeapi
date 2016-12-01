@@ -381,8 +381,9 @@ Utility.prototype.saveImageBase64 = function (base, path, name) {
 
         fs.writeFile(fullpath, imageBuffer, function (err) {
             if (err) console.log(err);
-            return url + path + name + format;
+
         });
+        return url + path + name + format;
     } else {
         console.log("Error: base is empty");
         return null;
