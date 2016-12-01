@@ -51,8 +51,6 @@ const MONGO_PROJECTION = {
  * @apiGroup Report
  *
  * @apiParam {String} [id] Id of a report in case single report needs to be viewed.
- * @apiParam {Boolean} [approved] Filter results by approved value
- * @apiParam {Boolean} [flagged] Filter results by flagged value
  * @apiParam {String} [submitterId] Filter results by submitter id
  * @apiParam {String} [long] Filter results by longitude (only if latitude is set). Center of circle.
  * @apiParam {String} [lat] Filter results by latitude (only if longitude is set). Center of circle.
@@ -128,14 +126,11 @@ const MONGO_PROJECTION = {
  *
  * @apiDescription
  * Public access and registered users receive only filtered results (approved,!flagged).
- * Admins and advanced users have more options to filter the results.
  * Location filter is available for public. Returns single report in case id is specified.
  *
  * @apiExample Example URL:
  * http://balticapp.fi/lukeA/report?submitterId=facebook|ad10ed1j2d010d21
  *
- * @apiUse specialAdmin
- * @apiUse specialAdv
  */
 router.get('/', function (req, res) {
     var data = req.query;
@@ -173,19 +168,151 @@ router.get('/', function (req, res) {
     var flagged = {$ne: null};
     var submitterId = data.submitterId || {$ne: null};
 
-    if (req.isAuthenticated()) {
-        var appMetadata = req.user.profile._json.app_metadata || {};
-        var roles = appMetadata.roles || [];
-        if (roles.indexOf("admin") != -1 || roles.indexOf("advanced") != -1) {
-            approved = data.approved || approved;
-            flagged = data.flagged || flagged;
-        }
-    }
     ReportModel.find({
         id: id,
         approved: approved,
         submitterId: submitterId,
         flagged: flagged
+    }, MONGO_PROJECTION).sort({"date": -1}).limit(parseInt(limit)).exec(function (err, collection) {
+        if (err) console.log(err);
+        var result = [];
+        if (rating != null) {
+            for (i = 0; i < collection.length; i++) {
+                if (collection[i].rating != null && rating < collection[i].rating) {
+                    result.push(collection[i]);
+                }
+            }
+        } else {
+            result = collection;
+        }
+
+        if (distance && location.long && location.lat) {
+            for (var i = 0; i < result.length; i++) {
+
+                if (result[i].latitude != null && result[i].longitude != null) {
+                    //if (((location.long - result[i].longitude) * longlen) ^ 2 + ((location.lat - result[i].latitude) * latlen) ^ 2 <= distance ^ 2) {
+                    if (Utility.getCrow(location.lat, location.long, result[i].latitude, result[i].longitude) <= distance) {
+                        returnResult.push(result[i]);
+                    }
+                }
+                if (i == result.length - 1) {
+                    res.status(200).json(returnResult);
+                }
+                //might require improvement right here
+            }
+        } else {
+            res.status(200).json(result);
+        }
+    });
+});
+/**
+ * @api {get} /lukeA/report/admin-get Get report(s) for Admin
+ * @apiName AdminGetAll
+ * @apiGroup Report
+ *
+ * @apiParam {String} [id] Id of a report in case single report needs to be viewed.
+ * @apiParam {String} [submitterId] Filter results by submitter id
+ * @apiParam {String} [long] Filter results by longitude (only if latitude is set). Center of circle.
+ * @apiParam {String} [lat] Filter results by latitude (only if longitude is set). Center of circle.
+ * @apiParam {String} [distance=5000] Filter results by radius(in meters, only if longitude and latitude is set). Radius of circle.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      [{
+ *          id: String
+ *          longitude: Number,
+ *          latitude: Number,
+ *          altitude: Number,
+ *          image_url: String,
+ *          title: String,
+ *          description: String,
+ *          date: String,
+ *          categoryId: [
+ *              String
+ *          ],
+ *          rating: Number,
+ *          submitterId: String,
+ *          approved: Boolean,
+ *          flagged: Boolean,
+ *          votes: [
+ *             {
+ *                  userId: String,
+ *                  vote: Boolean
+ *              }
+ *          ]
+ *      }]
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          id: String
+ *          longitude: Number,
+ *          latitude: Number,
+ *          altitude: Number,
+ *          image_url: String,
+ *          title: String,
+ *          description: String,
+ *          date: String,
+ *          categoryId: [
+ *              String
+ *          ],
+ *          rating: Number,
+ *          submitterId: String,
+ *          approved: Boolean,
+ *          flagged: Boolean,
+ *          votes: [
+ *             {
+ *                  userId: String,
+ *                  vote: Boolean
+ *              }
+ *          ]
+ *      }
+ *
+ * @apiSuccess {String} id Report id
+ * @apiSuccess {Number} longitude Longtitude of a report
+ * @apiSuccess {Number} latitude Latitude of a report
+ * @apiSuccess {Number} altitude Altitude of a report
+ * @apiSuccess {String} image_url Url to image that report has
+ * @apiSuccess {String} title Title of a report
+ * @apiSuccess {String} description Description of a report
+ * @apiSuccess {String} date Date when reprot was made
+ * @apiSuccess {Array} categoryId Array containing category ids of a report
+ * @apiSuccess {Number} rating Rating of a report
+ * @apiSuccess {String} submitterId User id of reports submitter
+ * @apiSuccess {Boolean} approved If true indicates that report is approved
+ * @apiSuccess {Boolean} flagged If true indicates that report is reported/flagged
+ * @apiSuccess {Array} votes Array containing json objects (Below details)
+ * @apiSuccess {String} votes[].userId Id of user who voted on this report
+ * @apiSuccess {Boolean} votes[].vote False if downvote. True if upvote.
+ *
+ * @apiDescription
+ * Admin get request returns unfiltered results.
+ * Location filter is available for public. Returns single report in case id is specified.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeA/report?submitterId=facebook|ad10ed1j2d010d21
+ *
+ * @apiUse roleAdmin
+ */
+router.get("/admin-get",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
+    var data = req.query;
+    var returnResult = [];
+    var limit = data.limit || 0;
+    var rating = data.rating;
+
+    var location = {
+        long: data.long,
+        lat: data.lat
+    };
+    var distance = data.distance || 5000;
+
+
+    var id = data.id || {$ne: null};
+
+    var submitterId = data.submitterId || {$ne: null};
+
+    ReportModel.find({
+        id: id,
+        submitterId: submitterId
     }, MONGO_PROJECTION).sort({"date": -1}).limit(parseInt(limit)).exec(function (err, collection) {
         if (err) console.log(err);
         var result = [];
