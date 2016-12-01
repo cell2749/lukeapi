@@ -408,12 +408,7 @@ router.post('/createBase', jwtCheck, authConverter, restrictBanned, function (re
                     report.submitterId = req.user.profile.id;
                     doc.save();
                     report.save(function (err, report) {
-                        if (err)console.log(err);
-                        var returnV = {};
-                        for (var key in ReportModel.schema.paths) {
-                            returnV[key] = report[key];
-                        }
-                        res.status(200).json(returnV);
+                        res.status(200).json(Utility.filter(report));
                     });
                 });
             } else {

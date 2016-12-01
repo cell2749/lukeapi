@@ -372,7 +372,7 @@ Utility.prototype.getKey = function (obj, key) {
 Utility.prototype.saveImageBase64 = function (base, path, name) {
     var prePath = "/opt/balticapp/lukeapi/public/images/";
     var url = "http://www.balticapp.fi/images/";
-    if (base == null) {
+    if (base != null) {
         var format = ".jpeg";
 
         var fullpath = prePath + path + name + format;
