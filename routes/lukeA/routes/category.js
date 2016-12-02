@@ -107,9 +107,6 @@ router.get('/',function(req,res){
  * Creates category with specified parameters. Title is required. Returns created category as json.
  * Requires admin role.
  *
- * @apiExample Example:
- * //POST REQUEST EXAMPLE
- *
  * @apiUse error
  * @apiUse loginError
  * @apiUse authError
@@ -137,7 +134,7 @@ router.post('/create',jwtCheck,authConverter,requiresRole('admin'),function(req,
                 }
                 reportCategory.id = id;
                 reportCategory._id = id;
-                reportCategory.image_url = Utility.saveImage(req,"lukeA/category/",id);
+                reportCategory.image_url = Utility.saveImageBase64(data.image,"lukeA/category/",id);
                 reportCategory.save(function (err, result) {
                     if (err)console.log(err);
 
@@ -180,9 +177,6 @@ router.post('/create',jwtCheck,authConverter,requiresRole('admin'),function(req,
  * Updates category with specified parameters. Returns updated category as json.
  * Requires admin role.
  *
- * @apiExample Example:
- * //POST REQUEST EXAMPLE
- *
  * @apiUse error
  * @apiUse loginError
  * @apiUse authError
@@ -209,7 +203,7 @@ router.post("/update",jwtCheck,authConverter,requiresRole("admin"),function(req,
                         doc[key] = data[key] || doc[key];
                     }
                 }
-                doc.image_url = Utility.saveImage(req,"lukeA/category/",doc.id) || doc.image_url;
+                doc.image_url = Utility.saveImageBase64(data.image,"lukeA/category/",doc.id) || doc.image_url;
                 doc.save(function (err, result) {
                     if (err) console.log(err);
 

@@ -85,7 +85,7 @@ router.post('/create', jwtCheck, authConverter, requiresRole('admin'), function 
         }
         rank.id = id;
         rank._id = id;
-        rank.image_url = Utility.saveImage(req, "lukeA/rank/", id);
+        rank.image_url = Utility.saveImageBase64(data.image, "lukeA/rank/", id);
         rank.save(function (err, rank) {
             if (err) console.log(err);
 
@@ -155,7 +155,7 @@ router.post("/update", jwtCheck, authConverter, requiresRole("admin"), function 
                         doc[key] = data[key] || doc[key];
                     }
                 }
-                doc.image_url = Utility.saveImage(req, "lukeA/rank/", doc.id) || doc.image_url;
+                doc.image_url = Utility.saveImageBase64(data.image, "lukeA/rank/", doc.id) || doc.image_url;
                 doc.save(function (err, result) {
                     if (err) console.log(err);
 
