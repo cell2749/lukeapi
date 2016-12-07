@@ -5,19 +5,6 @@
     "title": "Callback",
     "name": "Callback",
     "group": "Auth0",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "route",
-            "description": "<p>Redirect route after successful authentication</p>"
-          }
-        ]
-      }
-    },
     "success": {
       "examples": [
         {
@@ -31,13 +18,13 @@
           {
             "group": "Success 200",
             "optional": false,
-            "field": "Default",
-            "description": "<p>Responds with HTTP/1.1 200 OK if route is not provided.</p>"
+            "field": "Responds",
+            "description": "<p>always 200 OK</p>"
           }
         ]
       }
     },
-    "description": "<p>Callback url for the auth0 setup. Can be used with parameters - route. After registering/checking the user in local database redirects to specified route or responds with OK 200.</p>",
+    "description": "<p>Callback url for the auth0 authentication redirect_url. Returns always OK. Should be checked for client uri variables.</p>",
     "version": "0.0.0",
     "filename": "routes/lukeB/lukeApp.js",
     "groupTitle": "Auth0"
@@ -100,6 +87,18 @@
     "title": "Login",
     "name": "Login",
     "group": "Auth0",
+    "parameter": {
+      "fields": {
+        "Headers": [
+          {
+            "group": "Headers",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Bearer id_token</p>"
+          }
+        ]
+      }
+    },
     "success": {
       "examples": [
         {
@@ -120,37 +119,6 @@
       }
     },
     "description": "<p>Meant to be used instead of callback in case redirection is not needed. Note that this route is not specified as a callback, therefore it has to be called manually. (!Note: token is either manipulated automatically or you will have to send it manually)</p>",
-    "version": "0.0.0",
-    "filename": "routes/lukeB/lukeApp.js",
-    "groupTitle": "Auth0"
-  },
-  {
-    "type": "get",
-    "url": "/lukeA/logout",
-    "title": "Logout",
-    "name": "Logout",
-    "group": "Auth0",
-    "success": {
-      "examples": [
-        {
-          "title": "Success-Response-Single:",
-          "content": "HTTP/1.1 200\n{\n    success:true\n}",
-          "type": "json"
-        }
-      ],
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "Boolean",
-            "optional": false,
-            "field": "success",
-            "description": "<p>True if logout is successful</p>"
-          }
-        ]
-      }
-    },
-    "description": "<p>Logout function. Call this if user wants to logout from application. (!Note: token is either manipulated automatically or you will have to send it manually)</p>",
     "version": "0.0.0",
     "filename": "routes/lukeB/lukeApp.js",
     "groupTitle": "Auth0"
@@ -2822,6 +2790,82 @@
         ]
       }
     }
+  },
+  {
+    "type": "get",
+    "url": "/lukeA/place/start-weather-update",
+    "title": "Starts the weather update of places",
+    "name": "WeatherUpdateStart",
+    "group": "Place",
+    "description": "<p>Initiated by admin or superadmin if server crashes.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeB/place/start-weather-update",
+        "type": "json"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success: Started\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "success",
+            "description": "<p>Started indicated the initiation of the weather update.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/place.js",
+    "groupTitle": "Place"
+  },
+  {
+    "type": "get",
+    "url": "/lukeA/place/stop-weather-update",
+    "title": "stops the weather update of places",
+    "name": "WeatherUpdateStop",
+    "group": "Place",
+    "description": "<p>Admin or superadmin can stop weather-update in case of errors/unexpected fees from http://openweathermap.org</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeB/place/stop-weather-update",
+        "type": "json"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success: Stopped\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "success",
+            "description": "<p>Stopped indicated the termination of the weather update.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/place.js",
+    "groupTitle": "Place"
   },
   {
     "type": "get",

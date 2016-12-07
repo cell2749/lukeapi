@@ -26,8 +26,9 @@ var PlaceModel = require("../../../models/lukeB/PlaceModel");
 var CommentModel = require("../../../models/lukeB/CommentModel");
 var CategoryModel = require("../../../models/lukeB/CategoryModel");
 /*Utility*/
-var WEATHER_UPDATE = {};
-var WEATHER_UPDATE_PERIOD;
+var WEATHER_UPDATE = null;
+var WEATHER_UPDATE_PERIOD = 30000;
+var WEATHER_UPDATE_LOOP_COUNTER = 0;
 var UtModule = require("../../utility");
 var Utility = new UtModule([
     "id",
@@ -256,7 +257,6 @@ router.post("/create", jwtCheck, authConverter, requiresOneOfRoles(["admin", "ad
             if (err)throw err;
 
             res.status(200).json(Utility.filter(result));
-            weatherUpdate(id);
         });
     } else {
         res.status(422).json({error: "Missing title"});
@@ -342,9 +342,6 @@ router.post("/create", jwtCheck, authConverter, requiresOneOfRoles(["admin", "ad
  */
 router.post("/update", jwtCheck, authConverter, requiresOneOfRoles(["admin", "advanced", "researcher"]), function (req, res) {
     Utility.update(PlaceModel, req.body, res);
-    if (req.body.id) {
-        weatherUpdate(req.body.id);
-    }
 });
 /**
  * @api {get} /lukeB/place/remove Remove
@@ -470,106 +467,90 @@ router.get("/downvote-count", function (req, res) {
 router.get("/upvote-count", function (req, res) {
     Utility.voteCount(PlaceModel, req.query.id, res, true);
 });
+/**
+ * @api {get} /lukeA/place/start-weather-update Starts the weather update of places
+ * @apiName WeatherUpdateStart
+ * @apiGroup Place
+ *
+ * @apiDescription
+ * Initiated by admin or superadmin if server crashes.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/place/start-weather-update
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200
+ *      {
+ *          success: Started
+ *      }
+ * @apiSuccess {String} success Started indicated the initiation of the weather update.
+ */
+router.get("/start-weather-update", jwtCheck, authConverter, requiresOneOfRoles(["admin", "superadmin"]), function (req, res) {
+    if(WEATHER_UPDATE!=null){
+        clearInterval(WEATHER_UPDATE);
+    }
+    WEATHER_UPDATE = setInterval(function () {
+        PlaceModel.find({}, function (err, collection) {
+            if (err) console.log(err);
 
-function weatherUpdate(id) {
-    PlaceModel.find({}, {location: 1, id: 1}, function (err, places) {
-        if (err) {
-            console.log(err);
-            //res.status(500).json({error: "BEWARE THE WRATH OF A QUIET MAN!"})
-        } else {
-            var weatherUpdatePeriod = places.length * (5000 + Math.floor(Math.random() * 5000));
+            var options = {
+                hostname: 'api.openweathermap.org',
+                path: "/data/2.5/weather?lat=" + collection[WEATHER_UPDATE_LOOP_COUNTER].location.lat + "&lon=" + collection[WEATHER_UPDATE_LOOP_COUNTER].location.long + "&APPID=" + process.env.OPEN_WEATHER_API_KEY,
+                method: 'GET'
+            };
+            http.request(options, function (response) {
+                var str = "";
+                response.on('data', function (chunk) {
+                    str = str + chunk;
+                });
+                response.on("end", function () {
+                    try {
+                        var weatherData = JSON.parse(str);
 
-            if (WEATHER_UPDATE[id] != null) {
-                clearInterval(WEATHER_UPDATE[id]);
-                WEATHER_UPDATE[id] = null;
-            }
-            WEATHER_UPDATE[id] = setInterval(function () {
-                PlaceModel.findOne({id: id}, function (err, doc) {
-                    if (err) console.log(err);
-
-                    var options = {
-                        hostname: 'api.openweathermap.org',
-                        path: "/data/2.5/weather?lat=" + doc.location.lat + "&lon=" + doc.location.long + "&APPID=" + process.env.OPEN_WEATHER_API_KEY,
-                        method: 'GET'
-                    };
-                    http.request(options, function (response) {
-                        var str = "";
-                        response.on('data', function (chunk) {
-
-                            str = str + chunk;
+                        var weatherDataM = {
+                            temperature: weatherData.main.temp - 273.15,
+                            wind: weatherData.wind.speed
+                        };
+                        PlaceModel.update({id: collection[WEATHER_UPDATE_LOOP_COUNTER].id}, {$set: {weatherData: weatherDataM}}, function (err, res) {
+                            if (err) console.log(err);
+                            console.log("WEATHER UPDATE : " + res);
                         });
-                        response.on("end", function () {
-                            var weatherData = JSON.parse(str);
-
-                            var temperature = weatherData.main.temp - 273.15;
-                            var wind = weatherData.wind.speed;
-                            doc.weatherData = {
-                                temperature: temperature,
-                                wind: wind
-                            };
-                            doc.save(function (err, result) {
-                                if (err) console.log(err);
-                                console.log("Updated : ", result.id);
-                            });
-
-                        });
-
-                    }).end();
+                    } catch (e) {
+                        console.log("JSON parse ? ", e);
+                    }
+                    WEATHER_UPDATE_LOOP_COUNTER++;
+                    if (WEATHER_UPDATE_LOOP_COUNTER >= Object.keys(WEATHER_UPDATE).length) {
+                        WEATHER_UPDATE_LOOP_COUNTER = 0;
+                    }
                 });
 
-            }, weatherUpdatePeriod);
-
-            //res.status(200).json({status: "Started"});
-        }
-    });
-}
-
-router.get("/start-weather-update", jwtCheck, authConverter, requiresOneOfRoles(["admin", "superadmin"]), function (req, res) {
-    var placeId = req.query.id || {$ne: null};
-    PlaceModel.find({id: placeId}, {location: 1, id: 1}, function (err, places) {
-        if (err) {
-            console.log(err);
-            res.status(500).json({error: "BEWARE THE WRATH OF A QUIET MAN!"})
-        } else {
-            var weatherUpdatePeriod = places.length * 2000;
-            places.forEach(function (item) {
-                if (WEATHER_UPDATE[item.id] != null) {
-                    clearInterval(WEATHER_UPDATE[item.id]);
-                    WEATHER_UPDATE[item.id] = null;
-                }
-                WEATHER_UPDATE[item.id] = setInterval(function () {
-                    var options = {
-                        hostname: 'api.openweathermap.org',
-                        port: 80,
-                        path: "data/2.5/weather?lat=" + item.location.lat + "&lon=" + item.location.long,
-                        method: 'GET'
-                    };
-                    http.get(options, function (res) {
-                        var buffer = new Buffer(0)
-                        res.on('readable', function () {
-                            return buffer += this.read().toString('utf8');
-                        });
-                        return res.on('end', function () {
-                            ////RAKANISHU!!
-                            return callback(buffer);
-                        });
-                    });
-
-                }, weatherUpdatePeriod);
-
-            });
-            res.status(200).json({status: "Started"});
-        }
-    });
-
+            }).end();
+        });
+    }, WEATHER_UPDATE_PERIOD);
+    res.status(200).json({status:"Started"});
 });
-
+/**
+ * @api {get} /lukeA/place/stop-weather-update stops the weather update of places
+ * @apiName WeatherUpdateStop
+ * @apiGroup Place
+ *
+ * @apiDescription
+ * Admin or superadmin can stop weather-update in case of errors/unexpected fees from http://openweathermap.org
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeB/place/stop-weather-update
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200
+ *      {
+ *          success: Stopped
+ *      }
+ * @apiSuccess {String} success Stopped indicated the termination of the weather update.
+ */
 router.get("/stop-weather-update", jwtCheck, authConverter, requiresOneOfRoles(["admin", "superadmin"]), function (req, res) {
-    if (WEATHER_UPDATE.length != 0) {
-        for (var key in WEATHER_UPDATE) {
-            clearInterval(WEATHER_UPDATE[key]);
-            WEATHER_UPDATE[key] = null;
-        }
+    if (WEATHER_UPDATE != null) {
+        clearInterval(WEATHER_UPDATE);
+        WEATHER_UPDATE = null;
         res.status(200).json({status: "Stopped"});
     } else {
         res.status(200).json({status: "Nothing was running"});

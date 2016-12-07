@@ -8,15 +8,19 @@ var Utility = function (keyes, maxFlags) {
     this.maxFlags = maxFlags;
 };
 Utility.prototype.filter = function (object) {
-    var filteredObject = JSON.parse(JSON.stringify(object), function (key, value) {
-        if (key == '_id' || key == '__v') {
-            return undefined;
-        } else {
-            return value;
-        }
-    });
+    if(object!="undefined") {
+        var filteredObject = JSON.parse(JSON.stringify(object), function (key, value) {
+            if (key == '_id' || key == '__v') {
+                return undefined;
+            } else {
+                return value;
+            }
+        });
+        return filteredObject;
+    }else{
+        return {}
+    }
 
-    return filteredObject;
 
 };
 Utility.prototype.allowKey = function (key) {
@@ -105,11 +109,14 @@ Utility.prototype.update = function (Model, data, res) {
             if (doc) {
                 for (var key in Model.schema.paths) {
                     if (this.allowKey(key)) {
-                        doc[key] = data[key] || doc[key];
+                        var value = this.getKey(data, key) || this.getKey(doc, key);
+                        this.setKey(doc, key, value);
                     }
                 }
+
                 doc.save(function(err,item){
-                    res.status(200).json({success: true});
+                    if(err) console.log(err);
+                    res.status(200).json(this.filter(item));
                 });
 
             } else {

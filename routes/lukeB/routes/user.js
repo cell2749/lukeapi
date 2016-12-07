@@ -323,7 +323,8 @@ router.post('/update',jwtCheck,authConverter,function(req,res) {
             if (doc != null) {
                 for (var key in doc) {
                     if (Utility.allowKey(key)) {
-                        doc[key] = data[key] || doc[key];
+                        var value = Utility.getKey(data, key) || Utility.getKey(doc, key);
+                        Utility.setKey(doc, key, value);
                     }
                 }
                 doc.image_url = Utility.saveImage(req,"lukeB/user/",doc.id)||doc.image_url;

@@ -189,7 +189,8 @@ router.get("/create",jwtCheck,authConverter,function(req,res) {
                     var comment = new CommentModel();
                     for (var key in comment.schema.paths) {
                         if (Utility.allowKey(key)) {
-                            comment[key] = data[key] || comment[key];
+                            var value = Utility.getKey(data, key) || Utility.getKey(doc, key);
+                            Utility.setKey(doc, key, value);
                         }
                     }
                     var id = mongoose.Types.ObjectId();

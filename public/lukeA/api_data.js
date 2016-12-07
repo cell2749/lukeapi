@@ -697,13 +697,6 @@ define({ "api": [
       }
     },
     "description": "<p>Creates category with specified parameters. Title is required. Returns created category as json. Requires admin role.</p>",
-    "examples": [
-      {
-        "title": "Example:",
-        "content": "//POST REQUEST EXAMPLE",
-        "type": "json"
-      }
-    ],
     "error": {
       "examples": [
         {
@@ -1050,13 +1043,6 @@ define({ "api": [
       }
     },
     "description": "<p>Updates category with specified parameters. Returns updated category as json. Requires admin role.</p>",
-    "examples": [
-      {
-        "title": "Example:",
-        "content": "//POST REQUEST EXAMPLE",
-        "type": "json"
-      }
-    ],
     "error": {
       "examples": [
         {

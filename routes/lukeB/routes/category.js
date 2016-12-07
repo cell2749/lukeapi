@@ -27,7 +27,7 @@ var Utility = new UtModule([
     "__v",
     "image_url"
 ]);
-const MONGO_PROJECTION ={
+const MONGO_PROJECTION = {
     _id: 0,
     __v: 0
 };
@@ -66,8 +66,8 @@ const MONGO_PROJECTION ={
  * @apiExample Example URL:
  * http://balticapp.fi/lukeB/category
  */
-router.get("/",function(req,res){
-    Utility.get(CategoryModel,req.query.id,res);
+router.get("/", function (req, res) {
+    Utility.get(CategoryModel, req.query.id, res);
 });
 /**
  * @api {post} /lukeB/category/create Create
@@ -108,20 +108,21 @@ router.get("/",function(req,res){
  *          error:"Missing title"
  *      }
  */
-router.post("/create",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
+router.post("/create", jwtCheck, authConverter, requiresRole("admin"), function (req, res) {
     var data = req.body;
     if (data.title) {
         var category = new CategoryModel();
 
         for (var key in CategoryModel.schema.paths) {
             if (Utility.allowKey(key)) {
-                category[key] = data[key];
+                var value = Utility.getKey(data, key) || Utility.getKey(doc, key);
+                Utility.setKey(doc, key, value);
             }
         }
         var id = mongoose.Types.ObjectId();
         category.id = id;
         category._id = id;
-        category.image_url = Utility.saveImage(req,"lukeB/category/",id);
+        category.image_url = Utility.saveImage(req, "lukeB/category/", id);
         category.save(function (err, result) {
             if (err)throw err;
             res.status(200).json({success: true});
@@ -164,18 +165,29 @@ router.post("/create",jwtCheck,authConverter,requiresRole("admin"),function(req,
  * @apiUse error
  * @apiUse updateStatus
  */
-router.post("/update",jwtCheck,authConverter,requiresRole("admin"),function(req,res) {
-    Utility.update(CategoryModel, req.body, res);
-    if (req.body.id) {
-        CategoryModel.findOne({id: req.body.id}, function (err, doc) {
-            if (err)throw err;
+router.post("/update", jwtCheck, authConverter, requiresRole("admin"), function (req, res) {
+    var data = req.body;
+    if (data.id) {
+        CategoryModel.findOne({id: data.id}, function (err, doc) {
             if (doc) {
-                doc.image_url = Utility.saveImage(req,"lukeB/category/",doc.id)||doc.image_url;
-                doc.save(function(err,result){
-                   res.status(200).json(Utility.filter(result));
+                for (var key in CategoryModel.schema.paths) {
+                    if (Utility.allowKey(key)) {
+                        var value = Utility.getKey(data, key) || Utility.getKey(doc, key);
+                        Utility.setKey(doc, key, value);
+                    }
+                }
+                doc.image_url = Utility.saveImage(req, "lukeB/category/", doc.id) || doc.image_url;
+                doc.save(function (err, item) {
+                    if (err) console.log(err);
+                    res.status(200).json(Utility.filter(item));
                 });
+
+            } else {
+                res.status(404).json({error: "No such id"});
             }
         });
+    } else {
+        res.status(422).json({error: "Missing id"});
     }
 });
 /**
@@ -197,14 +209,14 @@ router.post("/update",jwtCheck,authConverter,requiresRole("admin"),function(req,
  * @apiUse roleAdv
  * @apiUse removeStatus
  */
-router.get("/remove",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
+router.get("/remove", jwtCheck, authConverter, requiresRole("admin"), function (req, res) {
     var id = req.query.id;
     CategoryModel.findOne({id: id}, function (err, doc) {
         if (err) throw err;
 
         if (doc) {
             Utility.deleteImage(doc.image_url);
-            Utility.remove(CategoryModel,id,res);
+            Utility.remove(CategoryModel, id, res);
         }
     });
 

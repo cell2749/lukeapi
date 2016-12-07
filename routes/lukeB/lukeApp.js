@@ -3,6 +3,7 @@ var router = express.Router();
 var passport = require('passport');
 var mongoose = require('mongoose');
 var mongodb = require('../../mongodb/lukeBdb');
+var util =require("util");
 /* SECURITY */
 var requiresLogin = require('../../security/requiresLogin');
 var requiresRole = require('../../security/requiresRole');
@@ -23,15 +24,15 @@ var place = require('./routes/place');
 var category = require('./routes/category');
 var comment = require('./routes/comment');
 
-const MONGO_PROJECTION ={
+const MONGO_PROJECTION = {
     _id: 0,
     __v: 0
 };
 /* DATABASE HTTP REQUESTS*/
-router.use('/user',user);
-router.use('/place',place);
-router.use("/category",category);
-router.use("/report",report);
+router.use('/user', user);
+router.use('/place', place);
+router.use("/category", category);
+router.use("/report", report);
 router.use('/comment', comment);
 /**
  * @api {get} /lukeB/authzero Get setup
@@ -56,7 +57,7 @@ router.use('/comment', comment);
  * @apiExample Example:
  * http://balticapp.fi/lukeB/authzero
  * */
-router.get("/authzero",function(req,res,next) {
+router.get("/authzero", function (req, res, next) {
     var env = {
         AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID,
         AUTH0_DOMAIN: process.env.AUTH0_DOMAIN,
@@ -69,63 +70,24 @@ router.get("/authzero",function(req,res,next) {
  * @apiName Callback
  * @apiGroup Auth0
  *
- * @apiParam {String} route Redirect route after successful authentication
- *
  * @apiSuccessExample Success-Response-Single:
  *      HTTP/1.1 200 OK
  *
- * @apiSuccess Default Responds with HTTP/1.1 200 OK if route is not provided.
+ * @apiSuccess Responds always 200 OK
  *
  * @apiDescription
- * Callback url for the auth0 setup. Can be used with parameters - route.
- * After registering/checking the user in local database redirects to specified route or responds with OK 200.
+ * Callback url for the auth0 authentication redirect_url. Returns always OK. Should be checked for client uri variables.
  *
  * */
-router.get("/callback",function(req,res){
-   res.status(200).json(req.query);
+router.get("/callback", function (req, res) {
+    res.status(200).send("OK");
 });
-/*router.get('/callback',passport.authenticate('auth0', { failureRedirect: '/url-if-something-fails' }), function(req, res) {
-    var route = req.query.route;
-
-    if (!req.user) {
-        throw new Error('user null');
-    } else {
-        var userData = req.user.profile;
-        console.log(userData);
-
-        UserModel.findOne({id: userData.id}, MONGO_PROJECTION, function (err, result) {
-            if (err) throw err;
-            console.log("User model find");
-            if (result != null) {
-                console.log("exists");
-            } else {
-                console.log("creating new");
-                var user = new UserModel({
-                    id: userData.id
-                });
-
-                console.log(user);
-
-                user.save(function (err, result) {
-                    if (err) throw err;
-
-                    console.log(result);
-                });
-            }
-        });
-    }
-    console.log(req.url);
-
-    if (route == null) {
-        res.status(200).send('OK');
-    } else {
-        res.redirect(route);
-    }
-});*/
 /**
  * @api {get} /lukeB/login Login
  * @apiName Login
  * @apiGroup Auth0
+ *
+ * @apiParam (Headers) Authorization Bearer id_token
  *
  * @apiSuccessExample Success-Response-Single:
  *      HTTP/1.1 200 OK
@@ -137,7 +99,7 @@ router.get("/callback",function(req,res){
  * Note that this route is not specified as a callback, therefore it has to be called manually.
  * (!Note: token is either manipulated automatically or you will have to send it manually)
  * */
-router.get("/login",jwtCheck,authConverter, function(req,res) {
+router.get("/login", jwtCheck, authConverter, function (req, res) {
     if (!req.user) {
         throw new Error('user null');
     } else {
@@ -159,42 +121,6 @@ router.get("/login",jwtCheck,authConverter, function(req,res) {
     }
     res.status(200).send('OK');
 });
-/**
- * @api {get} /lukeA/logout Logout
- * @apiName Logout
- * @apiGroup Auth0
- *
- * @apiSuccessExample Success-Response-Single:
- *      HTTP/1.1 200
- *      {
- *          success:true
- *      }
- *
- * @apiSuccess {Boolean} success True if logout is successful
- *
- * @apiDescription
- * Logout function. Call this if user wants to logout from application.
- * (!Note: token is either manipulated automatically or you will have to send it manually)
- *
- * */
-/*router.get('/logout',requiresLogin,function(req,res){
-    req.logout();
-    res.status(200).json({success:true});
-});*/
 
-/* SECURITY TESTS */
-router.get('/test/public',function(req,res,next){
-
-    res.writeHead(200, {'Content-Type': 'text/html'});
-    res.end("public OK");
-});
-router.get('/test/registered',jwtCheck,authConverter,function(req,res,next){
-    res.writeHead(200, {'Content-Type': 'text/html'});
-    res.end("registered OK");
-});
-router.get('/test/admin',jwtCheck,authConverter,requiresRole('adminS'),function(req,res,next){
-    res.writeHead(200, {'Content-Type': 'text/html'});
-    res.end("admin OK");
-});
 
 module.exports = router;

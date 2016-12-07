@@ -135,24 +135,11 @@ router.get('/',function(req,res){
 
     //deg2rad might not be necessary
     var location = {
-        long : deg2rad(data.long),
-        lat : deg2rad(data.lat)
+        long : data.long,
+        lat : data.lat
     };
-    var distance = data.distance || 5000;
+    var distance = data.distance || 10;
 
-    // Set up "Constants"
-    const m1 = 111132.92;		// latitude calculation term 1
-    const m2 = -559.82;		// latitude calculation term 2
-    const m3 = 1.175;			// latitude calculation term 3
-    const m4 = -0.0023;		// latitude calculation term 4
-    const p1 = 111412.84;		// longitude calculation term 1
-    const p2 = -93.5;			// longitude calculation term 2
-    const p3 = 0.118;			// longitude calculation term 3
-
-    var latlen = m1 + (m2 * Math.cos(2 * location.lat)) + (m3 * Math.cos(4 * location.lat)) +
-        (m4 * Math.cos(6 * location.lat));
-    var longlen = (p1 * Math.cos(location.lat)) + (p2 * Math.cos(3 * location.lat)) +
-        (p3 * Math.cos(5 * location.lat));
 
     var approved = true; //{$ne:null};
     var flagged = false; //{$ne:null};
@@ -167,7 +154,7 @@ router.get('/',function(req,res){
     var newProjection = MONGO_PROJECTION;
     newProjection[votes]=showVotes;
 
-    if(req.isAuthenticated()) {
+    if(req.user.profile) {
         var appMetadata = req.user.profile._json.app_metadata || {};
         var roles = appMetadata.roles || [];
         if (roles.indexOf("admin") != -1 || roles.indexOf("advanced") != -1) {
@@ -192,8 +179,8 @@ router.get('/',function(req,res){
             for (var i = 0; i < result.length; i++) {
 
                 if(result[i].location.lat!=null&&result[i].location.long!=null) {
-                    if (((location.long - result[i].location.long) * longlen) ^ 2 + ((location.lat - result[i].location.lat) * latlen) ^ 2 <= distance ^ 2) {
-                        returnResult.push(result);
+                    if (Utility.getCrow(location.lat, location.long, result[i].latitude, result[i].longitude) <= distance) {
+                        returnResult.push(result[i]);
                     }
                 }
                 if(i==result.length-1){
@@ -280,7 +267,8 @@ router.post('/create',jwtCheck,authConverter,function(req,res,next) {
 
         for (var key in report) {
             if (Utility.allowKey(key)) {
-                report[key] = data[key] || report[key];
+                var value = Utility.getKey(data, key) || Utility.getKey(report, key);
+                Utility.setKey(report, key, value);
             }
         }
         if (report.date == null) {
@@ -388,8 +376,9 @@ router.post('/update',jwtCheck,authConverter,function(req,res) {
             if (doc) {
                 var pattern = new ReportModel();
                 for (var key in pattern.schema.paths) {
-                    if (allowedKeyes.indexOf(key) != -1) {
-                        doc[key] = data[key] || doc[key];
+                    if (Utility.allowKey(key)) {
+                        var value = Utility.getKey(data, key) || Utility.getKey(doc, key);
+                        Utility.setKey(doc, key, value);
                     }
                 }
                 doc.image_url = Utility.saveImage(req,"lukeB/report/",doc.id)||doc.image_url;

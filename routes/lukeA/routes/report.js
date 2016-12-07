@@ -597,7 +597,7 @@ router.post("/update", jwtCheck, authConverter, restrictBanned, function (req, r
                         doc[key] = data[key] || doc[key];
                     }
                 }
-                doc.image_url = Utility.saveImage(req, "lukeA/report/", doc.id) || doc.image_url;
+                doc.image_url = Utility.saveImageBase64(data.image, "lukeA/report/", doc.id) || doc.image_url;
                 doc.save(function (err, result) {
                     res.status(200).json(Utility.filter(result));
                 });
