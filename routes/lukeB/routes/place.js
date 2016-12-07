@@ -27,7 +27,7 @@ var CommentModel = require("../../../models/lukeB/CommentModel");
 var CategoryModel = require("../../../models/lukeB/CategoryModel");
 /*Utility*/
 var WEATHER_UPDATE = null;
-var WEATHER_UPDATE_PERIOD = 30000;
+var WEATHER_UPDATE_PERIOD = 5000;
 var WEATHER_UPDATE_LOOP_COUNTER = 0;
 var UtModule = require("../../utility");
 var Utility = new UtModule([
