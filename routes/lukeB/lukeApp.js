@@ -81,6 +81,9 @@ router.get("/authzero",function(req,res,next) {
  * After registering/checking the user in local database redirects to specified route or responds with OK 200.
  *
  * */
+router.get("/callback",function(req,res){
+   res.status(200).json(req.query);
+});
 /*router.get('/callback',passport.authenticate('auth0', { failureRedirect: '/url-if-something-fails' }), function(req, res) {
     var route = req.query.route;
 
