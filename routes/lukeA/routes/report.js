@@ -1232,6 +1232,9 @@ router.get("/flag", jwtCheck, authConverter, restrictBanned, function (req, res)
             }
             if (doc.flags.length >= FLAG_TRIGGER) {
                 doc.flagged = true;
+                if(doc.approved==null){
+                    doc.approved = false;
+                }
             } else {
                 doc.flagged = false;
             }
