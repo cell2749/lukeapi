@@ -4505,9 +4505,122 @@
           {
             "group": "Parameter",
             "type": "String",
-            "optional": true,
+            "optional": false,
             "field": "id",
             "description": "<p>Users unique ID.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1\n{\n    id:String,\n    username:String,\n    image_url:String,\n    score: Number,\n    rankingId: String\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the User.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "username",
+            "description": "<p>Username of the User.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "image_url",
+            "description": "<p>Url of the image that User uses.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "score",
+            "description": "<p>Experience of the User.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "rankingId",
+            "description": "<p>Id of a rank that the User has.</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Id is mandatory.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeA/user?id=auth0|21jeh192he921e2121",
+        "type": "json"
+      }
+    ],
+    "error": {
+      "examples": [
+        {
+          "title": "Wrong id:",
+          "content": "HTTP/1.1 404\n{\n    error:\"No user with such id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing id:",
+          "content": "HTTP/1.1 422\n{\n    error:\"Missing id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Invalid id:",
+          "content": "HTTP/1.1 404\n{\n    error: 'No user with such id'\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/lukeA/routes/user.js",
+    "groupTitle": "User"
+  },
+  {
+    "type": "get",
+    "url": "/lukeA/user/me",
+    "title": "Get my info",
+    "name": "GetUserMe",
+    "group": "User",
+    "parameter": {
+      "fields": {
+        "header": [
+          {
+            "group": "header",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Bearer id_token</p>"
           }
         ]
       }
@@ -4576,8 +4689,8 @@
           "type": "json"
         },
         {
-          "title": "Missing id:",
-          "content": "HTTP/1.1 422\n{\n    error:\"Missing id\"\n}",
+          "title": "In case unexpected:",
+          "content": "HTTP/1.1 404\n{\n    error:\"Missing id\"\n}",
           "type": "json"
         },
         {

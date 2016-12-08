@@ -78,7 +78,7 @@ router.get('/get-all', function (req, res, next) {
  * @apiName GetUser
  * @apiGroup User
  *
- * @apiParam {String} [id] Users unique ID.
+ * @apiParam {String} id Users unique ID.
  *
  * @apiSuccessExample Success-Response:
  *      HTTP/1.1
@@ -97,7 +97,7 @@ router.get('/get-all', function (req, res, next) {
  * @apiSuccess {String} rankingId Id of a rank that the User has.
  *
  * @apiDescription
- * Id is optional. If id not specified then function returns the users own information.
+ * Id is mandatory.
  *
  * @apiExample Example URL:
  * http://balticapp.fi/lukeA/user?id=auth0|21jeh192he921e2121
@@ -134,6 +134,69 @@ router.get('/', function (req, res, next) {
         });
     }else{
         res.status(422).json({error:"Missing id"});
+    }
+});
+/**
+ * @api {get} /lukeA/user/me Get my info
+ * @apiName GetUserMe
+ * @apiGroup User
+ *
+ * @apiParam (header) Authorization Bearer id_token
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1
+ *      {
+ *          id:String,
+ *          username:String,
+ *          image_url:String,
+ *          score: Number,
+ *          rankingId: String
+ *      }
+ *
+ * @apiSuccess {String} id Id of the User.
+ * @apiSuccess {String} username Username of the User.
+ * @apiSuccess {String} image_url Url of the image that User uses.
+ * @apiSuccess {Number} score Experience of the User.
+ * @apiSuccess {String} rankingId Id of a rank that the User has.
+ *
+ * @apiDescription
+ * Id is optional. If id not specified then function returns the users own information.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeA/user?id=auth0|21jeh192he921e2121
+ *
+ * @apiErrorExample Wrong id:
+ *      HTTP/1.1 404
+ *      {
+ *          error:"No user with such id"
+ *      }
+ * @apiUse error
+ * @apiUse noUser
+ * @apiErrorExample In case unexpected:
+ *      HTTP/1.1 404
+ *      {
+ *          error:"Missing id"
+ *      }
+ */
+router.get('/me',jwtCheck,authConverter, function (req, res, next) {
+    var id;
+    try {
+        id = req.user.profile.id;
+    }catch(e){
+        console.log(e);
+    }
+    if(id!=null) {
+        UserModel.findOne({id: id}, MONGO_PROJECTION, function (err, result) {
+            if (err) console.log(err);
+
+            if (result) {
+                res.status(200).json(Utility.filter(result));
+            } else {
+                res.status(404).json({error: "No user with such id"});
+            }
+        });
+    }else{
+        res.status(404).json({error:"Something went wrong"});
     }
 });
 /**
