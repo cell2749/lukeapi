@@ -256,7 +256,10 @@ router.post('/update', jwtCheck, authConverter, function (req, res) {
                         success = true;
                     }
                 }
-                doc.image_url = Utility.saveImageBase64(data.image, "lukeA/user/", doc._id);
+                if(data.image!=null&&doc.image_url!=null){
+                    Utility.deleteImage(doc.image_url);
+                }
+                doc.image_url = Utility.saveImageBase64(data.image, "lukeA/user/", doc._id)||doc.image_url;
                 doc.save(function (err, result) {
                     if (err) console.log(err);
                     res.status(200).json(Utility.filter(result));
