@@ -152,7 +152,7 @@ router.get('/', function (req, res) {
 
     var id = data.id || {$ne: null};
     var approved = {$ne: false};
-    var flagged = {$ne: false};
+    var flagged = {$ne: true};
     var submitterId = data.submitterId || {$ne: null};
 
     ReportModel.find({
