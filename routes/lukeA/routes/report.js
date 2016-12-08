@@ -152,7 +152,7 @@ router.get('/', function (req, res) {
 
     var id = data.id || {$ne: null};
     var approved = {$ne: false};
-    var flagged = {$ne: null};
+    var flagged = {$ne: false};
     var submitterId = data.submitterId || {$ne: null};
 
     ReportModel.find({
@@ -700,6 +700,7 @@ router.get("/approve", jwtCheck, authConverter, requiresRole("admin"), function 
         if (err) console.log(err);
         if (doc) {
             doc.approved = true;
+            doc.flagged = false;
             doc.save(function (err, result) {
                 if (err) console.log(err);
                 res.status(200).json({success: true});
@@ -747,6 +748,7 @@ router.get("/disapprove", jwtCheck, authConverter, requiresRole("admin"), functi
         if (err) console.log(err);
         if (doc) {
             doc.approved = "false";
+            doc.flagged = true;
             doc.save(function (err, result) {
                 if (err) console.log(err);
                 res.status(200).json({success: true});
@@ -1230,23 +1232,25 @@ router.get("/flag", jwtCheck, authConverter, restrictBanned, function (req, res)
             } else {
                 doc.flags.splice(doc.flags.indexOf(req.user.profile.id), 1);
             }
-            if (doc.flags.length >= FLAG_TRIGGER) {
-                doc.flagged = true;
-                if(doc.approved==null){
-                    doc.approved = false;
+            if (doc.approved == null) {
+                if (doc.flags.length >= FLAG_TRIGGER) {
+                    doc.flagged = true;
+                } else {
+                    doc.flagged = false;
+
                 }
-            } else {
-                doc.flagged = false;
             }
             doc.save(function (err, result) {
                 if (err) throw err;
                 res.status(200).json({success: true, flagged: result.flagged});
             });
-        } else {
+        }
+        else {
             res.status(200).json({error: "No report with such id"});
         }
     });
-});
+})
+;
 
 
 module.exports = router;
