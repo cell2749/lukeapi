@@ -22,7 +22,7 @@ var ReportCategoryModel = require("../../../models/lukeA/ReportCategoryModel");
 var VoteModel = require("../../../models/lukeA/VoteModel");
 var ExperienceModel = require("../../../models/lukeA/ExperienceModel");
 /* UTILITY */
-const FLAG_TRIGGER = 1;
+const FLAG_TRIGGER = 10;
 var UtModule = require("../../utility");
 var Utility = new UtModule([
     //Omit Keyes to be updated by user
