@@ -251,15 +251,19 @@ Utility.prototype.get = function (Model, id, res) {
     if (id == null) {
         Model.find({}, MONGO_PROJECTION, function (err, doc) {
             if (err) console.log(err);
-            for (var i = 0; i < doc.length; i++) {
-                for (var key in Model.schema.paths) {
-                    returnV[key] = doc[i][key];
+            if(doc.length>0) {
+                for (var i = 0; i < doc.length; i++) {
+                    for (var key in Model.schema.paths) {
+                        returnV[key] = doc[i][key];
+                    }
+                    returnArray.push(returnV);
+                    returnV = {};
+                    if (i == doc.length - 1) {
+                        res.status(200).json(that.filter(returnArray));
+                    }
                 }
-                returnArray.push(returnV);
-                returnV = {};
-                if (i == doc.length - 1) {
-                    res.status(200).json(that.filter(returnArray));
-                }
+            }else{
+                res.status(200).json([]);
             }
         });
     } else {

@@ -1249,8 +1249,7 @@ router.get("/flag", jwtCheck, authConverter, restrictBanned, function (req, res)
             res.status(200).json({error: "No report with such id"});
         }
     });
-})
-;
+});
 
 
 module.exports = router;
