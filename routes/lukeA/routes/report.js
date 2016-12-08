@@ -1237,7 +1237,7 @@ router.get("/flag", jwtCheck, authConverter, restrictBanned, function (req, res)
             }
             doc.save(function (err, result) {
                 if (err) throw err;
-                res.status(200).json({success: true, flagged: false});
+                res.status(200).json({success: true, flagged: result.flagged});
             });
         } else {
             res.status(200).json({error: "No report with such id"});
