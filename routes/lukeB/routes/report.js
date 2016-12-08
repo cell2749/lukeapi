@@ -628,7 +628,7 @@ router.get("/disapprove",jwtCheck,authConverter,requiresRole("admin"),function(r
     });
 });
 /**
- * @api {get} /lukeA/report/flag Flag
+ * @api {get} /lukeB/report/flag Flag
  * @apiName Flag
  * @apiGroup Report
  *
@@ -673,7 +673,7 @@ router.get("/flag",jwtCheck,authConverter,restrictBanned,function(req,res){
     });
 });
 /**
- * @api {get} /lukeA/report/unflag Unflag
+ * @api {get} /lukeB/report/unflag Unflag
  * @apiName Unflag
  * @apiGroup Report
  *

@@ -22,6 +22,7 @@ var ReportCategoryModel = require("../../../models/lukeA/ReportCategoryModel");
 var VoteModel = require("../../../models/lukeA/VoteModel");
 var ExperienceModel = require("../../../models/lukeA/ExperienceModel");
 /* UTILITY */
+const FLAG_TRIGGER = 1;
 var UtModule = require("../../utility");
 var Utility = new UtModule([
     //Omit Keyes to be updated by user
@@ -148,20 +149,6 @@ router.get('/', function (req, res) {
         lat: data.lat
     };
     var distance = data.distance || 5000;
-
-    // Set up "Constants"
-    const m1 = 111132.92;		// latitude calculation term 1
-    const m2 = -559.82;		// latitude calculation term 2
-    const m3 = 1.175;			// latitude calculation term 3
-    const m4 = -0.0023;		// latitude calculation term 4
-    const p1 = 111412.84;		// longitude calculation term 1
-    const p2 = -93.5;			// longitude calculation term 2
-    const p3 = 0.118;			// longitude calculation term 3
-
-    var latlen = m1 + (m2 * Math.cos(2 * location.lat)) + (m3 * Math.cos(4 * location.lat)) +
-        (m4 * Math.cos(6 * location.lat));
-    var longlen = (p1 * Math.cos(location.lat)) + (p2 * Math.cos(3 * location.lat)) +
-        (p3 * Math.cos(5 * location.lat));
 
     var id = data.id || {$ne: null};
     var approved = {$ne: false};
@@ -293,7 +280,7 @@ router.get('/', function (req, res) {
  *
  * @apiUse roleAdmin
  */
-router.get("/admin-get",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
+router.get("/admin-get", jwtCheck, authConverter, requiresRole("admin"), function (req, res) {
     var data = req.query;
     var returnResult = [];
     var limit = data.limit || 0;
@@ -482,7 +469,7 @@ router.post('/create', jwtCheck, authConverter, restrictBanned, function (req, r
                     report.submitterId = req.user.profile.id;
                     doc.save();
                     report.save(function (err, report) {
-                        if (err)console.log(err);
+                        if (err) console.log(err);
 
                         res.status(200).json(Utility.filter(report));
                     });
@@ -654,7 +641,7 @@ router.get("/remove", jwtCheck, authConverter, function (req, res) {
     var appMetadata = req.user.profile._json.app_metadata || {};
     var adminRoles = appMetadata.roles || [];
     ReportModel.findOne({id: id}, {"submitterId": 1}, function (err, doc) {
-        if (err)console.log(err);
+        if (err) console.log(err);
         if (doc != null) {
             if ((doc.submitterId == req.user.profile.id || adminRoles.indexOf("admin") != -1)) {
                 Utility.deleteImage(doc.image_url);
@@ -1130,7 +1117,7 @@ router.get("/downvote-count", function (req, res) {
     var count = 0;
     if (data.id) {
         ReportModel.findOne({id: data.id}, function (err, doc) {
-            if (err)console.log(err);
+            if (err) console.log(err);
             if (doc) {
                 for (var i = 0; i < doc.votes.length; i++) {
                     if (!doc.votes[i].vote) {
@@ -1185,7 +1172,7 @@ router.get("/upvote-count", function (req, res) {
     var count = 0;
     if (data.id) {
         ReportModel.findOne({id: data.id}, function (err, doc) {
-            if (err)console.log(err);
+            if (err) console.log(err);
             if (doc) {
                 for (var i = 0; i < doc.votes.length; i++) {
                     if (doc.votes[i].vote) {
@@ -1203,4 +1190,60 @@ router.get("/upvote-count", function (req, res) {
         res.status(200).json({error: "Missing report id"});
     }
 });
+/**
+ * @api {get} /lukeA/report/flag Flag
+ * @apiName Flag
+ * @apiGroup Report
+ *
+ * @apiParam {String} id Id of the report
+ *
+ * @apiSuccess {Boolean} success True if report was flagged/unflagged successfully
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200
+ *      {
+ *          success:true
+ *      }
+ * @apiDescription
+ * Adds or removes flag in report by id. If the flags reach threshold the report is flagged, if they are below threshold, it is unflagged.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeA/report/flag?id=y892128121u08
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse banned
+ * @apiErrorExample Missing Id:
+ *      HTTP/1.1 404
+ *      {
+ *          error: "No report with such id"
+ *      }
+ */
+router.get("/flag", jwtCheck, authConverter, restrictBanned, function (req, res) {
+    var data = req.query;
+    var id = data.id;
+    ReportModel.findOne({id: id}, function (err, doc) {
+        if (err) throw err;
+        if (doc) {
+            if (doc.flags.indexOf(req.user.profile.id) == -1) {
+                doc.flags.push(req.user.profile.id);
+            } else {
+                doc.flags.splice(doc.flags.indexOf(req.user.profile.id), 1);
+            }
+            if (doc.flags.length >= FLAG_TRIGGER) {
+                doc.flagged = true;
+            } else {
+                doc.flagged = false;
+            }
+            doc.save(function (err, result) {
+                if (err) throw err;
+                res.status(200).json({success: true, flagged: false});
+            });
+        } else {
+            res.status(200).json({error: "No report with such id"});
+        }
+    });
+});
+
+
 module.exports = router;

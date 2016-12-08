@@ -3228,6 +3228,92 @@ define({ "api": [
   },
   {
     "type": "get",
+    "url": "/lukeA/report/flag",
+    "title": "Flag",
+    "name": "Flag",
+    "group": "Report",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the report</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>True if report was flagged/unflagged successfully</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success:true\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "description": "<p>Adds or removes flag in report by id. If the flags reach threshold the report is flagged, if they are below threshold, it is unflagged.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeA/report/flag?id=y892128121u08",
+        "type": "json"
+      }
+    ],
+    "error": {
+      "examples": [
+        {
+          "title": "Missing Id:",
+          "content": "HTTP/1.1 404\n{\n    error: \"No report with such id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Banned:",
+          "content": "HTTP/1.1 401\n{\n    error: 'You are banned from the service',\n    ban: true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/lukeA/routes/report.js",
+    "groupTitle": "Report"
+  },
+  {
+    "type": "get",
     "url": "/lukeA/report",
     "title": "Get report(s)",
     "name": "GetAll",
