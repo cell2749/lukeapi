@@ -4375,8 +4375,8 @@
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "image_url",
-            "description": "<p>Image url to be deleted</p>"
+            "field": "name",
+            "description": "<p>Default image name to be deleted.</p>"
           }
         ],
         "Required Role": [
@@ -4419,7 +4419,7 @@
     "examples": [
       {
         "title": "Example URL:",
-        "content": "http://balticapp.fi/lukeA/user/delete-default-image?image_url='http://www.balticapp.fi/images/lukeA/user/default/doggy.jpg'",
+        "content": "http://balticapp.fi/lukeA/user/delete-default-image?name=dogs",
         "type": "json"
       }
     ],
@@ -5504,6 +5504,13 @@
         "Parameter": [
           {
             "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "image_name",
+            "description": "<p>Image name without format</p>"
+          },
+          {
+            "group": "Parameter",
             "type": "File",
             "optional": false,
             "field": "image",
@@ -5546,7 +5553,7 @@
         ]
       }
     },
-    "description": "<p>Uploads default image for the user to view.</p>",
+    "description": "<p>Uploads default image for the user to view. The image then is accessible through /images/lukeA/user/default/image_name.jpeg</p>",
     "error": {
       "examples": [
         {

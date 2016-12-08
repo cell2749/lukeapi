@@ -776,6 +776,7 @@ router.get("/unban", jwtCheck, authConverter, requiresRole("admin"), function (r
  * @apiName UploadDefaultImage
  * @apiGroup User
  *
+ * @apiParam {String} image_name Image name without format
  * @apiParam {File} image Image file to be used as default image
  * @apiSuccessExample Success-Response:
  *      HTTP/1.1 200
@@ -786,8 +787,7 @@ router.get("/unban", jwtCheck, authConverter, requiresRole("admin"), function (r
  * @apiSuccess {Boolean} success If true, upload was successful
  *
  * @apiDescription
- * Uploads default image for the user to view.
- *
+ * Uploads default image for the user to view. The image then is accessible through /images/lukeA/user/default/image_name.jpeg
  *
  * @apiUse error
  * @apiUse loginError
@@ -809,7 +809,7 @@ router.get("/unban", jwtCheck, authConverter, requiresRole("admin"), function (r
 router.post("/upload-default-image", jwtCheck, authConverter, requiresOneOfRoles(["admin", "superadmin"]), function (req, res) {
     var name = req.body.image_name;
     if (name != null) {
-        if (Utility.saveImage(req, "lukeA/user/default/", name) != null) {
+        if (Utility.saveImageBase64(req.body.image, "lukeA/user/default/", name) != null) {
             res.status(200).json({success: true});
         } else {
             res.status(500).json({error: "Image upload failed"});
@@ -823,7 +823,7 @@ router.post("/upload-default-image", jwtCheck, authConverter, requiresOneOfRoles
  * @apiName DeleteDefaultImage
  * @apiGroup User
  *
- * @apiParam {String} image_url Image url to be deleted
+ * @apiParam {String} name Default image name to be deleted.
  * @apiSuccessExample Success-Response:
  *      HTTP/1.1 200
  *      {
@@ -836,7 +836,7 @@ router.post("/upload-default-image", jwtCheck, authConverter, requiresOneOfRoles
  * Deletes default image from defaults.
  *
  * @apiExample Example URL:
- * http://balticapp.fi/lukeA/user/delete-default-image?image_url='http://www.balticapp.fi/images/lukeA/user/default/doggy.jpg'
+ * http://balticapp.fi/lukeA/user/delete-default-image?name=dogs
  *
  * @apiUse error
  * @apiUse loginError
@@ -856,7 +856,8 @@ router.post("/upload-default-image", jwtCheck, authConverter, requiresOneOfRoles
  * @apiUse roleSuper
  */
 router.get("/delete-default-image", jwtCheck, authConverter, requiresOneOfRoles(["admin", "superadmin"]), function (req, res) {
-    var image_url = req.query.image_url;
+    var image_name = req.query.name;
+    var image_url = "http://www.balticapp.fi/images/lukeA/user/default/"+image_name+".jpeg";
     if (image_url != null && image_url.indexOf("user/default") != -1) {
         if (Utility.deleteImage(image_url) != null) {
             res.status(200).json({success: true});

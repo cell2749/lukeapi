@@ -3440,7 +3440,7 @@ define({ "api": [
   },
   {
     "type": "get",
-    "url": "/lukeA/report/flag",
+    "url": "/lukeB/report/flag",
     "title": "Flag",
     "name": "Flag",
     "group": "Report",
@@ -3834,7 +3834,7 @@ define({ "api": [
   },
   {
     "type": "get",
-    "url": "/lukeA/report/unflag",
+    "url": "/lukeB/report/unflag",
     "title": "Unflag",
     "name": "Unflag",
     "group": "Report",
@@ -4869,8 +4869,8 @@ define({ "api": [
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "image_url",
-            "description": "<p>Image url to be deleted</p>"
+            "field": "name",
+            "description": "<p>Default image name to be deleted.</p>"
           }
         ],
         "Required Role": [
@@ -4913,7 +4913,7 @@ define({ "api": [
     "examples": [
       {
         "title": "Example URL:",
-        "content": "http://balticapp.fi/lukeB/user/delete-default-image?image_url='http://www.balticapp.fi/images/lukeB/user/default/doggy.jpg'",
+        "content": "http://balticapp.fi/lukeB/user/delete-default-image?name=dogs",
         "type": "json"
       }
     ],
@@ -6380,7 +6380,7 @@ define({ "api": [
         ]
       }
     },
-    "description": "<p>Uploads default image for the user to view.</p>",
+    "description": "<p>Uploads default image for the user to view. The image then is accessible through /images/lukeA/user/default/image_name.jpeg</p>",
     "error": {
       "examples": [
         {
