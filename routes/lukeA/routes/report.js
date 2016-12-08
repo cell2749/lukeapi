@@ -446,32 +446,49 @@ router.post('/create', jwtCheck, authConverter, restrictBanned, function (req, r
             if (exp) {
                 UserModel.findOne({id: req.user.profile.id}, function (err, doc) {
                     doc.score = doc.score + exp.reportGain;
-                    var report = new ReportModel();
-                    //var vote = new VoteModel();
-
-                    for (var key in report.schema.paths) {
-                        if (Utility.allowKey(key)) {
-                            report[key] = data[key] || report[key];
-                        }
-                    }
-                    if (report.date == null) {
-                        report.date = new Date().toISOString();
-                    }
-                    //vote.report.id = id;
-                    report._id = id;
-                    report.id = id;
-                    report.votes = {};
-                    report.approved = null;
-                    report.flagged = false;
-                    report.date = new Date().toISOString();
-
-                    report.image_url = Utility.saveImageBase64(data.image, "lukeA/report/", id);
-                    report.submitterId = req.user.profile.id;
-                    doc.save();
-                    report.save(function (err, report) {
+                    RankModel.find({}, {id: 1, score: 1}, {sort: {score: 1}}, function (err, ranks) {
                         if (err) console.log(err);
 
-                        res.status(200).json(Utility.filter(report));
+                        if (ranks.length = 0) {
+                            doc.rankingId = null;
+                        } else {
+                            for (var i = 0; i < ranks.length; i++) {
+                                if (doc.score >= ranks[i].score) {
+                                    doc.rankingId = ranks[i].id;
+                                }
+                            }
+                        }
+
+                        var report = new ReportModel();
+                        //var vote = new VoteModel();
+
+                        for (var key in report.schema.paths) {
+                            if (Utility.allowKey(key)) {
+                                report[key] = data[key] || report[key];
+                            }
+                        }
+                        if (report.date == null) {
+                            report.date = new Date().toISOString();
+                        }
+                        //vote.report.id = id;
+                        report._id = id;
+                        report.id = id;
+                        report.votes = {};
+                        report.approved = null;
+                        report.flagged = false;
+                        report.date = new Date().toISOString();
+
+                        report.image_url = Utility.saveImageBase64(data.image, "lukeA/report/", id);
+                        report.submitterId = req.user.profile.id;
+                        doc.save(function (err, userSaved) {
+                            if (err) console.log(err);
+
+                            report.save(function (err, reportSaved) {
+                                if (err) console.log(err);
+
+                                res.status(200).json(Utility.filter(reportSaved));
+                            });
+                        });
                     });
                 });
             } else {
@@ -813,13 +830,14 @@ router.get("/upvote", jwtCheck, authConverter, restrictBanned, function (req, re
                         UserModel.findOne({id: doc.submitterId}, function (err, usr) {
                             if (err) console.log(err);
                             if (usr) {
-                                usr.score = usr.score + exp.upvoteGain;
+
                                 var exists = false;
                                 for (var i = 0; i < doc.votes.length; i++) {
                                     if (doc.votes[i].userId == userId) {
                                         exists = true;
                                         if (!doc.votes[i].vote) {
                                             doc.votes[i].vote = true;
+                                            usr.score = usr.score + exp.upvoteGain - exp.downvoteGain;
                                             if (doc.rating != null) {
                                                 doc.rating++;
                                             } else {
@@ -830,17 +848,36 @@ router.get("/upvote", jwtCheck, authConverter, restrictBanned, function (req, re
                                 }
                                 if (!exists) {
                                     doc.votes.push({userId: userId, vote: true});
+                                    usr.score = usr.score + exp.upvoteGain;
                                     if (doc.rating != null) {
                                         doc.rating++;
                                     } else {
                                         doc.rating = 1;
                                     }
                                 }
-                                doc.save();
-                                res.status(200).json({success: true});
+                                RankModel.find({}, {id: 1, score: 1}, {sort: {score: 1}}, function (err, ranks) {
+                                    if (err) console.log(err);
+
+                                    if (ranks.length = 0) {
+                                        usr.rankingId = null;
+                                    } else {
+                                        for (var i = 0; i < ranks.length; i++) {
+                                            if (usr.score >= ranks[i].score) {
+                                                usr.rankingId = ranks[i].id;
+                                            }
+                                        }
+                                    }
+                                    doc.save(function (err, docSaved) {
+                                        if (err) console.log(err);
+                                        usr.save(function (err, usrSaved) {
+                                            if (err) console.log(err);
+                                            res.status(200).json({success: true});
+                                        });
+
+                                    });
+                                });
                             } else {
-                                res.status(200).json({success: true});
-                                //res.status(200).json({error: "Report does not have a submitter"});
+                                res.status(200).json({success: false});
                             }
                         });
                     } else {
@@ -910,14 +947,13 @@ router.get("/downvote", jwtCheck, authConverter, restrictBanned, function (req, 
                         UserModel.findOne({id: doc.submitterId}, function (err, usr) {
                             if (err) console.log(err);
                             if (usr) {
-                                usr.score = usr.score + exp.downvoteGain;
-
                                 var exists = false;
                                 for (var i = 0; i < doc.votes.length; i++) {
                                     if (doc.votes[i].userId == userId) {
                                         exists = true;
                                         if (doc.votes[i].vote) {
                                             doc.votes[i].vote = false;
+                                            usr.score = usr.score + exp.downvoteGain - exp.upvoteGain;
                                             if (doc.rating != null) {
                                                 doc.rating--;
                                             } else {
@@ -928,16 +964,36 @@ router.get("/downvote", jwtCheck, authConverter, restrictBanned, function (req, 
                                 }
                                 if (!exists) {
                                     doc.votes.push({userId: userId, vote: false});
+                                    usr.score = usr.score + exp.downvoteGain;
                                     if (doc.rating != null) {
                                         doc.rating--;
                                     } else {
                                         doc.rating = -1;
                                     }
                                 }
-                                doc.save();
-                                res.status(200).json({success: true});
+                                RankModel.find({}, {id: 1, score: 1}, {sort: {score: 1}}, function (err, ranks) {
+                                    if (err) console.log(err);
+
+                                    if (ranks.length = 0) {
+                                        usr.rankingId = null;
+                                    } else {
+                                        for (var i = 0; i < ranks.length; i++) {
+                                            if (usr.score >= ranks[i].score) {
+                                                usr.rankingId = ranks[i].id;
+                                            }
+                                        }
+                                    }
+                                    doc.save(function (err, docSaved) {
+                                        if (err) console.log(err);
+                                        usr.save(function (err, usrSaved) {
+                                            if (err) console.log(err);
+                                            res.status(200).json({success: true});
+                                        });
+                                    });
+
+                                });
                             } else {
-                                res.status(200).json({success: true});
+                                res.status(200).json({success: false});
                                 //res.status(200).json({error: "Report does not have a submitter"});
                             }
                         });
@@ -1019,7 +1075,7 @@ router.get("/vote", jwtCheck, authConverter, restrictBanned, function (req, res)
                                             exists = true;
                                             if (!doc.votes[i].vote) {
                                                 doc.votes[i].vote = true;
-                                                usr.score = usr.score + exp.upvoteGain;
+                                                usr.score = usr.score + exp.upvoteGain - exp.downvoteGain;
                                                 if (doc.rating != null) {
                                                     doc.rating++;
                                                 } else {
@@ -1044,7 +1100,7 @@ router.get("/vote", jwtCheck, authConverter, restrictBanned, function (req, res)
                                             exists = true;
                                             if (doc.votes[i].vote) {
                                                 doc.votes[i].vote = false;
-                                                usr.score = usr.score + exp.downvoteGain;
+                                                usr.score = usr.score + exp.downvoteGain - exp.upvoteGain;
                                                 if (doc.rating != null) {
                                                     doc.rating--;
                                                 } else {
@@ -1063,8 +1119,27 @@ router.get("/vote", jwtCheck, authConverter, restrictBanned, function (req, res)
                                         }
                                     }
                                 }
-                                doc.save();
-                                res.status(200).json({success: true});
+                                RankModel.find({}, {id: 1, score: 1}, {sort: {score: 1}}, function (err, ranks) {
+                                    if (err) console.log(err);
+
+                                    if (ranks.length = 0) {
+                                        usr.rankingId = null;
+                                    } else {
+                                        for (var i = 0; i < ranks.length; i++) {
+                                            if (usr.score >= ranks[i].score) {
+                                                usr.rankingId = ranks[i].id;
+                                            }
+                                        }
+                                    }
+                                    doc.save(function (err, docSaved) {
+                                        if (err) console.log(err);
+                                        usr.save(function (err, usrSaved) {
+                                            if (err) console.log(err);
+                                            res.status(200).json({success: true});
+                                        });
+                                    });
+
+                                });
                             } else {
                                 res.status(200).json({success: true});
                                 //res.status(200).json({error: "Report does not have a submitter"});

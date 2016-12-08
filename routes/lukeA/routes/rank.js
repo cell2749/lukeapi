@@ -35,9 +35,9 @@ const MONGO_PROJECTION = {
  * @apiGroup Rank
  *
  * @apiParam {String} title Title of rank
+ * @apiParam {Number} score Required score/experience for a user to get this rank
  * @apiParam {String} [description] Description of the rank
  * @apiParam {File} [image] Image file that is to be used as Rank icon
- * @apiParam {Number} [score] Required score/experience for a user to get this rank
  *
  * @apiSuccessExample Success-Response:
  *      HTTP/1.1 200 OK
@@ -71,12 +71,21 @@ const MONGO_PROJECTION = {
  *      {
  *          error:"Missing title"
  *      }
+ * @apiErrorExample Score is missing:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Missing score"
+ *      }
  */
 router.post('/create', jwtCheck, authConverter, requiresRole('admin'), function (req, res, next) {
     var data = req.body;
     var id = mongoose.Types.ObjectId();
 
-    if (data.title != null) {
+    if (data.title == null) {
+        res.status(422).json({error: "Missing title"});
+    } else if (data.score == null) {
+        res.status(422).json({error: "Missing score"});
+    } else {
         var rank = new RankModel();
         for (var key in rank.schema.paths) {
             if (Utility.allowKey(key)) {
@@ -91,8 +100,6 @@ router.post('/create', jwtCheck, authConverter, requiresRole('admin'), function 
 
             res.status(200).json(Utility.filter(rank));
         });
-    } else {
-        res.status(422).json({error: "Missing title"});
     }
 });
 /**

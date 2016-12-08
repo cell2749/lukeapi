@@ -11,7 +11,7 @@ var schema = mongoose.Schema(
         title:{type: String, required: '{PATH} is required!'},
         description:String,
         image_url: String,
-        score: Number
+        score: {type: Number, required: '{PATH} is required!'}
     }
 );
 

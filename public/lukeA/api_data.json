@@ -1938,6 +1938,13 @@
           },
           {
             "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "score",
+            "description": "<p>Required score/experience for a user to get this rank</p>"
+          },
+          {
+            "group": "Parameter",
             "type": "String",
             "optional": true,
             "field": "description",
@@ -1949,13 +1956,6 @@
             "optional": true,
             "field": "image",
             "description": "<p>Image file that is to be used as Rank icon</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Number",
-            "optional": true,
-            "field": "score",
-            "description": "<p>Required score/experience for a user to get this rank</p>"
           }
         ],
         "Required Role": [
@@ -2029,6 +2029,11 @@
         {
           "title": "Title is missing:",
           "content": "HTTP/1.1 422\n{\n    error:\"Missing title\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Score is missing:",
+          "content": "HTTP/1.1 422\n{\n    error:\"Missing score\"\n}",
           "type": "json"
         },
         {
