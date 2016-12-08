@@ -327,7 +327,7 @@ router.post('/update',jwtCheck,authConverter,function(req,res) {
                         Utility.setKey(doc, key, value);
                     }
                 }
-                doc.image_url = Utility.saveImage(req,"lukeB/user/",doc.id)||doc.image_url;
+                doc.image_url = Utility.saveImageBase64(data.image,"lukeB/user/",doc.id)||doc.image_url;
                 doc.save(function(err,result) {
                     if (err)throw err;
 
@@ -1032,7 +1032,7 @@ router.get("/unban",jwtCheck,authConverter,requiresRole("admin"),function(req,re
 router.post("/upload-default-image",jwtCheck,authConverter,requiresOneOfRoles(["admin","superadmin"]),function(req,res){
     var name = req.body.image_name;
     if(name!=null) {
-        if (Utility.saveImage(req, "lukeB/user/default/", name) != null) {
+        if (Utility.saveImageBase64(req.body.image, "lukeB/user/default/", name) != null) {
             res.status(200).json({success: true});
         } else {
             res.status(500).json({error: "Image upload failed"});

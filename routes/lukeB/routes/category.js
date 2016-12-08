@@ -122,7 +122,7 @@ router.post("/create", jwtCheck, authConverter, requiresRole("admin"), function 
         var id = mongoose.Types.ObjectId();
         category.id = id;
         category._id = id;
-        category.image_url = Utility.saveImage(req, "lukeB/category/", id);
+        category.image_url = Utility.saveImageBase64(data.image, "lukeB/category/", id);
         category.save(function (err, result) {
             if (err)throw err;
             res.status(200).json({success: true});
@@ -176,7 +176,7 @@ router.post("/update", jwtCheck, authConverter, requiresRole("admin"), function 
                         Utility.setKey(doc, key, value);
                     }
                 }
-                doc.image_url = Utility.saveImage(req, "lukeB/category/", doc.id) || doc.image_url;
+                doc.image_url = Utility.saveImageBase64(data.image, "lukeB/category/", doc.id) || doc.image_url;
                 doc.save(function (err, item) {
                     if (err) console.log(err);
                     res.status(200).json(Utility.filter(item));

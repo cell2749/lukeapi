@@ -279,7 +279,7 @@ router.post('/create',jwtCheck,authConverter,function(req,res,next) {
         report.approved = false;
         report.rating = 0;
         report.rating2 = 0;
-        report.image_url = Utility.saveImage(req,"lukeB/report/",id);
+        report.image_url = Utility.saveImageBase64(data.image,"lukeB/report/",id);
         report.save(function (err, report) {
             if (err)throw err;
 
@@ -381,7 +381,7 @@ router.post('/update',jwtCheck,authConverter,function(req,res) {
                         Utility.setKey(doc, key, value);
                     }
                 }
-                doc.image_url = Utility.saveImage(req,"lukeB/report/",doc.id)||doc.image_url;
+                doc.image_url = Utility.saveImageBase64(data.image,"lukeB/report/",doc.id)||doc.image_url;
                 doc.save(function (err, result) {
 
                     res.status(200).json(Utility.filter(result));
