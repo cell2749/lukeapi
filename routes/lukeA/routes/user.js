@@ -68,11 +68,9 @@ const MONGO_PROJECTION = {
  * @apiDescription
  * Returns array of json objects containing user information.
  *
- * @apiUse error
- * @apiUse loginError
  *
  */
-router.get('/get-all', jwtCheck, authConverter, function (req, res, next) {
+router.get('/get-all', function (req, res, next) {
     Utility.get(UserModel, null, res);
 });
 /**
@@ -110,21 +108,33 @@ router.get('/get-all', jwtCheck, authConverter, function (req, res, next) {
  *          error:"No user with such id"
  *      }
  * @apiUse error
- * @apiUse loginError
  * @apiUse noUser
+ * @apiErrorExample Missing id:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Missing id"
+ *      }
  */
-router.get('/', jwtCheck, authConverter, function (req, res, next) {
-    var id = req.query.id || req.user.profile.id;
+router.get('/', function (req, res, next) {
+    var id;
+    try {
+        id = req.query.id || req.user.profile.id;
+    }catch(e){
+        console.log(e);
+    }
+    if(id!=null) {
+        UserModel.findOne({id: id}, MONGO_PROJECTION, function (err, result) {
+            if (err) console.log(err);
 
-    UserModel.findOne({id: id}, MONGO_PROJECTION, function (err, result) {
-        if (err) console.log(err);
-
-        if (result) {
-            res.status(200).json(Utility.filter(result));
-        } else {
-            res.status(404).json({error: "No user with such id"});
-        }
-    });
+            if (result) {
+                res.status(200).json(Utility.filter(result));
+            } else {
+                res.status(404).json({error: "No user with such id"});
+            }
+        });
+    }else{
+        res.status(422).json({error:"Missing id"});
+    }
 });
 /**
  * @api {post} /lukeA/user/update Update user

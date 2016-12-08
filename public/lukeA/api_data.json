@@ -4576,8 +4576,8 @@
           "type": "json"
         },
         {
-          "title": "Login Error:",
-          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "title": "Missing id:",
+          "content": "HTTP/1.1 422\n{\n    error:\"Missing id\"\n}",
           "type": "json"
         },
         {
@@ -4664,32 +4664,7 @@
     "description": "<p>Returns array of json objects containing user information.</p>",
     "version": "0.0.0",
     "filename": "routes/lukeA/routes/user.js",
-    "groupTitle": "User",
-    "error": {
-      "fields": {
-        "Error": [
-          {
-            "group": "Error",
-            "optional": false,
-            "field": "4xx",
-            "description": "<p>Status Code of the error</p>"
-          },
-          {
-            "group": "Error",
-            "optional": false,
-            "field": "error",
-            "description": "<p>Error message</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Login Error:",
-          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
-          "type": "json"
-        }
-      ]
-    }
+    "groupTitle": "User"
   },
   {
     "type": "get",
