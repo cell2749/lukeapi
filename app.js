@@ -55,7 +55,8 @@ app.set('view engine', 'jade');
 
 app.use(logger('dev'));
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '10mb'}));
+app.use(bodyParser.urlencoded({limit: '10mb',extended:false}));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(session({
