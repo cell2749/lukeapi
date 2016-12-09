@@ -203,7 +203,7 @@ router.get('/get-all',function(req,res){
  * @apiUse error
  * @apiUse loginError
  */
-router.get('/',jwtCheck,authConverter, function(req, res, next) {
+router.get('/', function(req, res, next) {
     var id = req.query.id;
     Utility.get(UserModel,id,res);
 });
