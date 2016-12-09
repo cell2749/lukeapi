@@ -1524,21 +1524,21 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "Object",
-            "optional": true,
+            "optional": false,
             "field": "location",
-            "description": "<p>Json] object containing location of the place</p>"
+            "description": "<p>Json object containing location of the place</p>"
           },
           {
             "group": "Parameter",
             "type": "Number",
-            "optional": true,
+            "optional": false,
             "field": "location.long",
             "description": "<p>Longiture of the place</p>"
           },
           {
             "group": "Parameter",
             "type": "Number",
-            "optional": true,
+            "optional": false,
             "field": "location.lat",
             "description": "<p>Latitude of the place</p>"
           },
@@ -1559,7 +1559,7 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "Number",
-            "optional": true,
+            "optional": false,
             "field": "radius",
             "description": "<p>Radius of the place</p>"
           }
@@ -1746,6 +1746,16 @@ define({ "api": [
         {
           "title": "Missing title:",
           "content": "HTTP/1.1 422\n{\n    error:\"Missing title\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing location:",
+          "content": "HTTP/1.1 422\n{\n    error:\"Missing location\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing location:",
+          "content": "HTTP/1.1 422\n{\n    error:\"Missing location\"\n}",
           "type": "json"
         },
         {

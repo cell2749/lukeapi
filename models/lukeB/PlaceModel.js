@@ -10,8 +10,8 @@ var schema = mongoose.Schema(
         id:{type: String, required: '{PATH} is required!'},
         title:String,
         location:{
-            long:Number,
-            lat:Number
+            long:{type: Number, required: '{PATH} is required!'},
+            lat:{type: Number, required: '{PATH} is required!'}
         },
         type:String,
         votes:[{
@@ -33,7 +33,7 @@ var schema = mongoose.Schema(
             seaTemperature:Number,
             wind:Number
         },
-        radius: Number
+        radius: {type: Number, required: '{PATH} is required!'}
 
     }
 );

@@ -159,12 +159,12 @@ router.get("/", function (req, res) {
  * @apiGroup Place
  *
  * @apiParam {String} title Title of the place
- * @apiParam {Object} [location Json] object containing location of the place
- * @apiParam {Number} [location.long] Longiture of the place
- * @apiParam {Number} [location.lat] Latitude of the place
+ * @apiParam {Object} location Json object containing location of the place
+ * @apiParam {Number} location.long Longiture of the place
+ * @apiParam {Number} location.lat Latitude of the place
  * @apiParam {String} [type] Type of the place
  * @apiParam {String} [description] Description of the place
- * @apiParam {Number} [radius] Radius of the place
+ * @apiParam {Number} radius Radius of the place
  *
  * @apiSuccessExample Success-Response-Single:
  *      HTTP/1.1 200 OK
@@ -237,10 +237,26 @@ router.get("/", function (req, res) {
  *      {
  *          error:"Missing title"
  *      }
+ * @apiErrorExample Missing location:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Missing location"
+ *      }
+ * @apiErrorExample Missing location:
+ *      HTTP/1.1 422
+ *      {
+ *          error:"Missing location"
+ *      }
  */
 router.post("/create", jwtCheck, authConverter, requiresOneOfRoles(["admin", "advanced", "researcher"]), function (req, res) {
     var data = req.body;
-    if (data.title) {
+    if (data.title == null) {
+        res.status(422).json({error: "Missing title"});
+    } else if (data.location == null || data.location.lat == null || data.long == null) {
+        res.status(422).json({error: "Missing location"});
+    } else if (data.radius == null) {
+        res.status(422).json({error: "Missing radius"});
+    } else {
         var place = new PlaceModel();
 
         for (var key in PlaceModel.schema.paths) {
@@ -257,8 +273,6 @@ router.post("/create", jwtCheck, authConverter, requiresOneOfRoles(["admin", "ad
 
             res.status(200).json(Utility.filter(result));
         });
-    } else {
-        res.status(422).json({error: "Missing title"});
     }
 });
 /**
@@ -633,7 +647,7 @@ router.post("/visit", jwtCheck, authConverter, function (req, res) {
     } else {
         PlaceModel.find({}, function (err, places) {
             if (err) console.log(err);
-            if(places.length>0) {
+            if (places.length > 0) {
                 for (var i = 0; i < places.length; i++) {
                     if (places[i].radius >= Utility.getCrow(places[i].location.lat, places[i].location.long, data.lat, data.long)) {
                         //record visit
@@ -685,8 +699,8 @@ router.post("/visit", jwtCheck, authConverter, function (req, res) {
                         res.status(200).json({visited: false});
                     }
                 }
-            }else{
-                res.status(404).json({error:"No places in DB"});
+            } else {
+                res.status(404).json({error: "No places in DB"});
             }
         });
     }
