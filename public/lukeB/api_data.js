@@ -5281,7 +5281,7 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "String",
-            "optional": true,
+            "optional": false,
             "field": "id",
             "description": "<p>User id that is to be returned. If not provided, users own information is returned.</p>"
           }
@@ -5380,7 +5380,7 @@ define({ "api": [
             "type": "Array",
             "optional": false,
             "field": "profile",
-            "description": "<p>Array containing links to social profiles of the user(Facebook, Twitter and etc.)* Note! Currently there is no way of linking multiple social profiles to 1 user. Even though if provider and link will be added, user won't be able to log in from more than 1 of the profiles. Ask Nikita more about this topic if you have any questions.</p>"
+            "description": "<p>Array containing links to social profiles of the user(Facebook, Twitter and etc.)* Note! Currently there is no way of linking multiple social profiles to 1 user. Even though if provider and link will be added, user won't be able to log in from more than 1 of the profiles.</p>"
           },
           {
             "group": "Success 200",
@@ -5448,7 +5448,203 @@ define({ "api": [
         "type": "json"
       }
     ],
-    "description": "<p>Returns single json object containing user own information if no id was provided. Returns single json object containing user information if id was provided. Requires Login.</p>",
+    "description": "<p>Returns single json object containing user information by the id that was provided.</p>",
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/user.js",
+    "groupTitle": "User",
+    "error": {
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        }
+      ]
+    }
+  },
+  {
+    "type": "get",
+    "url": "/lukeB/user/me",
+    "title": "Get my userInfo",
+    "name": "GetUserMe",
+    "group": "User",
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>User id</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "username",
+            "description": "<p>Users chosen username</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "email",
+            "description": "<p>Users e-mail</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "image_url",
+            "description": "<p>URL to users image</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "bio",
+            "description": "<p>Users biography</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "location",
+            "description": "<p>Users location (country, town or city)</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "gender",
+            "description": "<p>Users gender. String, not boolean? We support apaches?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "hobby",
+            "description": "<p>Users hobby</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "favouritePlaces",
+            "description": "<p>Array of favourite places for user</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "favouritePlaces[]",
+            "description": "<p>.placeId Id of the place as reference</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "visitedPlaces",
+            "description": "<p>Places that user has visited</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "visitedPlaces[]",
+            "description": "<p>.placeId Place Id as reference</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "profile",
+            "description": "<p>Array containing links to social profiles of the user(Facebook, Twitter and etc.)* Note! Currently there is no way of linking multiple social profiles to 1 user. Even though if provider and link will be added, user won't be able to log in from more than 1 of the profiles.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "profile[]",
+            "description": "<p>.provider Social Provider (Facebook, Twitter, Google and etc.)</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "lastOnline",
+            "description": "<p>Date indicating last action of the user?</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "logTimes",
+            "description": "<p>Array containing log in and log out times bound to certain places</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "logTimes[]",
+            "description": "<p>.locationId Place id</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "numberOfComments",
+            "description": "<p>Amount of comments user made</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "numberOfRatings",
+            "description": "<p>Amount of hearts/flags user has given</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "numberOfReports",
+            "description": "<p>Amount of reports user has made</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    id:String,\n    username:String,\n    email:String,\n    image_url:String,\n    bio:String,\n    location:String,\n    gender:String,\n    hobby:String,\n    favouritePlaces:[{\n        placeId:String,\n        favouriteTime:String\n    }],\n    visitedPlaces:[{\n        placeId:String,\n        report:Boolean\n    }],\n    profile: [{\n        provider: String,\n        link: String\n    }],\n    lastOnline:String,\n    logTimes:[{\n        locationId:String,\n        timeLogIn:String,\n        timeLogOut:String,\n        numberOfComments:Number,\n        numberOfRatings:Number,\n        numberOfReports:Number\n    }]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "http://balticapp.fi/lukeB/user?id=2u190e2u02190u",
+        "content": "http://balticapp.fi/lukeB/user?id=2u190e2u02190u",
+        "type": "json"
+      }
+    ],
+    "description": "<p>Returns single json object containing users own information. Requires Login.</p>",
     "version": "0.0.0",
     "filename": "routes/lukeB/routes/user.js",
     "groupTitle": "User",

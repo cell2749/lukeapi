@@ -124,7 +124,7 @@ const MONGO_PROJECTION ={
  * @apiUse error
  * @apiUse loginError
  */
-router.get('/get-all',jwtCheck,authConverter,function(req,res){
+router.get('/get-all',function(req,res){
    Utility.get(UserModel,null,res);
 });
 /**
@@ -132,7 +132,7 @@ router.get('/get-all',jwtCheck,authConverter,function(req,res){
  * @apiName GetUser
  * @apiGroup User
  *
- * @apiParam {String} [id] User id that is to be returned. If not provided, users own information is returned.
+ * @apiParam {String} id User id that is to be returned. If not provided, users own information is returned.
  *
  * @apiSuccess {String} id User id
  * @apiSuccess {String} username Users chosen username
@@ -151,7 +151,6 @@ router.get('/get-all',jwtCheck,authConverter,function(req,res){
  * @apiSuccess {Array} profile Array containing links to social profiles of the user(Facebook, Twitter and etc.)*
  * Note! Currently there is no way of linking multiple social profiles to 1 user.
  * Even though if provider and link will be added, user won't be able to log in from more than 1 of the profiles.
- * Ask Nikita more about this topic if you have any questions.
  * @apiSuccess {String} profile[].provider Social Provider (Facebook, Twitter, Google and etc.)
  * @apiSuccess {String} profile[].link Link to the profile
  * @apiSuccess {String} lastOnline Date indicating last action of the user?
@@ -199,16 +198,93 @@ router.get('/get-all',jwtCheck,authConverter,function(req,res){
  * @apiExample
  * http://balticapp.fi/lukeB/user?id=2u190e2u02190u
  * @apiDescription
- * Returns single json object containing user own information if no id was provided.
- * Returns single json object containing user information if id was provided.
- * Requires Login.
+ * Returns single json object containing user information by the id that was provided.
  *
  * @apiUse error
  * @apiUse loginError
  */
 router.get('/',jwtCheck,authConverter, function(req, res, next) {
-    var id = req.query.id || req.user.profile.id;
+    var id = req.query.id;
     Utility.get(UserModel,id,res);
+});
+/**
+ * @api {get} /lukeB/user/me Get my userInfo
+ * @apiName GetUserMe
+ * @apiGroup User
+ *
+ * @apiSuccess {String} id User id
+ * @apiSuccess {String} username Users chosen username
+ * @apiSuccess {String} email Users e-mail
+ * @apiSuccess {String} image_url URL to users image
+ * @apiSuccess {String} bio Users biography
+ * @apiSuccess {String} location Users location (country, town or city)
+ * @apiSuccess {String} gender Users gender. String, not boolean? We support apaches?
+ * @apiSuccess {String} hobby Users hobby
+ * @apiSuccess {Array} favouritePlaces Array of favourite places for user
+ * @apiSuccess {String} favouritePlaces[].placeId Id of the place as reference
+ * @apiSuccess {String} favouritePlaces[].favouriteTime:String Favourite time.(Summer for example or a year)
+ * @apiSuccess {Array} visitedPlaces Places that user has visited
+ * @apiSuccess {String} visitedPlaces[].placeId Place Id as reference
+ * @apiSuccess {Boolean} visitedPlaces[].report Boolean indicating if user has done any reports around that place
+ * @apiSuccess {Array} profile Array containing links to social profiles of the user(Facebook, Twitter and etc.)*
+ * Note! Currently there is no way of linking multiple social profiles to 1 user.
+ * Even though if provider and link will be added, user won't be able to log in from more than 1 of the profiles.
+ * @apiSuccess {String} profile[].provider Social Provider (Facebook, Twitter, Google and etc.)
+ * @apiSuccess {String} profile[].link Link to the profile
+ * @apiSuccess {String} lastOnline Date indicating last action of the user?
+ * @apiSuccess {Array} logTimes Array containing log in and log out times bound to certain places
+ * @apiSuccess {String} logTimes[].locationId Place id
+ * @apiSuccess {String} logTimes[].timeLogIn Log in Date&Time
+ * @apiSuccess {String} logTimes[].timeLogOut Log out Date&Time
+ * @apiSuccess {Number} numberOfComments Amount of comments user made
+ * @apiSuccess {Number} numberOfRatings Amount of hearts/flags user has given
+ * @apiSuccess {Number} numberOfReports Amount of reports user has made
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200
+ *      {
+ *          id:String,
+ *          username:String,
+ *          email:String,
+ *          image_url:String,
+ *          bio:String,
+ *          location:String,
+ *          gender:String,
+ *          hobby:String,
+ *          favouritePlaces:[{
+ *              placeId:String,
+ *              favouriteTime:String
+ *          }],
+ *          visitedPlaces:[{
+ *              placeId:String,
+ *              report:Boolean
+ *          }],
+ *          profile: [{
+ *              provider: String,
+ *              link: String
+ *          }],
+ *          lastOnline:String,
+ *          logTimes:[{
+ *              locationId:String,
+ *              timeLogIn:String,
+ *              timeLogOut:String,
+ *              numberOfComments:Number,
+ *              numberOfRatings:Number,
+ *              numberOfReports:Number
+ *          }]
+ *      }
+ * @apiExample
+ * http://balticapp.fi/lukeB/user?id=2u190e2u02190u
+ * @apiDescription
+ * Returns single json object containing users own information.
+ * Requires Login.
+ *
+ * @apiUse error
+ * @apiUse loginError
+ */
+router.get("/me",jwtCheck,authConverter,function(req,res,next){
+   var id = req.user.profile.id;
+   Utility.get(UserModel,id,res);
 });
 /**
  * @api {post} /lukeB/user/update Update
