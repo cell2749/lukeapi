@@ -47,7 +47,7 @@ const MONGO_PROJECTION ={
     _id: 0,
     __v: 0
 };
-/**
+/*
  * @api {get} /lukeB/user/get-all Get All
  * @apiName GetAll
  * @apiGroup User
@@ -123,16 +123,16 @@ const MONGO_PROJECTION ={
  *
  * @apiUse error
  * @apiUse loginError
- */
-router.get('/get-all',function(req,res){
+*/
+/*router.get('/get-all',function(req,res){
    Utility.get(UserModel,null,res);
-});
+});*/
 /**
  * @api {get} /lukeB/user Get user
  * @apiName GetUser
  * @apiGroup User
  *
- * @apiParam {String} id User id that is to be returned. If not provided, users own information is returned.
+ * @apiParam {String} [id] User id that is to be returned. If not provided, users own information is returned.
  *
  * @apiSuccess {String} id User id
  * @apiSuccess {String} username Users chosen username
@@ -195,10 +195,43 @@ router.get('/get-all',function(req,res){
  *              numberOfReports:Number
  *          }]
  *      }
+ * @apiSuccessExample Success-Response-All:
+ *      HTTP/1.1 200
+ *      [{
+ *          id:String,
+ *          username:String,
+ *          email:String,
+ *          image_url:String,
+ *          bio:String,
+ *          location:String,
+ *          gender:String,
+ *          hobby:String,
+ *          favouritePlaces:[{
+ *              placeId:String,
+ *              favouriteTime:String
+ *          }],
+ *          visitedPlaces:[{
+ *              placeId:String,
+ *              report:Boolean
+ *          }],
+ *          profile: [{
+ *              provider: String,
+ *              link: String
+ *          }],
+ *          lastOnline:String,
+ *          logTimes:[{
+ *              locationId:String,
+ *              timeLogIn:String,
+ *              timeLogOut:String,
+ *              numberOfComments:Number,
+ *              numberOfRatings:Number,
+ *              numberOfReports:Number
+ *          }]
+ *      }]
  * @apiExample
  * http://balticapp.fi/lukeB/user?id=2u190e2u02190u
  * @apiDescription
- * Returns single json object containing user information by the id that was provided.
+ * Returns single json object containing user information if the id was provided. Returns every user if no id is provided.
  *
  * @apiUse error
  * @apiUse loginError
