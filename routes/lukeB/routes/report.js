@@ -36,8 +36,8 @@ var Utility = new UtModule([
     "votes.date",
     "flagged",
     "approved"
-],5);
-const MONGO_PROJECTION ={
+], 5);
+const MONGO_PROJECTION = {
     _id: 0,
     __v: 0
 };
@@ -127,34 +127,34 @@ const MONGO_PROJECTION ={
  * @apiUse specialAdmin
  * @apiUse specialAdv
  */
-router.get('/',function(req,res){
+router.get('/', function (req, res) {
     var data = req.query;
-    var returnResult=[];
+    var returnResult = [];
     var limit = data.limit || 0;
     var rating = data.rating;
 
     //deg2rad might not be necessary
     var location = {
-        long : data.long,
-        lat : data.lat
+        long: data.long,
+        lat: data.lat
     };
     var distance = data.distance || 10;
 
 
     var approved = true; //{$ne:null};
     var flagged = false; //{$ne:null};
-    var id = data.id || {$ne:null};
-    var profileId = data.profileId || {$ne:null};
+    var id = data.id || {$ne: null};
+    var profileId = data.profileId || {$ne: null};
     var showVotes = 0;
-    if(data.votes=="false"||data.votes==0){
+    if (data.votes == "false" || data.votes == 0) {
         showVotes = 0;
-    }else if(data.votes=="true"||data.votes==1){
+    } else if (data.votes == "true" || data.votes == 1) {
         showVotes = 1;
     }
     var newProjection = MONGO_PROJECTION;
-    newProjection[votes]=showVotes;
+    newProjection[votes] = showVotes;
 
-    if(req.user.profile) {
+    if (req.user.profile) {
         var appMetadata = req.user.profile._json.app_metadata || {};
         var roles = appMetadata.roles || [];
         if (roles.indexOf("admin") != -1 || roles.indexOf("advanced") != -1) {
@@ -162,33 +162,38 @@ router.get('/',function(req,res){
             flagged = data.flagged || flagged;
         }
     }
-    ReportModel.find({id:id, approved:approved,profileId:profileId,flagged:flagged},newProjection).sort({"date":-1}).limit(parseInt(limit)).exec(function(err, collection){
-        if(err) throw err;
+    ReportModel.find({
+        id: id,
+        approved: approved,
+        profileId: profileId,
+        flagged: flagged
+    }, newProjection).sort({"date": -1}).limit(parseInt(limit)).exec(function (err, collection) {
+        if (err) throw err;
         var result = [];
-        if(rating!=null) {
+        if (rating != null) {
             for (i = 0; i < collection.length; i++) {
                 if (collection[i].rating != null && rating < collection[i].rating) {
                     result.push(collection[i]);
                 }
             }
-        }else{
-            result=collection;
+        } else {
+            result = collection;
         }
 
-        if(distance&&location.long&&location.lat) {
+        if (distance && location.long && location.lat) {
             for (var i = 0; i < result.length; i++) {
 
-                if(result[i].location.lat!=null&&result[i].location.long!=null) {
+                if (result[i].location.lat != null && result[i].location.long != null) {
                     if (Utility.getCrow(location.lat, location.long, result[i].latitude, result[i].longitude) <= distance) {
                         returnResult.push(result[i]);
                     }
                 }
-                if(i==result.length-1){
+                if (i == result.length - 1) {
                     res.status(200).json(Utility.filter(returnResult));
                 }
                 //might require improvement right here
             }
-        }else {
+        } else {
             res.status(200).json(Utility.filter(result));
         }
     });
@@ -202,7 +207,7 @@ router.get('/',function(req,res){
  * @apiParam {Object} [location] Json object containing longitude and latitude
  * @apiParam {Number} [location.longitude] Longtitude of a report
  * @apiParam {Number} [location.latitude] Latitude of a report
- * @apiParam {File} [image] Image file to be used in a report
+ * @apiparam {File} [image] Base64 string representing jpeg image
  * @apiParam {String} [description] Description of a report
  * @apiParam {String} [date] Date when report was made*
  * @apiParam {Array} [categoryId] Array containing category ids of a report
@@ -250,19 +255,36 @@ router.get('/',function(req,res){
  * @apiDescription
  * Create report using provided parameters. Date is currently created on the server side.
  * Maybe make it client side?
- * Image not yet implemented. Returns created report.
+ * Returns created report.
  *
- * @apiExample Example URL:
- * //POST REQUEST EXAMPLE
  *
  * @apiUse error
  * @apiUse loginError
  */
-router.post('/create',jwtCheck,authConverter,function(req,res,next) {
+router.post('/create', jwtCheck, authConverter, function (req, res, next) {
     var data = req.body;
     var id = mongoose.Types.ObjectId();
 
-    UserModel.findOne({id: req.user.profile.id}, function (err, doc) {
+    PlaceModel.find({}, function (err, places) {
+        if (err) console.log(err);
+        if(data.lat!=null&&data.long!=null) {
+            for (var i = 0; i < places.length; i++) {
+                if (places[i].radius >= Utility.getCrow(places[i].location.lat, places[i].location.long, data.lat, data.long)) {
+                    PlaceModel.findOne({id: places[i].id}, function (err, place) {
+                        if (err) console.log(err);
+                        place.nearReports = place.nearReports || [];
+                        place.nearReports.push({
+                            reportId: id
+                        });
+                        place.save(function (err, placeSaved) {
+                            if (err) console.log(err);
+
+                        });
+                    });
+                }
+            }
+        }
+
         var report = new ReportModel();
 
         for (var key in report) {
@@ -279,7 +301,7 @@ router.post('/create',jwtCheck,authConverter,function(req,res,next) {
         report.approved = false;
         report.rating = 0;
         report.rating2 = 0;
-        report.image_url = Utility.saveImageBase64(data.image,"lukeB/report/",id);
+        report.image_url = Utility.saveImageBase64(data.image, "lukeB/report/", id);
         report.save(function (err, report) {
             if (err)throw err;
 
@@ -296,6 +318,7 @@ router.post('/create',jwtCheck,authConverter,function(req,res,next) {
  * @apiParam {String} id Id of the report to be updated
  * @apiParam {String} [title] Title of a report
  * @apiParam {String} [description] Description of a report
+ * @apiparam {File} [image] Base64 string representing jpeg image
  * @apiParam {Array} [categoryId] Array containing category ids of a report
  *
  * @apiSuccessExample Success-Response:
@@ -339,11 +362,9 @@ router.post('/create',jwtCheck,authConverter,function(req,res,next) {
  * @apiSuccess {String} votes[].date Date when vote was made
  *
  * @apiDescription
- * Updates the report by id. Image is currently not updatable.
+ * Updates the report by id. Location of report cannot be updated.
  * Returns updated report.
  *
- * @apiExample Example URL:
- * //POST REQUEST EXAMPLE
  *
  * @apiUse error
  * @apiUse loginError
@@ -358,7 +379,7 @@ router.post('/create',jwtCheck,authConverter,function(req,res,next) {
  *          error:"No report with such id"
  *      }
  */
-router.post('/update',jwtCheck,authConverter,function(req,res) {
+router.post('/update', jwtCheck, authConverter, function (req, res) {
     var data = req.body;
 
     var allowedKeyes = [
@@ -381,7 +402,7 @@ router.post('/update',jwtCheck,authConverter,function(req,res) {
                         Utility.setKey(doc, key, value);
                     }
                 }
-                doc.image_url = Utility.saveImageBase64(data.image,"lukeB/report/",doc.id)||doc.image_url;
+                doc.image_url = Utility.saveImageBase64(data.image, "lukeB/report/", doc.id) || doc.image_url;
                 doc.save(function (err, result) {
 
                     res.status(200).json(Utility.filter(result));
@@ -422,7 +443,7 @@ router.post('/update',jwtCheck,authConverter,function(req,res) {
  *          error:"Restricted access"
  *      }
  */
-router.get("/remove",jwtCheck,authConverter,function(req,res) {
+router.get("/remove", jwtCheck, authConverter, function (req, res) {
     var id = req.query.id;
     ReportModel.findOne({id: id}, function (err, doc) {
         if (err) throw err;
@@ -452,8 +473,8 @@ router.get("/remove",jwtCheck,authConverter,function(req,res) {
  * @apiUse loginError
  * @apiUse voteStatus
  */
-router.get("/upvote",jwtCheck,authConverter,function(req,res){
-    Utility.vote(ReportModel,req,res,true);
+router.get("/upvote", jwtCheck, authConverter, function (req, res) {
+    Utility.vote(ReportModel, req, res, true);
 });
 /**
  * @api {get} /lukeA/report/downvote Downvote
@@ -472,8 +493,8 @@ router.get("/upvote",jwtCheck,authConverter,function(req,res){
  * @apiUse loginError
  * @apiUse voteStatus
  */
-router.get("/downvote",jwtCheck,authConverter,function(req,res){
-    Utility.vote(ReportModel,req,res,false);
+router.get("/downvote", jwtCheck, authConverter, function (req, res) {
+    Utility.vote(ReportModel, req, res, false);
 });
 /**
  * @api {get} /lukeA/report/vote Vote
@@ -494,8 +515,8 @@ router.get("/downvote",jwtCheck,authConverter,function(req,res){
  * @apiUse voteStatus
  * @apiUse missingVote
  */
-router.get("/vote",jwtCheck,authConverter,function(req,res){
-    Utility.vote(ReportModel,req,res,req.query.vote);
+router.get("/vote", jwtCheck, authConverter, function (req, res) {
+    Utility.vote(ReportModel, req, res, req.query.vote);
 });
 /**
  * @api {get} /lukeA/report/downvote-count Downvote count
@@ -513,8 +534,8 @@ router.get("/vote",jwtCheck,authConverter,function(req,res){
  * @apiUse error
  * @apiUse voteCountStatus
  */
-router.get("/downvote-count",function(req,res){
-    Utility.voteCount(ReportModel,req.query.id,res,false);
+router.get("/downvote-count", function (req, res) {
+    Utility.voteCount(ReportModel, req.query.id, res, false);
 });
 /**
  * @api {get} /lukeA/report/upvote-count Upvote count
@@ -532,8 +553,8 @@ router.get("/downvote-count",function(req,res){
  * @apiUse error
  * @apiUse voteCountStatus
  */
-router.get("/upvote-count",function(req,res){
-    Utility.voteCount(ReportModel,req.query.id,res,true);
+router.get("/upvote-count", function (req, res) {
+    Utility.voteCount(ReportModel, req.query.id, res, true);
 });
 /**
  * @api {get} /lukeA/report/approve Approve
@@ -565,19 +586,19 @@ router.get("/upvote-count",function(req,res){
  *          error: "No report with such id"
  *      }
  */
-router.get("/approve",jwtCheck,authConverter,requiresRole("admin"),function(req,res) {
+router.get("/approve", jwtCheck, authConverter, requiresRole("admin"), function (req, res) {
     var data = req.query;
     var id = data.id;
     ReportModel.findOne({id: id}, function (err, doc) {
         if (err) throw err;
-        if(doc) {
+        if (doc) {
             doc.approved = true;
-            doc.save(function(err,result){
-                if(err) throw err;
-                res.status(200).json({success:true});
+            doc.save(function (err, result) {
+                if (err) throw err;
+                res.status(200).json({success: true});
             });
-        }else{
-            res.status(404).json({error:"No report with such id"});
+        } else {
+            res.status(404).json({error: "No report with such id"});
         }
     });
 });
@@ -611,19 +632,19 @@ router.get("/approve",jwtCheck,authConverter,requiresRole("admin"),function(req,
  *          error: "No report with such id"
  *      }
  */
-router.get("/disapprove",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
+router.get("/disapprove", jwtCheck, authConverter, requiresRole("admin"), function (req, res) {
     var data = req.query;
     var id = data.id;
-    ReportModel.findOne({id:id},function(err,doc){
-        if(err) throw err;
-        if(doc) {
+    ReportModel.findOne({id: id}, function (err, doc) {
+        if (err) throw err;
+        if (doc) {
             doc.approved = false;
-            doc.save(function(err,result){
-                if(err) throw err;
-                res.status(200).json({success:true});
+            doc.save(function (err, result) {
+                if (err) throw err;
+                res.status(200).json({success: true});
             });
-        }else{
-            res.status(200).json({error:"No report with such id"});
+        } else {
+            res.status(200).json({error: "No report with such id"});
         }
     });
 });
@@ -656,19 +677,19 @@ router.get("/disapprove",jwtCheck,authConverter,requiresRole("admin"),function(r
  *          error: "No report with such id"
  *      }
  */
-router.get("/flag",jwtCheck,authConverter,restrictBanned,function(req,res){
+router.get("/flag", jwtCheck, authConverter, restrictBanned, function (req, res) {
     var data = req.query;
     var id = data.id;
-    ReportModel.findOne({id:id},function(err,doc){
-        if(err) throw err;
-        if(doc) {
+    ReportModel.findOne({id: id}, function (err, doc) {
+        if (err) throw err;
+        if (doc) {
             doc.flagged = true;
-            doc.save(function(err,result){
-                if(err) throw err;
-                res.status(200).json({success:true});
+            doc.save(function (err, result) {
+                if (err) throw err;
+                res.status(200).json({success: true});
             });
-        }else{
-            res.status(200).json({error:"No report with such id"});
+        } else {
+            res.status(200).json({error: "No report with such id"});
         }
     });
 });
@@ -702,19 +723,19 @@ router.get("/flag",jwtCheck,authConverter,restrictBanned,function(req,res){
  *          error: "No report with such id"
  *      }
  */
-router.get("/unflag",jwtCheck,authConverter,requiresRole("admin"),function(req,res){
+router.get("/unflag", jwtCheck, authConverter, requiresRole("admin"), function (req, res) {
     var data = req.query;
     var id = data.id;
-    ReportModel.findOne({id:id},function(err,doc){
-        if(err) throw err;
-        if(doc) {
+    ReportModel.findOne({id: id}, function (err, doc) {
+        if (err) throw err;
+        if (doc) {
             doc.flagged = false;
-            doc.save(function(err,result){
-                if(err) throw err;
-                res.status(200).json({success:true});
+            doc.save(function (err, result) {
+                if (err) throw err;
+                res.status(200).json({success: true});
             });
-        }else{
-            res.status(200).json({error:"No report with such id"});
+        } else {
+            res.status(200).json({error: "No report with such id"});
         }
     });
 });

@@ -560,8 +560,8 @@ router.get("/stop-weather-update", jwtCheck, authConverter, requiresOneOfRoles([
  * @apiName VisitPlace
  * @apiGroup Place
  *
- * @apiParam {Number} latitude Latitude of users current position
- * @apiParam {Number} longitude Longitude of users current position
+ * @apiParam {Number} lat Latitude of users current position
+ * @apiParam {Number} long Longitude of users current position
  * @apiParam {Boolean} report True if user made the report at the position.
  *
  * @apiSuccessExample Success-Visited:
@@ -617,6 +617,11 @@ router.get("/stop-weather-update", jwtCheck, authConverter, requiresOneOfRoles([
  * @apiUse loginError
  * @apiUse authError
  *
+ * @apiErrorExample No places:
+ *      HTTP/1.1 404
+ *      {
+ *          error: "No places in DB"
+ *      }
  */
 router.post("/visit", jwtCheck, authConverter, function (req, res) {
     var data = req.body;
@@ -628,56 +633,60 @@ router.post("/visit", jwtCheck, authConverter, function (req, res) {
     } else {
         PlaceModel.find({}, function (err, places) {
             if (err) console.log(err);
-            for (var i = 0; i < places.length; i++) {
-                if (places[i].radius >= Utility.getCrow(places[i].location.lat, places[i].location.long, data.latitude, data.longitude)) {
-                    //record visit
-                    if (visited != 2) {
-                        visited = 1;
-                    }
-                    PlaceModel.findOne({id: places[i]}, function (err, place) {
-                        if (err) console.log(err);
-                        UserModel.findOne({id: req.user.profile.id}, function (err, user) {
+            if(places.length>0) {
+                for (var i = 0; i < places.length; i++) {
+                    if (places[i].radius >= Utility.getCrow(places[i].location.lat, places[i].location.long, data.lat, data.long)) {
+                        //record visit
+                        if (visited != 2) {
+                            visited = 1;
+                        }
+                        PlaceModel.findOne({id: places[i]}, function (err, place) {
                             if (err) console.log(err);
-                            user.visitedPlaces = user.visitedPlaces || [];
-                            place.visitLog = place.visitLog || [];
+                            UserModel.findOne({id: req.user.profile.id}, function (err, user) {
+                                if (err) console.log(err);
+                                user.visitedPlaces = user.visitedPlaces || [];
+                                place.visitLog = place.visitLog || [];
 
-                            place.visitLog.push({
-                                profileId: req.user.profile.id,
-                                date: new Date().toISOString().replace(/T/, ' ').replace(/\..+/, ''),
-                                report: data.report || false
-                            });
-                            var userHasPlace = -1;
-                            for (var k = 0; k < user.visitedPlaces.length; k++) {
-                                if (user.visitedPlaces[k].placeId == place.id) {
-                                    userHasPlace = k;
-                                }
-                                if (k == user.visitedPlaces.length - 1) {
-                                    if (userHasPlace != -1) {
-                                        user.visitedPlaces[userHasPlace].report = user.visitedPlaces[userHasPlace].report || data.report;
-                                    } else {
-                                        user.visitedPlaces.push({
-                                            placeId: place.id,
-                                            report: data.report
+                                place.visitLog.push({
+                                    profileId: req.user.profile.id,
+                                    date: new Date().toISOString(), //.replace(/T/, ' ').replace(/\..+/, '')
+                                    report: data.report || false
+                                });
+                                var userHasPlace = -1;
+                                for (var k = 0; k < user.visitedPlaces.length; k++) {
+                                    if (user.visitedPlaces[k].placeId == place.id) {
+                                        userHasPlace = k;
+                                    }
+                                    if (k == user.visitedPlaces.length - 1) {
+                                        if (userHasPlace != -1) {
+                                            user.visitedPlaces[userHasPlace].report = user.visitedPlaces[userHasPlace].report || data.report;
+                                        } else {
+                                            user.visitedPlaces.push({
+                                                placeId: place.id,
+                                                report: data.report
+                                            });
+                                        }
+                                        place.save(function (err, placeSaved) {
+                                            if (err) console.log(err);
+                                            if (visited != 2) {
+                                                visited = 2;
+                                                res.status(200).json({visited: true, place: placeSaved});
+                                            }
+                                            user.save(function (err, userSaved) {
+                                                if (err) console.log(err);
+                                            });
                                         });
                                     }
-                                    place.save(function (err, placeSaved) {
-                                        if (err) console.log(err);
-                                        if (visited != 2) {
-                                            visited = 2;
-                                            res.status(200).json({visited: true, place: placeSaved});
-                                        }
-                                        user.save(function (err, userSaved) {
-                                            if (err) console.log(err);
-                                        });
-                                    });
                                 }
-                            }
+                            });
                         });
-                    });
+                    }
+                    if (i == places.length - 1 && visited == 0) {
+                        res.status(200).json({visited: false});
+                    }
                 }
-                if (i == places.length - 1 && visited == 0) {
-                    res.status(200).json({visited: false});
-                }
+            }else{
+                res.status(404).json({error:"No places in DB"});
             }
         });
     }

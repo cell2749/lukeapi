@@ -2701,14 +2701,14 @@
             "group": "Parameter",
             "type": "Number",
             "optional": false,
-            "field": "latitude",
+            "field": "lat",
             "description": "<p>Latitude of users current position</p>"
           },
           {
             "group": "Parameter",
             "type": "Number",
             "optional": false,
-            "field": "longitude",
+            "field": "long",
             "description": "<p>Longitude of users current position</p>"
           },
           {
@@ -2754,10 +2754,24 @@
       }
     },
     "description": "<p>Checks if user coordinates are in range of place and records the visit in the user profile and place. If user has visited the place &amp; made a report there, the report value won't be overwritten for user later on to a false if he visits the place again and doesn't make a report. User data has record of a single visit to a place. Place model contains records of each visit from a user to a place, if the user has made a report on that visit and date when visit was made.</p>",
-    "version": "0.0.0",
-    "filename": "routes/lukeB/routes/place.js",
-    "groupTitle": "Place",
     "error": {
+      "examples": [
+        {
+          "title": "No places:",
+          "content": "HTTP/1.1 404\n{\n    error: \"No places in DB\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Authorization Error:",
+          "content": "HTTP/1.1 401\n{\n    error:'Proper authorization required',\n    auth:true\n}",
+          "type": "json"
+        }
+      ],
       "fields": {
         "Error": [
           {
@@ -2773,20 +2787,11 @@
             "description": "<p>Error message</p>"
           }
         ]
-      },
-      "examples": [
-        {
-          "title": "Login Error:",
-          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
-          "type": "json"
-        },
-        {
-          "title": "Authorization Error:",
-          "content": "HTTP/1.1 401\n{\n    error:'Proper authorization required',\n    auth:true\n}",
-          "type": "json"
-        }
-      ]
-    }
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/place.js",
+    "groupTitle": "Place"
   },
   {
     "type": "get",
@@ -3103,7 +3108,7 @@
             "type": "File",
             "optional": true,
             "field": "image",
-            "description": "<p>Image file to be used in a report</p>"
+            "description": "<p>Base64 string representing jpeg image</p>"
           },
           {
             "group": "Parameter",
@@ -3240,14 +3245,7 @@
         ]
       }
     },
-    "description": "<p>Create report using provided parameters. Date is currently created on the server side. Maybe make it client side? Image not yet implemented. Returns created report.</p>",
-    "examples": [
-      {
-        "title": "Example URL:",
-        "content": "//POST REQUEST EXAMPLE",
-        "type": "json"
-      }
-    ],
+    "description": "<p>Create report using provided parameters. Date is currently created on the server side. Maybe make it client side? Returns created report.</p>",
     "version": "0.0.0",
     "filename": "routes/lukeB/routes/report.js",
     "groupTitle": "Report",
@@ -4058,6 +4056,13 @@
           },
           {
             "group": "Parameter",
+            "type": "File",
+            "optional": true,
+            "field": "image",
+            "description": "<p>Base64 string representing jpeg image</p>"
+          },
+          {
+            "group": "Parameter",
             "type": "Array",
             "optional": true,
             "field": "categoryId",
@@ -4177,14 +4182,7 @@
         ]
       }
     },
-    "description": "<p>Updates the report by id. Image is currently not updatable. Returns updated report.</p>",
-    "examples": [
-      {
-        "title": "Example URL:",
-        "content": "//POST REQUEST EXAMPLE",
-        "type": "json"
-      }
-    ],
+    "description": "<p>Updates the report by id. Location of report cannot be updated. Returns updated report.</p>",
     "error": {
       "examples": [
         {
@@ -6174,7 +6172,7 @@
             "type": "File",
             "optional": true,
             "field": "image",
-            "description": "<p>Image file that is to be linked to user profile.</p>"
+            "description": "<p>Base64 string representing jpeg image</p>"
           },
           {
             "group": "Parameter",
@@ -6209,7 +6207,7 @@
             "type": "Array",
             "optional": true,
             "field": "profile",
-            "description": "<p>Array containing links to social profiles of the user(Facebook, Twitter and etc.)* Note! Currently there is no way of linking multiple social profiles to 1 user. Even though if provider and link will be added, user won't be able to log in from more than 1 of the profiles. Ask Nikita more about this topic if you have any questions.</p>"
+            "description": "<p>Array containing links to social profiles of the user(Facebook, Twitter and etc.)* Note! Currently there is no way of linking multiple social profiles to 1 user. Even though if provider and link will be added, user won't be able to log in from more than 1 of the profiles.</p>"
           },
           {
             "group": "Parameter",
@@ -6313,7 +6311,7 @@
             "type": "Array",
             "optional": false,
             "field": "profile",
-            "description": "<p>Array containing links to social profiles of the user(Facebook, Twitter and etc.)* Note! Currently there is no way of linking multiple social profiles to 1 user. Even though if provider and link will be added, user won't be able to log in from more than 1 of the profiles. Ask Nikita more about this topic if you have any questions.</p>"
+            "description": "<p>Array containing links to social profiles of the user(Facebook, Twitter and etc.)* Note! Currently there is no way of linking multiple social profiles to 1 user. Even though if provider and link will be added, user won't be able to log in from more than 1 of the profiles.</p>"
           },
           {
             "group": "Success 200",

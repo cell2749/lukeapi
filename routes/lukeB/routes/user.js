@@ -330,7 +330,7 @@ router.get("/me", jwtCheck, authConverter, function (req, res, next) {
  * @apiParam {String} [location] Users location (country, town or city)
  * @apiParam {String} [gender] Users gender. String, not boolean? We support apaches?
  * @apiParam {String} [hobby] Users hobby
- * @apiParam {File} [image] Image file that is to be linked to user profile.
+ * @apiparam {File} [image] Base64 string representing jpeg image
  * @apiParam {Array} [favouritePlaces] Array of favourite places for user
  * @apiParam {String} [favouritePlaces[].placeId] Id of the place as reference
  * @apiParam {String} [favouritePlaces[].favouriteTime] Favourite time.(Summer for example or a year)
@@ -340,7 +340,6 @@ router.get("/me", jwtCheck, authConverter, function (req, res, next) {
  * @apiParam {Array} [profile] Array containing links to social profiles of the user(Facebook, Twitter and etc.)*
  * Note! Currently there is no way of linking multiple social profiles to 1 user.
  * Even though if provider and link will be added, user won't be able to log in from more than 1 of the profiles.
- * Ask Nikita more about this topic if you have any questions.
  * @apiParam {String} [profile[].provider] Social Provider (Facebook, Twitter, Google and etc.)
  * @apiParam {String} [profile[].link] Link to the profile
  *
@@ -361,7 +360,6 @@ router.get("/me", jwtCheck, authConverter, function (req, res, next) {
  * @apiSuccess {Array} profile Array containing links to social profiles of the user(Facebook, Twitter and etc.)*
  * Note! Currently there is no way of linking multiple social profiles to 1 user.
  * Even though if provider and link will be added, user won't be able to log in from more than 1 of the profiles.
- * Ask Nikita more about this topic if you have any questions.
  * @apiSuccess {String} profile[].provider Social Provider (Facebook, Twitter, Google and etc.)
  * @apiSuccess {String} profile[].link Link to the profile
  * @apiSuccess {String} lastOnline Date indicating last action of the user?
