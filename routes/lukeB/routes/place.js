@@ -273,7 +273,7 @@ router.post("/create", jwtCheck, authConverter, requiresOneOfRoles(["admin", "ad
         place.id = id;
         place._id = id;
         place.save(function (err, result) {
-            if (err)throw err;
+            if (err)console.log(err);
 
             res.status(200).json(Utility.filter(result));
         });
