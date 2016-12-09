@@ -205,7 +205,9 @@ router.post('/create', jwtCheck, authConverter, requiresRole("admin"), function 
         }
         marker._id = id;
         marker.id = id;
-        marker.date = new Date().toISOString();
+        var date = new Date();
+        date.setUTCHours(date.getUTCHours()-Math.floor(date.getTimezoneOffset()/60));
+        marker.date = date.toISOString();
 
         marker.save(function (err, marker) {
             if (err)console.log(err);

@@ -468,7 +468,9 @@ router.post('/create', jwtCheck, authConverter, restrictBanned, function (req, r
                             }
                         }
                         if (report.date == null) {
-                            report.date = new Date().toISOString();
+                            var date = new Date();
+                            date.setUTCHours(date.getUTCHours()-Math.floor(date.getTimezoneOffset()/60));
+                            report.date = date.toISOString();
                         }
                         //vote.report.id = id;
                         report._id = id;
@@ -476,7 +478,9 @@ router.post('/create', jwtCheck, authConverter, restrictBanned, function (req, r
                         report.votes = {};
                         report.approved = null;
                         report.flagged = false;
-                        report.date = new Date().toISOString();
+                        var date = new Date();
+                        date.setUTCHours(date.getUTCHours()-Math.floor(date.getTimezoneOffset()/60));
+                        report.date = date.toISOString();
 
                         report.image_url = Utility.saveImageBase64(data.image, "lukeA/report/", id);
                         report.submitterId = req.user.profile.id;

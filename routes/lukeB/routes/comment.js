@@ -196,6 +196,9 @@ router.get("/create",jwtCheck,authConverter,function(req,res) {
                     var id = mongoose.Types.ObjectId();
                     comment._id = id;
                     comment.id = id;
+                    var date = new Date();
+                    date.setUTCHours(date.getUTCHours()-Math.floor(date.getTimezoneOffset()/60));
+                    comment.date = date.toISOString();
                     comment.profileId = req.user.profileId;
                     comment.save(function (err, item) {
                         if (err)throw err;
