@@ -256,7 +256,7 @@ router.post("/create", jwtCheck, authConverter, requiresOneOfRoles(["admin", "ad
     console.log(req);
     if (data.title == null) {
         res.status(422).json({error: "Missing title"});
-    } else if (data.location == null || data.location.lat == null || data.long == null) {
+    } else if (data.location == null || data.location.lat == null || data.location.long == null) {
         res.status(422).json({error: "Missing location"});
     } else if (data.radius == null) {
         res.status(422).json({error: "Missing radius"});
