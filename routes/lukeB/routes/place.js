@@ -242,13 +242,13 @@ router.get("/", function (req, res) {
  *      {
  *          error:"Missing location"
  *      }
- * @apiErrorExample Missing location:
+ * @apiErrorExample Missing radius:
  *      HTTP/1.1 422
  *      {
- *          error:"Missing location"
+ *          error:"Missing radius"
  *      }
  */
-router.post("/create", jwtCheck, authConverter, requiresOneOfRoles(["admin", "advanced", "researcher"]), function (req, res) {
+router.post("/create", jwtCheck, authConverter, requiresOneOfRoles(["admin", "advanced"]), function (req, res) {
     var data = req.body;
     console.log("data /");
     console.log(data);

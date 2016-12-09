@@ -1754,8 +1754,8 @@ define({ "api": [
           "type": "json"
         },
         {
-          "title": "Missing location:",
-          "content": "HTTP/1.1 422\n{\n    error:\"Missing location\"\n}",
+          "title": "Missing radius:",
+          "content": "HTTP/1.1 422\n{\n    error:\"Missing radius\"\n}",
           "type": "json"
         },
         {
