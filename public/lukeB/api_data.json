@@ -1584,7 +1584,7 @@
       "examples": [
         {
           "title": "Success-Response-Single:",
-          "content": "HTTP/1.1 200 OK\n{\n    id:String,\n    title:String,\n    location:{\n        long:Number,\n        lat:Number\n    },\n    type:String,\n    votes:[{\n        profileId:String,\n        date:String,\n        vote:Boolean\n    }],\n    description:String,\n    nearReports:[{\n        reportId:String\n    }],\n    reportLog:[{\n        profileId:String,\n        date:String,\n        report:Boolean\n    }],\n    weatherData:{\n        temperature:Number,\n        seaTemperature:Number,\n        wind:Number\n    },\n    radius: Number\n}",
+          "content": "HTTP/1.1 200 OK\n{\n    id:String,\n    title:String,\n    location:{\n        long:Number,\n        lat:Number\n    },\n    type:String,\n    votes:[{\n        profileId:String,\n        date:String,\n        vote:Boolean\n    }],\n    description:String,\n    nearReports:[{\n        reportId:String\n    }],\n    visitLog:[{\n        profileId:String,\n        date:String,\n        report:Boolean\n    }],\n    weatherData:{\n        temperature:Number,\n        seaTemperature:Number,\n        wind:Number\n    },\n    radius: Number\n}",
           "type": "json"
         }
       ],
@@ -1671,28 +1671,28 @@
             "group": "Success 200",
             "type": "Array",
             "optional": false,
-            "field": "reportLog",
+            "field": "visitLog",
             "description": "<p>Array containing visiting log of users</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "reportLog.profileId",
+            "field": "visitLog.profileId",
             "description": "<p>Id of the user who visited the place</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "reportLog.date",
+            "field": "visitLog.date",
             "description": "<p>Date when the place was visited by this user</p>"
           },
           {
             "group": "Success 200",
             "type": "Boolean",
             "optional": false,
-            "field": "reportLog.report",
+            "field": "visitLog.report",
             "description": "<p>If true, user made submission in the area</p>"
           },
           {
@@ -1975,12 +1975,12 @@
       "examples": [
         {
           "title": "Success-Response-Multiple:",
-          "content": "HTTP/1.1 200 OK\n[{\n    id:String,\n    title:String,\n    location:{\n        long:Number,\n        lat:Number\n    },\n    type:String,\n    votes:[{\n        profileId:String,\n        date:String,\n        vote:Boolean\n    }],\n    description:String,\n    nearReports:[{\n        reportId:String\n    }],\n    reportLog:[{\n        profileId:String,\n        date:String,\n        report:Boolean\n    }],\n    weatherData:{\n        temperature:Number,\n        seaTemperature:Number,\n        wind:Number\n    },\n    radius: Number\n}]",
+          "content": "HTTP/1.1 200 OK\n[{\n    id:String,\n    title:String,\n    location:{\n        long:Number,\n        lat:Number\n    },\n    type:String,\n    votes:[{\n        profileId:String,\n        date:String,\n        vote:Boolean\n    }],\n    description:String,\n    nearReports:[{\n        reportId:String\n    }],\n    visitLog:[{\n        profileId:String,\n        date:String,\n        report:Boolean\n    }],\n    weatherData:{\n        temperature:Number,\n        seaTemperature:Number,\n        wind:Number\n    },\n    radius: Number\n}]",
           "type": "json"
         },
         {
           "title": "Success-Response-Single:",
-          "content": "HTTP/1.1 200 OK\n{\n    id:String,\n    title:String,\n    location:{\n        long:Number,\n        lat:Number\n    },\n    type:String,\n    votes:[{\n        profileId:String,\n        date:String,\n        vote:Boolean\n    }],\n    description:String,\n    nearReports:[{\n        reportId:String\n    }],\n    reportLog:[{\n        profileId:String,\n        date:String,\n        report:Boolean\n    }],\n    weatherData:{\n        temperature:Number,\n        seaTemperature:Number,\n        wind:Number\n    },\n    radius: Number\n}",
+          "content": "HTTP/1.1 200 OK\n{\n    id:String,\n    title:String,\n    location:{\n        long:Number,\n        lat:Number\n    },\n    type:String,\n    votes:[{\n        profileId:String,\n        date:String,\n        vote:Boolean\n    }],\n    description:String,\n    nearReports:[{\n        reportId:String\n    }],\n    visitLog:[{\n        profileId:String,\n        date:String,\n        report:Boolean\n    }],\n    weatherData:{\n        temperature:Number,\n        seaTemperature:Number,\n        wind:Number\n    },\n    radius: Number\n}",
           "type": "json"
         }
       ],
@@ -2067,28 +2067,28 @@
             "group": "Success 200",
             "type": "Array",
             "optional": false,
-            "field": "reportLog",
+            "field": "visitLog",
             "description": "<p>Array containing visiting log of users</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "reportLog.profileId",
+            "field": "visitLog.profileId",
             "description": "<p>Id of the user who visited the place</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "reportLog.date",
+            "field": "visitLog.date",
             "description": "<p>Date when the place was visited by this user</p>"
           },
           {
             "group": "Success 200",
             "type": "Boolean",
             "optional": false,
-            "field": "reportLog.report",
+            "field": "visitLog.report",
             "description": "<p>If true, user made submission in the area</p>"
           },
           {
@@ -2313,7 +2313,7 @@
       "examples": [
         {
           "title": "Success-Response-Single:",
-          "content": "HTTP/1.1 200 OK\n{\n    id:String,\n    title:String,\n    location:{\n        long:Number,\n        lat:Number\n    },\n    type:String,\n    votes:[{\n        profileId:String,\n        date:String,\n        vote:Boolean\n    }],\n    description:String,\n    nearReports:[{\n        reportId:String\n    }],\n    reportLog:[{\n        profileId:String,\n        date:String,\n        report:Boolean\n    }],\n    weatherData:{\n        temperature:Number,\n        seaTemperature:Number,\n        wind:Number\n    },\n    radius: Number\n}",
+          "content": "HTTP/1.1 200 OK\n{\n    id:String,\n    title:String,\n    location:{\n        long:Number,\n        lat:Number\n    },\n    type:String,\n    votes:[{\n        profileId:String,\n        date:String,\n        vote:Boolean\n    }],\n    description:String,\n    nearReports:[{\n        reportId:String\n    }],\n    visitLog:[{\n        profileId:String,\n        date:String,\n        report:Boolean\n    }],\n    weatherData:{\n        temperature:Number,\n        seaTemperature:Number,\n        wind:Number\n    },\n    radius: Number\n}",
           "type": "json"
         },
         {
@@ -2405,28 +2405,28 @@
             "group": "Success 200",
             "type": "Array",
             "optional": false,
-            "field": "reportLog",
+            "field": "visitLog",
             "description": "<p>Array containing visiting log of users</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "reportLog.profileId",
+            "field": "visitLog.profileId",
             "description": "<p>Id of the user who visited the place</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "reportLog.date",
+            "field": "visitLog.date",
             "description": "<p>Date when the place was visited by this user</p>"
           },
           {
             "group": "Success 200",
             "type": "Boolean",
             "optional": false,
-            "field": "reportLog.report",
+            "field": "visitLog.report",
             "description": "<p>If true, user made submission in the area</p>"
           },
           {
@@ -2686,6 +2686,106 @@
           }
         ]
       }
+    }
+  },
+  {
+    "type": "post",
+    "url": "/lukeB/place/visit",
+    "title": "Visit Place",
+    "name": "VisitPlace",
+    "group": "Place",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "latitude",
+            "description": "<p>Latitude of users current position</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "longitude",
+            "description": "<p>Longitude of users current position</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Boolean",
+            "optional": false,
+            "field": "report",
+            "description": "<p>True if user made the report at the position.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Visited:",
+          "content": "HTTP/1.1 200\n{\n    visited: true\n    place: {\n        id:String,\n        title:String,\n        location:{\n            long:Number,\n            lat:Number\n        },\n        type:String,\n        votes:[{\n            profileId:String,\n            date:String,\n            vote:Boolean\n        }],\n        description:String,\n        nearReports:[{\n            reportId:String\n        }],\n            visitLog:[{\n            profileId:String,\n            date:String,\n            report:Boolean\n        }],\n        weatherData:{\n            temperature:Number,\n            seaTemperature:Number,\n            wind:Number\n        },\n        radius: Number\n    }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Success-NotVisited:",
+          "content": "HTTP/1.1 200\n{\n    visited: false\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "visited",
+            "description": "<p>If true, user has visited the place</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": true,
+            "field": "place",
+            "description": "<p>returns place that was visited. Only appears if place was visited.</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Checks if user coordinates are in range of place and records the visit in the user profile and place. If user has visited the place &amp; made a report there, the report value won't be overwritten for user later on to a false if he visits the place again and doesn't make a report. User data has record of a single visit to a place. Place model contains records of each visit from a user to a place, if the user has made a report on that visit and date when visit was made.</p>",
+    "version": "0.0.0",
+    "filename": "routes/lukeB/routes/place.js",
+    "groupTitle": "Place",
+    "error": {
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Authorization Error:",
+          "content": "HTTP/1.1 401\n{\n    error:'Proper authorization required',\n    auth:true\n}",
+          "type": "json"
+        }
+      ]
     }
   },
   {
@@ -4957,24 +5057,6 @@
         ]
       }
     },
-    "version": "0.0.0",
-    "filename": "routes/lukeB/routes/user.js",
-    "groupTitle": "User"
-  },
-  {
-    "type": "get",
-    "url": "/images/lukeB/user/default",
-    "title": "Get Default Image(s)",
-    "name": "GetImages",
-    "group": "User",
-    "description": "<p>Location of default user images. Access unique image by name. *Requires improvement.</p>",
-    "examples": [
-      {
-        "title": "Example image_url:",
-        "content": "http://balticapp.fi/images/lukeB/user/default/redTomato.jpg",
-        "type": "json"
-      }
-    ],
     "version": "0.0.0",
     "filename": "routes/lukeB/routes/user.js",
     "groupTitle": "User"

@@ -23,7 +23,7 @@ var schema = mongoose.Schema(
         nearReports:[{
             reportId:String
         }],
-        reportLog:[{
+        visitLog:[{
             profileId:String,
             date:String,
             report:Boolean

@@ -38,7 +38,6 @@ var Utility = new UtModule([
     "profileId",
     "nearReports",
     "votes",
-    "reportLog",
     "visitLog",
     "visitLog.id",
     "visitLog.date",
@@ -78,7 +77,7 @@ const MONGO_PROJECTION = {
  *          nearReports:[{
  *              reportId:String
  *          }],
- *          reportLog:[{
+ *          visitLog:[{
  *              profileId:String,
  *              date:String,
  *              report:Boolean
@@ -109,7 +108,7 @@ const MONGO_PROJECTION = {
  *          nearReports:[{
  *              reportId:String
  *          }],
- *          reportLog:[{
+ *          visitLog:[{
  *              profileId:String,
  *              date:String,
  *              report:Boolean
@@ -135,10 +134,10 @@ const MONGO_PROJECTION = {
  * @apiSuccess {String} description Description of the place
  * @apiSuccess {Array} nearReports Array of reports that are made withing the area of this place
  * @apiSuccess {String} nearReports[].reportId Id of the report as a reference
- * @apiSuccess {Array} reportLog Array containing visiting log of users
- * @apiSuccess {String} reportLog.profileId Id of the user who visited the place
- * @apiSuccess {String} reportLog.date Date when the place was visited by this user
- * @apiSuccess {Boolean} reportLog.report If true, user made submission in the area
+ * @apiSuccess {Array} visitLog Array containing visiting log of users
+ * @apiSuccess {String} visitLog.profileId Id of the user who visited the place
+ * @apiSuccess {String} visitLog.date Date when the place was visited by this user
+ * @apiSuccess {Boolean} visitLog.report If true, user made submission in the area
  * @apiSuccess {Object} weatherData Json object containing current weather data about the place
  * @apiSuccess {Number} weatherData.temperature Temperature at the place
  * @apiSuccess {Number} weatherData.seaTemperature Sea tempereature if the area provides such information
@@ -186,7 +185,7 @@ router.get("/", function (req, res) {
  *          nearReports:[{
  *              reportId:String
  *          }],
- *          reportLog:[{
+ *          visitLog:[{
  *              profileId:String,
  *              date:String,
  *              report:Boolean
@@ -212,10 +211,10 @@ router.get("/", function (req, res) {
  * @apiSuccess {String} description Description of the place
  * @apiSuccess {Array} nearReports Array of reports that are made withing the area of this place
  * @apiSuccess {String} nearReports[].reportId Id of the report as a reference
- * @apiSuccess {Array} reportLog Array containing visiting log of users
- * @apiSuccess {String} reportLog.profileId Id of the user who visited the place
- * @apiSuccess {String} reportLog.date Date when the place was visited by this user
- * @apiSuccess {Boolean} reportLog.report If true, user made submission in the area
+ * @apiSuccess {Array} visitLog Array containing visiting log of users
+ * @apiSuccess {String} visitLog.profileId Id of the user who visited the place
+ * @apiSuccess {String} visitLog.date Date when the place was visited by this user
+ * @apiSuccess {Boolean} visitLog.report If true, user made submission in the area
  * @apiSuccess {Object} weatherData Json object containing current weather data about the place
  * @apiSuccess {Number} weatherData.temperature Temperature at the place
  * @apiSuccess {Number} weatherData.seaTemperature Sea tempereature if the area provides such information
@@ -295,7 +294,7 @@ router.post("/create", jwtCheck, authConverter, requiresOneOfRoles(["admin", "ad
  *          nearReports:[{
  *              reportId:String
  *          }],
- *          reportLog:[{
+ *          visitLog:[{
  *              profileId:String,
  *              date:String,
  *              report:Boolean
@@ -321,10 +320,10 @@ router.post("/create", jwtCheck, authConverter, requiresOneOfRoles(["admin", "ad
  * @apiSuccess {String} description Description of the place
  * @apiSuccess {Array} nearReports Array of reports that are made withing the area of this place
  * @apiSuccess {String} nearReports[].reportId Id of the report as a reference
- * @apiSuccess {Array} reportLog Array containing visiting log of users
- * @apiSuccess {String} reportLog.profileId Id of the user who visited the place
- * @apiSuccess {String} reportLog.date Date when the place was visited by this user
- * @apiSuccess {Boolean} reportLog.report If true, user made submission in the area
+ * @apiSuccess {Array} visitLog Array containing visiting log of users
+ * @apiSuccess {String} visitLog.profileId Id of the user who visited the place
+ * @apiSuccess {String} visitLog.date Date when the place was visited by this user
+ * @apiSuccess {Boolean} visitLog.report If true, user made submission in the area
  * @apiSuccess {Object} weatherData Json object containing current weather data about the place
  * @apiSuccess {Number} weatherData.temperature Temperature at the place
  * @apiSuccess {Number} weatherData.seaTemperature Sea tempereature if the area provides such information
@@ -486,7 +485,7 @@ router.get("/upvote-count", function (req, res) {
  * @apiSuccess {String} success Started indicated the initiation of the weather update.
  */
 router.get("/start-weather-update", jwtCheck, authConverter, requiresOneOfRoles(["admin", "superadmin"]), function (req, res) {
-    if(WEATHER_UPDATE!=null){
+    if (WEATHER_UPDATE != null) {
         clearInterval(WEATHER_UPDATE);
     }
     WEATHER_UPDATE = setInterval(function () {
@@ -527,7 +526,7 @@ router.get("/start-weather-update", jwtCheck, authConverter, requiresOneOfRoles(
             }).end();
         });
     }, WEATHER_UPDATE_PERIOD);
-    res.status(200).json({status:"Started"});
+    res.status(200).json({status: "Started"});
 });
 /**
  * @api {get} /lukeA/place/stop-weather-update stops the weather update of places
@@ -556,5 +555,131 @@ router.get("/stop-weather-update", jwtCheck, authConverter, requiresOneOfRoles([
         res.status(200).json({status: "Nothing was running"});
     }
 });
+/**
+ * @api {post} /lukeB/place/visit Visit Place
+ * @apiName VisitPlace
+ * @apiGroup Place
+ *
+ * @apiParam {Number} latitude Latitude of users current position
+ * @apiParam {Number} longitude Longitude of users current position
+ * @apiParam {Boolean} report True if user made the report at the position.
+ *
+ * @apiSuccessExample Success-Visited:
+ *      HTTP/1.1 200
+ *      {
+ *          visited: true
+ *          place: {
+ *              id:String,
+ *              title:String,
+ *              location:{
+ *                  long:Number,
+ *                  lat:Number
+ *              },
+ *              type:String,
+ *              votes:[{
+ *                  profileId:String,
+ *                  date:String,
+ *                  vote:Boolean
+ *              }],
+ *              description:String,
+ *              nearReports:[{
+ *                  reportId:String
+ *              }],
+ *                  visitLog:[{
+ *                  profileId:String,
+ *                  date:String,
+ *                  report:Boolean
+ *              }],
+ *              weatherData:{
+ *                  temperature:Number,
+ *                  seaTemperature:Number,
+ *                  wind:Number
+ *              },
+ *              radius: Number
+ *          }
+ *      }
+ * @apiSuccessExample Success-NotVisited:
+ *      HTTP/1.1 200
+ *      {
+ *          visited: false
+ *      }
+ * @apiSuccess {Boolean} visited If true, user has visited the place
+ * @apiSuccess {Boolean} [place] returns place that was visited. Only appears if place was visited.
+ * @apiDescription
+ * Checks if user coordinates are in range of place and records the visit in the user profile and place.
+ * If user has visited the place & made a report there,
+ * the report value won't be overwritten for user later on to a false if he visits the place again and doesn't make a report.
+ * User data has record of a single visit to a place.
+ * Place model contains records of each visit from a user to a place, if the user has made a report on that visit and
+ * date when visit was made.
+ *
+ * @apiUse error
+ * @apiUse loginError
+ * @apiUse authError
+ *
+ */
+router.post("/visit", jwtCheck, authConverter, function (req, res) {
+    var data = req.body;
+    var visited = 0;
+    if (data.longitude == null) {
+        res.status(422).json({error: "Longitude is missing"});
+    } else if (data.latitude == null) {
+        res.status(422).json({error: "Latitude is missing"});
+    } else {
+        PlaceModel.find({}, function (err, places) {
+            if (err) console.log(err);
+            for (var i = 0; i < places.length; i++) {
+                if (places[i].radius >= Utility.getCrow(places[i].location.lat, places[i].location.long, data.latitude, data.longitude)) {
+                    //record visit
+                    if (visited != 2) {
+                        visited = 1;
+                    }
+                    PlaceModel.findOne({id: places[i]}, function (err, place) {
+                        if (err) console.log(err);
+                        UserModel.findOne({id: req.user.profile.id}, function (err, user) {
+                            if (err) console.log(err);
+                            user.visitedPlaces = user.visitedPlaces || [];
+                            place.visitLog = place.visitLog || [];
 
+                            place.visitLog.push({
+                                profileId: req.user.profile.id,
+                                date: new Date().toISOString().replace(/T/, ' ').replace(/\..+/, ''),
+                                report: data.report || false
+                            });
+                            var userHasPlace = -1;
+                            for (var k = 0; k < user.visitedPlaces.length; k++) {
+                                if (user.visitedPlaces[k].placeId == place.id) {
+                                    userHasPlace = k;
+                                }
+                                if (k == user.visitedPlaces.length - 1) {
+                                    if (userHasPlace != -1) {
+                                        user.visitedPlaces[userHasPlace].report = user.visitedPlaces[userHasPlace].report || data.report;
+                                    } else {
+                                        user.visitedPlaces.push({
+                                            placeId: place.id,
+                                            report: data.report
+                                        });
+                                    }
+                                    place.save(function (err, placeSaved) {
+                                        if (err) console.log(err);
+                                        if (visited != 2) {
+                                            visited = 2;
+                                            res.status(200).json({visited: true, place: placeSaved});
+                                        }
+                                        user.save(function (err, userSaved) {
+                                            if (err) console.log(err);
+                                        });
+                                    });
+                                }
+                            }
+                        });
+                    });
+                }
+                if (i == places.length - 1 && visited == 0) {
+                    res.status(200).json({visited: false});
+                }
+            }
+        });
+    }
+});
 module.exports = router;

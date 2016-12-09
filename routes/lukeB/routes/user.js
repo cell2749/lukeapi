@@ -43,7 +43,7 @@ var Utility = new UtModule([
     "logTimes.numberOfRatings",
     "logTimes.numberOfReports"
 ]);
-const MONGO_PROJECTION ={
+const MONGO_PROJECTION = {
     _id: 0,
     __v: 0
 };
@@ -123,10 +123,10 @@ const MONGO_PROJECTION ={
  *
  * @apiUse error
  * @apiUse loginError
-*/
+ */
 /*router.get('/get-all',function(req,res){
-   Utility.get(UserModel,null,res);
-});*/
+ Utility.get(UserModel,null,res);
+ });*/
 /**
  * @api {get} /lukeB/user Get user
  * @apiName GetUser
@@ -236,9 +236,9 @@ const MONGO_PROJECTION ={
  * @apiUse error
  * @apiUse loginError
  */
-router.get('/', function(req, res, next) {
+router.get('/', function (req, res, next) {
     var id = req.query.id;
-    Utility.get(UserModel,id,res);
+    Utility.get(UserModel, id, res);
 });
 /**
  * @api {get} /lukeB/user/me Get my userInfo
@@ -315,9 +315,9 @@ router.get('/', function(req, res, next) {
  * @apiUse error
  * @apiUse loginError
  */
-router.get("/me",jwtCheck,authConverter,function(req,res,next){
-   var id = req.user.profile.id;
-   Utility.get(UserModel,id,res);
+router.get("/me", jwtCheck, authConverter, function (req, res, next) {
+    var id = req.user.profile.id;
+    Utility.get(UserModel, id, res);
 });
 /**
  * @api {post} /lukeB/user/update Update
@@ -422,7 +422,7 @@ router.get("/me",jwtCheck,authConverter,function(req,res,next){
  *          error: 'No user with such id'
  *      }
  */
-router.post('/update',jwtCheck,authConverter,function(req,res) {
+router.post('/update', jwtCheck, authConverter, function (req, res) {
     var data = req.body;
     var id = data.id || req.user.profile.id;
     var appMetadata = req.user.profile._json.app_metadata || {roles: []};
@@ -436,8 +436,8 @@ router.post('/update',jwtCheck,authConverter,function(req,res) {
                         Utility.setKey(doc, key, value);
                     }
                 }
-                doc.image_url = Utility.saveImageBase64(data.image,"lukeB/user/",doc.id)||doc.image_url;
-                doc.save(function(err,result) {
+                doc.image_url = Utility.saveImageBase64(data.image, "lukeB/user/", doc.id) || doc.image_url;
+                doc.save(function (err, result) {
                     if (err)throw err;
 
                     res.status(200).json(Utility.filter(result));
@@ -448,7 +448,7 @@ router.post('/update',jwtCheck,authConverter,function(req,res) {
             }
         });
     } else {
-        res.status(401).json({error:'Proper authorization required',reqAuth:true});
+        res.status(401).json({error: 'Proper authorization required', reqAuth: true});
     }
 });
 /**
@@ -479,9 +479,9 @@ router.post('/update',jwtCheck,authConverter,function(req,res) {
  *          error:"Username not specified"
  *      }
  */
-router.get('/available',jwtCheck,authConverter,function(req,res){
+router.get('/available', jwtCheck, authConverter, function (req, res) {
     var username = req.query.username;
-    if(username) {
+    if (username) {
         UserModel.findOne({username: username}, function (err, doc) {
             if (err) throw err;
 
@@ -491,8 +491,8 @@ router.get('/available',jwtCheck,authConverter,function(req,res){
                 res.status(200).json({exists: false});
             }
         });
-    }else{
-        res.status(422).json({error:"Username not specified"});
+    } else {
+        res.status(422).json({error: "Username not specified"});
     }
 });
 /**
@@ -538,7 +538,7 @@ router.get('/available',jwtCheck,authConverter,function(req,res){
  *      }
  * @apiUse specialAdmin
  */
-router.get('/set-username',jwtCheck,authConverter,function(req,res) {
+router.get('/set-username', jwtCheck, authConverter, function (req, res) {
     var id = req.query.id || req.user.profile.id;
     var username = req.query.username;
     var appMetadata = req.user.profile._json.app_metadata || {};
@@ -610,14 +610,14 @@ router.get('/set-username',jwtCheck,authConverter,function(req,res) {
  *          error:"Error in reading social media profile data"
  *      }
  */
-router.get("/copy-profile",jwtCheck,authConverter,function(req,res) {
+router.get("/copy-profile", jwtCheck, authConverter, function (req, res) {
     var data = req.user.profile;
     var cpyImg = true;
-    if(req.query.cpyImg=="false" || req.query.cpyImg==0){
+    if (req.query.cpyImg == "false" || req.query.cpyImg == 0) {
         cpyImg = false;
     }
 
-    if(data.provider&&data._json.link) {
+    if (data.provider && data._json.link) {
         UserModel.findOne({id: data.id}, function (err, doc) {
             if (err)throw err;
             var exists = false;
@@ -636,13 +636,13 @@ router.get("/copy-profile",jwtCheck,authConverter,function(req,res) {
             if (cpyImg && data.picture) {
                 doc.image_url = data.picture;
             }
-            doc.save(function(err,result){
-                if(err)throw err;
-                res.status(200).json({success:true});
+            doc.save(function (err, result) {
+                if (err)throw err;
+                res.status(200).json({success: true});
             });
         });
-    }else{
-        res.status(404).json({error:"Error in reading social media profile data"});
+    } else {
+        res.status(404).json({error: "Error in reading social media profile data"});
     }
 });
 /**
@@ -676,7 +676,7 @@ router.get("/copy-profile",jwtCheck,authConverter,function(req,res) {
  *          error:"No place with such id"
  *      }
  */
-router.get("/add-favourite-place",jwtCheck,authConverter,function(req,res) {
+router.get("/add-favourite-place", jwtCheck, authConverter, function (req, res) {
     var data = req.query;
 
     PlaceModel.findOne({id: data.id}, function (err, place) {
@@ -734,7 +734,7 @@ router.get("/add-favourite-place",jwtCheck,authConverter,function(req,res) {
  * @apiUse loginError
  *
  */
-router.get("/remove-favourite-place",jwtCheck,authConverter,function(req,res) {
+router.get("/remove-favourite-place", jwtCheck, authConverter, function (req, res) {
     var data = req.query;
     UserModel.findOne({id: req.user.profile.id}, function (err, user) {
         if (err)throw err;
@@ -787,7 +787,7 @@ router.get("/remove-favourite-place",jwtCheck,authConverter,function(req,res) {
  * @apiUse roleSuper
  * @apiUse roleAdmin
  */
-router.get("/add-role",jwtCheck,authConverter,requiresRole("admin"),function(req,res) {
+router.get("/add-role", jwtCheck, authConverter, requiresRole("admin"), function (req, res) {
     var data = req.query;
     var userId = data.userid;
     var role = data.role;
@@ -798,7 +798,7 @@ router.get("/add-role",jwtCheck,authConverter,requiresRole("admin"),function(req
     if (role != "superadmin" && (role != "admin" || adminRoles.indexOf("superadmin") != -1)) {
         management.users.get({id: userId}, function (err, user) {
             if (err) {
-                res.status(200).json({error:"Invalid user id"});
+                res.status(200).json({error: "Invalid user id"});
             } else {
                 rolesArr = user.app_metadata.roles || [];
 
@@ -812,12 +812,12 @@ router.get("/add-role",jwtCheck,authConverter,requiresRole("admin"),function(req
 
                 management.users.updateAppMetadata({id: userId}, metadata, function (err, user) {
                     if (err) console.log(err);
-                    res.status(200).json({success:true});
+                    res.status(200).json({success: true});
                 });
             }
         });
     } else {
-        res.status(200).json({error:"Restricted access"});
+        res.status(200).json({error: "Restricted access"});
     }
 });
 /**
@@ -857,7 +857,7 @@ router.get("/add-role",jwtCheck,authConverter,requiresRole("admin"),function(req
  * @apiUse roleAdmin
  * @apiUse roleSuper
  */
-router.get("/remove-role",jwtCheck,authConverter,requiresRole("admin"),function(req,res) {
+router.get("/remove-role", jwtCheck, authConverter, requiresRole("admin"), function (req, res) {
     var data = req.query;
     var userId = data.userid;
     var role = data.role;
@@ -865,10 +865,10 @@ router.get("/remove-role",jwtCheck,authConverter,requiresRole("admin"),function(
     var appMetadata = req.user.profile._json.app_metadata || {};
     var adminRoles = appMetadata.roles || [];
 
-    if(role!="superadmin"&&(role!="admin"||adminRoles.indexOf("superadmin") != -1)) {
+    if (role != "superadmin" && (role != "admin" || adminRoles.indexOf("superadmin") != -1)) {
         management.users.get({id: userId}, function (err, user) {
             if (err) {
-                res.status(200).json({error:"Invalid user id"});
+                res.status(200).json({error: "Invalid user id"});
             } else {
                 roles = user.app_metadata.roles;
                 if (roles.indexOf(role) != -1 && role != null) {
@@ -881,12 +881,12 @@ router.get("/remove-role",jwtCheck,authConverter,requiresRole("admin"),function(
 
                 management.users.updateAppMetadata({id: userId}, metadata, function (err, user) {
                     if (err) console.log(err);
-                    res.status(200).json({success:"OK"});
+                    res.status(200).json({success: "OK"});
                 });
             }
         });
-    }else{
-        res.status(200).json({error:"Restricted access"});
+    } else {
+        res.status(200).json({error: "Restricted access"});
     }
 });
 /**
@@ -920,13 +920,13 @@ router.get("/remove-role",jwtCheck,authConverter,requiresRole("admin"),function(
  *      }
  * @apiUse specialAdmin
  */
-router.get("/roles",jwtCheck,authConverter,function(req,res){
+router.get("/roles", jwtCheck, authConverter, function (req, res) {
     var data = req.query;
-    var userId = data.id ||req.user.profile.id;
+    var userId = data.id || req.user.profile.id;
     var appMetadata = req.user.profile._json.app_metadata || {};
     var adminRoles = appMetadata.roles || [];
 
-    if(userId==req.user.profile.id || adminRoles.indexOf("admin")!=-1) {
+    if (userId == req.user.profile.id || adminRoles.indexOf("admin") != -1) {
         management.users.get({id: userId}, function (err, user) {
             if (err) {
                 res.status(200).json({error: "Invalid user id"});
@@ -934,8 +934,8 @@ router.get("/roles",jwtCheck,authConverter,function(req,res){
                 res.status(200).json(user.app_metadata.roles);
             }
         });
-    }else{
-        res.status(200).json({error:'Proper authorization required',auth:true});
+    } else {
+        res.status(200).json({error: 'Proper authorization required', auth: true});
     }
 });
 /**
@@ -962,8 +962,8 @@ router.get("/roles",jwtCheck,authConverter,function(req,res){
  * @apiUse authError
  * @apiUse roleAdmin
  */
-router.get('/is-admin',jwtCheck,authConverter,requiresRole("admin"),function(req,res){
-    res.status(200).json({success:true});
+router.get('/is-admin', jwtCheck, authConverter, requiresRole("admin"), function (req, res) {
+    res.status(200).json({success: true});
 });
 /**
  * @api {get} /lukeB/user/is-advanced Is Advanced
@@ -989,8 +989,8 @@ router.get('/is-admin',jwtCheck,authConverter,requiresRole("admin"),function(req
  * @apiUse authError
  * @apiUse roleAdv
  */
-router.get('/is-advanced',jwtCheck,authConverter,requiresRole("advanced"),function(req,res){
-    res.status(200).json({success:true});
+router.get('/is-advanced', jwtCheck, authConverter, requiresRole("advanced"), function (req, res) {
+    res.status(200).json({success: true});
 });
 /**
  * @api {get} /lukeB/user/ban Ban
@@ -1022,7 +1022,7 @@ router.get('/is-advanced',jwtCheck,authConverter,requiresRole("advanced"),functi
  *      }
  * @apiUse roleAdmin
  */
-router.get("/ban",jwtCheck,authConverter,requiresRole("admin"),function(req,res) {
+router.get("/ban", jwtCheck, authConverter, requiresRole("admin"), function (req, res) {
     var data = req.query;
     var id = data.id;
     var rolesArr;
@@ -1079,7 +1079,7 @@ router.get("/ban",jwtCheck,authConverter,requiresRole("admin"),function(req,res)
  *
  * @apiUse roleAdmin
  */
-router.get("/unban",jwtCheck,authConverter,requiresRole("admin"),function(req,res) {
+router.get("/unban", jwtCheck, authConverter, requiresRole("admin"), function (req, res) {
     var data = req.query;
     var id = data.id;
     var roles;
@@ -1139,16 +1139,16 @@ router.get("/unban",jwtCheck,authConverter,requiresRole("admin"),function(req,re
  * @apiUse roleAdmin
  * @apiUse roleSuper
  */
-router.post("/upload-default-image",jwtCheck,authConverter,requiresOneOfRoles(["admin","superadmin"]),function(req,res){
+router.post("/upload-default-image", jwtCheck, authConverter, requiresOneOfRoles(["admin", "superadmin"]), function (req, res) {
     var name = req.body.image_name;
-    if(name!=null) {
+    if (name != null) {
         if (Utility.saveImageBase64(req.body.image, "lukeB/user/default/", name) != null) {
             res.status(200).json({success: true});
         } else {
             res.status(500).json({error: "Image upload failed"});
         }
-    }else{
-        res.status(422).json({error:"Missing image_name"});
+    } else {
+        res.status(422).json({error: "Missing image_name"});
     }
 });
 /**
@@ -1188,28 +1188,18 @@ router.post("/upload-default-image",jwtCheck,authConverter,requiresOneOfRoles(["
  * @apiUse roleAdmin
  * @apiUse roleSuper
  */
-router.get("/delete-default-image",jwtCheck,authConverter,requiresOneOfRoles(["admin","superadmin"]),function(req,res){
+router.get("/delete-default-image", jwtCheck, authConverter, requiresOneOfRoles(["admin", "superadmin"]), function (req, res) {
     var image_name = req.query.name;
-    var image_url = "http://www.balticapp.fi/images/lukeB/user/default/"+image_name+".jpeg";
-    if(image_url!=null&&image_url.indexOf("user/default")!=-1) {
+    var image_url = "http://www.balticapp.fi/images/lukeB/user/default/" + image_name + ".jpeg";
+    if (image_url != null && image_url.indexOf("user/default") != -1) {
         if (Utility.deleteImage(image_url) != null) {
             res.status(200).json({success: true});
         } else {
             res.status(500).json({error: "Image deletion failed"});
         }
-    }else{
-        res.status(422).json({error:"Missing/incorrect url"});
+    } else {
+        res.status(422).json({error: "Missing/incorrect url"});
     }
 });
-/**
- * @api {get} /images/lukeB/user/default Get Default Image(s)
- * @apiName GetImages
- * @apiGroup User
- *
- * @apiDescription
- * Location of default user images. Access unique image by name. *Requires improvement.
- *
- * @apiExample Example image_url:
- * http://balticapp.fi/images/lukeB/user/default/redTomato.jpg
- */
+
 module.exports = router;
