@@ -246,13 +246,13 @@ Utility.prototype.voteCount = function (Model, id, res, vote) {
     }
 };
 Utility.prototype.get = function (Model, id, res) {
-    var returnArray = [];
+    //var returnArray = [];
     var that = this;
     if (id == null) {
         Model.find({}, MONGO_PROJECTION, function (err, doc) {
             if (err) console.log(err);
             if (doc.length > 0) {
-                res.status(200).json(that.filter(returnArray));
+                res.status(200).json(that.filter(doc));
 
             } else {
                 res.status(200).json([]);
