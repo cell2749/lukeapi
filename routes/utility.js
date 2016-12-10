@@ -8,7 +8,7 @@ var Utility = function (keyes, maxFlags) {
     this.maxFlags = maxFlags;
 };
 Utility.prototype.filter = function (object) {
-    if(object!="undefined") {
+    if (object != "undefined") {
         var filteredObject = JSON.parse(JSON.stringify(object), function (key, value) {
             if (key == '_id' || key == '__v') {
                 return undefined;
@@ -17,7 +17,7 @@ Utility.prototype.filter = function (object) {
             }
         });
         return filteredObject;
-    }else{
+    } else {
         return {}
     }
 
@@ -115,8 +115,8 @@ Utility.prototype.update = function (Model, data, res) {
                     }
                 }
 
-                doc.save(function(err,item){
-                    if(err) console.log(err);
+                doc.save(function (err, item) {
+                    if (err) console.log(err);
                     res.status(200).json(this.filter(item));
                 });
 
@@ -246,24 +246,15 @@ Utility.prototype.voteCount = function (Model, id, res, vote) {
     }
 };
 Utility.prototype.get = function (Model, id, res) {
-    var returnV = new Model();
     var returnArray = [];
     var that = this;
     if (id == null) {
         Model.find({}, MONGO_PROJECTION, function (err, doc) {
             if (err) console.log(err);
-            if(doc.length>0) {
-                for (var i = 0; i < doc.length; i++) {
-                    for (var key in Model.schema.paths) {
-                        returnV[key] = doc[i][key];
-                    }
-                    returnArray.push(returnV);
-                    returnV = {};
-                    if (i == doc.length - 1) {
-                        res.status(200).json(that.filter(returnArray));
-                    }
-                }
-            }else{
+            if (doc.length > 0) {
+                res.status(200).json(that.filter(returnArray));
+
+            } else {
                 res.status(200).json([]);
             }
         });
@@ -273,7 +264,8 @@ Utility.prototype.get = function (Model, id, res) {
             res.status(200).json(that.filter(doc));
         });
     }
-};
+}
+;
 Utility.prototype.hasRole = function (req, role) {
     var appMetadata = req.user.profile._json.app_metadata || {};
     var roles = appMetadata.roles || [];
@@ -334,7 +326,7 @@ Utility.prototype.copyImage = function (req, large) {
 Utility.prototype.setKey = function (obj, key, value) {
     var keys = key.split(".");
     var ret = obj;
-    for (var i = 0; i < keys.length-1; i++) {
+    for (var i = 0; i < keys.length - 1; i++) {
         ret = ret[keys[i]];
     }
     ret[keys[i]] = value;
