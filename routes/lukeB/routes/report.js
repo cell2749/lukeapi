@@ -298,6 +298,11 @@ router.post('/create', jwtCheck, authConverter, function (req, res, next) {
             date.setUTCHours(date.getUTCHours()-Math.floor(date.getTimezoneOffset()/60));
             report.date = date.toISOString();
         }
+        console.log(data.image);
+        console.log(data.files);
+        console.log(data.file);
+        console.log(req.files);
+        console.log(req.file);
         //vote.report.id = id;
         report._id = id;
         report.id = id;
