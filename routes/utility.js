@@ -8,6 +8,7 @@ var Utility = function (keyes, maxFlags) {
     this.maxFlags = maxFlags;
 };
 Utility.prototype.filter = function (object) {
+    console.log(object);
     if (object != "undefined") {
         var filteredObject = JSON.parse(JSON.stringify(object), function (key, value) {
             if (key == '_id' || key == '__v') {
