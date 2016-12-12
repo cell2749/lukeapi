@@ -250,10 +250,6 @@ router.get("/", function (req, res) {
  */
 router.post("/create", jwtCheck, authConverter, requiresOneOfRoles(["admin", "advanced"]), function (req, res) {
     var data = req.body;
-    console.log("data /");
-    console.log(data);
-    console.log("Req /");
-    console.log(req);
     if (data.title == null) {
         res.status(422).json({error: "Missing title"});
     } else if (data.location == null || data.location.lat == null || data.location.long == null) {
