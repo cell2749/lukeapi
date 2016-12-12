@@ -272,7 +272,7 @@ Utility.prototype.hasRole = function (req, role) {
 
     return (roles.indexOf(role) != -1);
 };
-Utility.prototype.saveImage = function (req, path, imgName) {
+Utility.prototype.saveImageFromFiles = function (req, path, imgName) {
     var fullpath = "/opt/balticapp/lukeapi/public/images/" + path + imgName;
     if (req.files) {
         if (req.files.image) {
@@ -369,6 +369,26 @@ Utility.prototype.saveImageBase64 = function (base, path, name) {
     } else {
         console.log("Error: base is empty");
         return null;
+    }
+};
+Utility.prototype.saveImage = function (image, path, name) {
+    var prePath = "/opt/balticapp/lukeapi/public/images/";
+    var url = "http://www.balticapp.fi/images/";
+    var format = ".jpeg";
+
+    var fullPath = prePath + path + name + format;
+
+    if(image==null){
+        console.log("ERROR: Image is empty");
+    }else{
+        fs.readFile(image.uri, function (err, data) {
+            if (err) console.log("ERROR READ ",err);
+            fs.writeFile(fullPath, data, function (err) {
+                if (err) console.log("ERROR WRITE",err);
+
+            });
+        });
+        return url + path + name + format;
     }
 };
 
