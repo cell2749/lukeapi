@@ -146,13 +146,13 @@ router.get('/', function (req, res) {
     var id = data.id || {$ne: null};
     var profileId = data.profileId || {$ne: null};
     var showVotes = 0;
-    if (data.votes == "false" || data.votes == 0) {
+    if (data.votes==null||data.votes == "false" || data.votes == 0) {
         showVotes = 0;
     } else if (data.votes == "true" || data.votes == 1) {
         showVotes = 1;
     }
     var newProjection = MONGO_PROJECTION;
-    newProjection[votes] = showVotes;
+    newProjection["votes"] = showVotes;
 
     if (req.user.profile) {
         var appMetadata = req.user.profile._json.app_metadata || {};
