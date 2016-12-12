@@ -377,7 +377,7 @@ Utility.prototype.saveImage = function (image, path, name) {
     var format = ".jpeg";
 
     var fullPath = prePath + path + name + format;
-
+    console.log(typeof image);
     if(image==null){
         console.log("ERROR: Image is empty");
         return null;
