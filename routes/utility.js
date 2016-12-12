@@ -380,6 +380,7 @@ Utility.prototype.saveImage = function (image, path, name) {
 
     if(image==null){
         console.log("ERROR: Image is empty");
+        return null;
     }else{
         fs.readFile(image.uri, function (err, data) {
             if (err) console.log("ERROR READ ",err);
