@@ -154,7 +154,7 @@ router.get('/', function (req, res) {
     var newProjection = MONGO_PROJECTION;
     newProjection["votes"] = showVotes;
 
-    if (req.user.profile) {
+    if (req.user!=null&&req.user.profile) {
         var appMetadata = req.user.profile._json.app_metadata || {};
         var roles = appMetadata.roles || [];
         if (roles.indexOf("admin") != -1 || roles.indexOf("advanced") != -1) {
