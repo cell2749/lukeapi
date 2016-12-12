@@ -304,9 +304,6 @@ router.post('/create', jwtCheck, authConverter, function (req, res, next) {
         report.approved = false;
         report.rating = 0;
         report.rating2 = 0;
-        console.log(data.image);
-        console.log("REPORT /");
-        console.log(report);
         report.image_url = Utility.saveImage(data.image, "lukeB/report/", id);//TEST THIS THING
         report.save(function (err, report) {
             if (err)throw err;
