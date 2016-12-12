@@ -300,6 +300,7 @@ router.post('/create', jwtCheck, authConverter, function (req, res, next) {
         }
         //vote.report.id = id;
         report._id = id;
+        report.id = id;
         report.approved = false;
         report.rating = 0;
         report.rating2 = 0;
