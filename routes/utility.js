@@ -355,17 +355,23 @@ Utility.prototype.saveImageBase64 = function (base, path, name) {
     var prePath = "/opt/balticapp/lukeapi/public/images/";
     var url = "http://www.balticapp.fi/images/";
     if (base != null) {
-        var format = ".jpeg";
+        try {
+            var format = ".jpeg";
 
-        var fullpath = prePath + path + name + format;
+            var fullpath = prePath + path + name + format;
+            console.log("Base");
+            console.log(base);
+            var imageBuffer = new Buffer(base, 'base64');
 
-        var imageBuffer = new Buffer(base, 'base64');
+            fs.writeFile(fullpath, imageBuffer, function (err) {
+                if (err) console.log(err);
 
-        fs.writeFile(fullpath, imageBuffer, function (err) {
-            if (err) console.log(err);
-
-        });
-        return url + path + name + format;
+            });
+            return url + path + name + format;
+        }catch(e){
+            console.log(e);
+            return null;
+        }
     } else {
         console.log("Error: base is empty");
         return null;
