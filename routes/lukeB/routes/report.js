@@ -170,6 +170,7 @@ router.get('/', function (req, res) {
     }, newProjection).sort({"date": -1}).limit(parseInt(limit)).exec(function (err, collection) {
         if (err) throw err;
         var result = [];
+        console.log(collection);
         if (rating != null) {
             for (i = 0; i < collection.length; i++) {
                 if (collection[i].rating != null && rating < collection[i].rating) {
