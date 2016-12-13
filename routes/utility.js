@@ -177,7 +177,7 @@ Utility.prototype.vote = function (Model, req, res, vote) {
                     var flagCount = 0;
                     for (var i = 0; i < doc.votes.length; i++) {
                         if (doc.votes[i].profileId == req.user.profile.id) {
-                            doc.votes[i] = vote;
+                            doc.votes[i] = voteObj;
                             exists = true;
                         }
                         if (doc.votes[i].vote == false || doc.votes[i].vote == "false") {
