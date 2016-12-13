@@ -2437,7 +2437,7 @@ define({ "api": [
         ]
       }
     },
-    "description": "<p>Remove Link by id.</p>",
+    "description": "<p>Used in order to register that user has clicked on the link.</p>",
     "examples": [
       {
         "title": "Example URL:",
