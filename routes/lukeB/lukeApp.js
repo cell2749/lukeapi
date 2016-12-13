@@ -114,7 +114,7 @@ router.get("/login", jwtCheck, authConverter, function (req, res) {
                 });
                 user.save(function (err, result) {
                     if (err) throw err;
-                    console.log(result);
+                    //console.log(result);
                 });
             }
         });

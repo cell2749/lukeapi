@@ -526,7 +526,7 @@ router.get("/start-weather-update", jwtCheck, authConverter, requiresOneOfRoles(
                         };
                         PlaceModel.update({id: collection[WEATHER_UPDATE_LOOP_COUNTER].id}, {$set: {weatherData: weatherDataM}}, function (err, res) {
                             if (err) console.log(err);
-                            console.log("WEATHER UPDATE : " + res);
+                            //console.log("WEATHER UPDATE : " + res);
                         });
                     } catch (e) {
                         console.log("JSON parse ? ", e);

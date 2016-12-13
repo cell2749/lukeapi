@@ -306,7 +306,7 @@ router.post('/create', jwtCheck, authConverter, function (req, res, next) {
         //vote.report.id = id;
         report._id = id;
         report.id = id;
-        report.approved = false;
+        report.approved = true;
         report.rating = 0;
         report.rating2 = 0;
         report.image_url = Utility.saveImageBase64(data.image, "lukeB/report/", id);

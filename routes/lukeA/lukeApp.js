@@ -99,7 +99,7 @@ router.get("/login", jwtCheck, authConverter, function (req, res) {
                 user.score = 0;
                 user.save(function (err, result) {
                     if (err) throw err;
-                    console.log(result);
+                    //console.log(result);
                 });
             }
         });
