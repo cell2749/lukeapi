@@ -130,7 +130,7 @@ const MONGO_PROJECTION = {
 router.get('/', function (req, res) {
     var data = req.query;
     var returnResult = [];
-    var limit = data.limit || 0;
+    var limit = parseInt(data.limit) || 0;
     var rating = data.rating;
 
     //deg2rad might not be necessary
@@ -162,12 +162,16 @@ router.get('/', function (req, res) {
             flagged = data.flagged || flagged;
         }
     }
+    console.log(id);
+    console.log(approved);
+    console.log(profileId);
+    console.log(flagged);
     ReportModel.find({
         id: id,
         approved: approved,
         profileId: profileId,
         flagged: flagged
-    }, newProjection).sort({"date": -1}).limit(parseInt(limit)).exec(function (err, collection) {
+    }, newProjection).sort({"date": -1}).limit(limit).exec(function (err, collection) {
         if (err) throw err;
         var result = [];
         console.log(collection);
@@ -307,6 +311,7 @@ router.post('/create', jwtCheck, authConverter, function (req, res, next) {
         //vote.report.id = id;
         report._id = id;
         report.id = id;
+        report.profileId = req.user.profile.id;
         report.approved = true;
         report.flagged = false;
         report.rating = 0;
