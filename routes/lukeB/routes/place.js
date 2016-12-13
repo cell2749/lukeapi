@@ -532,7 +532,7 @@ router.get("/start-weather-update", jwtCheck, authConverter, requiresOneOfRoles(
                         console.log("JSON parse ? ", e);
                     }
                     WEATHER_UPDATE_LOOP_COUNTER++;
-                    if (WEATHER_UPDATE_LOOP_COUNTER >= Object.keys(WEATHER_UPDATE).length) {
+                    if (WEATHER_UPDATE_LOOP_COUNTER >= collection.length) {
                         WEATHER_UPDATE_LOOP_COUNTER = 0;
                     }
                 });
