@@ -519,7 +519,7 @@ router.get("/start-weather-update", jwtCheck, authConverter, requiresOneOfRoles(
                 response.on("end", function () {
                     try {
                         var weatherData = JSON.parse(str);
-
+                        console.log(weatherData);
                         var weatherDataM = {
                             temperature: weatherData.main.temp - 273.15,
                             wind: weatherData.wind.speed
