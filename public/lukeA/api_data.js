@@ -3823,18 +3823,32 @@ define({ "api": [
             "optional": false,
             "field": "success",
             "description": "<p>True if report was flagged/unflagged successfully</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "flagged",
+            "description": "<p>True if threshold reached and report is now officially flagged.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "action",
+            "description": "<p>Flag if true unflag if false</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200\n{\n    success:true\n}",
+          "content": "HTTP/1.1 200\n{\n    success:true,\n    flagged: Boolean,\n    action: Boolean\n\n}",
           "type": "json"
         }
       ]
     },
-    "description": "<p>Adds or removes flag in report by id. If the flags reach threshold the report is flagged, if they are below threshold, it is unflagged.</p>",
+    "description": "<p>Adds or removes flag in report by id. If the flags reach threshold the report is flagged, if they are below threshold, it is unflagged. Threshold currently 10.</p>",
     "examples": [
       {
         "title": "Example URL:",

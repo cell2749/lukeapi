@@ -1279,14 +1279,20 @@ router.get("/upvote-count", function (req, res) {
  * @apiParam {String} id Id of the report
  *
  * @apiSuccess {Boolean} success True if report was flagged/unflagged successfully
+ * @apiSuccess {Boolean} flagged True if threshold reached and report is now officially flagged.
+ * @apiSuccess {Boolean} action Flag if true unflag if false
  *
  * @apiSuccessExample Success-Response:
  *      HTTP/1.1 200
  *      {
- *          success:true
+ *          success:true,
+ *          flagged: Boolean,
+ *          action: Boolean
+ *
  *      }
  * @apiDescription
  * Adds or removes flag in report by id. If the flags reach threshold the report is flagged, if they are below threshold, it is unflagged.
+ * Threshold currently 10.
  *
  * @apiExample Example URL:
  * http://balticapp.fi/lukeA/report/flag?id=y892128121u08
@@ -1303,13 +1309,16 @@ router.get("/upvote-count", function (req, res) {
 router.get("/flag", jwtCheck, authConverter, restrictBanned, function (req, res) {
     var data = req.query;
     var id = data.id;
+    var action;
     ReportModel.findOne({id: id}, function (err, doc) {
         if (err) throw err;
         if (doc) {
             if (doc.flags.indexOf(req.user.profile.id) == -1) {
                 doc.flags.push(req.user.profile.id);
+                action=true
             } else {
                 doc.flags.splice(doc.flags.indexOf(req.user.profile.id), 1);
+                action=false;
             }
             if (doc.approved == null) {
                 if (doc.flags.length >= FLAG_TRIGGER) {
@@ -1321,7 +1330,7 @@ router.get("/flag", jwtCheck, authConverter, restrictBanned, function (req, res)
             }
             doc.save(function (err, result) {
                 if (err) throw err;
-                res.status(200).json({success: true, flagged: result.flagged});
+                res.status(200).json({success: true, flagged: result.flagged,action:action});
             });
         }
         else {
