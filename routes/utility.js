@@ -169,7 +169,7 @@ Utility.prototype.vote = function (Model, req, res, vote) {
                     var exists = false;
                     var date = new Date();
                     date.setUTCHours(date.getUTCHours() - Math.floor(date.getTimezoneOffset() / 60));
-                    var vote = {
+                    var voteObj = {
                         profileId: req.user.profile.id,
                         date: date.toISOString(),
                         vote: vote
@@ -186,7 +186,7 @@ Utility.prototype.vote = function (Model, req, res, vote) {
 
                         if (i == doc.votes.length - 1) {
                             if (!exists) {
-                                doc.votes.push(vote);
+                                doc.votes.push(voteObj);
                             }
                             if (this.maxFlags != null && flagCount >= this.maxFlags) {
                                 doc.flagged = true;
@@ -198,7 +198,7 @@ Utility.prototype.vote = function (Model, req, res, vote) {
                         }
                     }
                     if (doc.votes.length == 0) {
-                        doc.votes.push(vote);
+                        doc.votes.push(voteObj);
                         doc.save(function (err, result) {
                             if (err) console.log(err);
                             res.status(200).json({success: true});

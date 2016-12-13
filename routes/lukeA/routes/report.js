@@ -431,7 +431,7 @@ router.get("/admin-get", jwtCheck, authConverter, requiresRole("admin"), functio
 router.post('/create', jwtCheck, authConverter, restrictBanned, function (req, res, next) {
     var data = req.body;
     var id = mongoose.Types.ObjectId();
-    console.log(data);
+
     if (data.longitude == null) {
         res.status(422).json({error: "Missing longitude"});
     } else if (data.latitude == null) {
