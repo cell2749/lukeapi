@@ -119,7 +119,7 @@ Utility.prototype.update = function (Model, data, res) {
 
                 doc.save(function (err, item) {
                     if (err) console.log(err);
-                    res.status(200).json(this.filter(item));
+                    res.status(200).json(that.filter(item));
                 });
 
             } else {
