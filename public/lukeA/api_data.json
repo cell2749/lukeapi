@@ -1921,6 +1921,570 @@
     "groupTitle": "Experience"
   },
   {
+    "type": "get",
+    "url": "/lukeA/link",
+    "title": "Create",
+    "name": "Create",
+    "group": "Link",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "link",
+            "description": "<p>Link of the link to create</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "title",
+            "description": "<p>Title of the link to create</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "description",
+            "description": "<p>Description of the link to create</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Boolean",
+            "optional": true,
+            "field": "active",
+            "defaultValue": "true",
+            "description": "<p>Active indicates that if the link is active to present</p>"
+          }
+        ],
+        "Required Role": [
+          {
+            "group": "Required Role",
+            "optional": false,
+            "field": "superadmin",
+            "description": ""
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response-Single:",
+          "content": "HTTP/1.1 200 OK\n{\n    id:String,\n    link: String,\n    description: String,\n    title: String,\n    active: Boolean,\n    done: [String]\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the Link</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "link",
+            "description": "<p>Third party link to specific site, or survey</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "description",
+            "description": "<p>Description of the link</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "title",
+            "description": "<p>Title of the link</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "active",
+            "description": "<p>Indicates if the link is good to present</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "done",
+            "description": "<p>Array containing ids of users who clicked the link, visited it</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Create Link, link parameter is required. All other parameters are optional with active being true by default.</p>",
+    "error": {
+      "examples": [
+        {
+          "title": "Missing Link",
+          "content": "HTTP/1.1 422\n{\n    error:\"Missing Link\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Authorization Error:",
+          "content": "HTTP/1.1 401\n{\n    error:'Proper authorization required',\n    auth:true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/lukeA/routes/link.js",
+    "groupTitle": "Link"
+  },
+  {
+    "type": "get",
+    "url": "/lukeA/link",
+    "title": "Get",
+    "name": "Get",
+    "group": "Link",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "id",
+            "description": "<p>Id of the link to retrieve</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Boolean",
+            "optional": true,
+            "field": "active",
+            "description": "<p>Active indicates that if the link is active to present</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response-Single:",
+          "content": "HTTP/1.1 200 OK\n[{\n    id:String,\n    link: String,\n    description: String,\n    title: String,\n    active: Boolean,\n    done: [String]\n}]",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the Link</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "link",
+            "description": "<p>Third party link to specific site, or survey</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "description",
+            "description": "<p>Description of the link</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "title",
+            "description": "<p>Title of the link</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "active",
+            "description": "<p>Indicates if the link is good to present</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "done",
+            "description": "<p>Array containing ids of users who clicked the link, visited it</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Link get request. Normal users and public get only active true by default. Super admins get everything by default. Super admins can specify parameter active in the request in order to get one or the other. If no id is specified, all the reports are delivered based on the active rules. Reports are active by default upon creation.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeA/link?id=e2921y8998e1",
+        "type": "json"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "routes/lukeA/routes/link.js",
+    "groupTitle": "Link"
+  },
+  {
+    "type": "get",
+    "url": "/lukeA/link/remove",
+    "title": "Remove",
+    "name": "Remove",
+    "group": "Link",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the link to be updated</p>"
+          }
+        ],
+        "Required Role": [
+          {
+            "group": "Required Role",
+            "optional": false,
+            "field": "superadmin",
+            "description": ""
+          }
+        ]
+      }
+    },
+    "description": "<p>Remove Link by id.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeA/link/remove?id=e2921y8998e1",
+        "type": "json"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "routes/lukeA/routes/link.js",
+    "groupTitle": "Link",
+    "error": {
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing id:",
+          "content": "HTTP/1.1 422\n{\n    success: \"Missing id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Wrong id:",
+          "content": "HTTP/1.1 404\n{\n    success: \"No such id\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success: \"Removed N items\"\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "success",
+            "description": "<p>Indicates amount of removed items.</p>"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "get",
+    "url": "/lukeA/link",
+    "title": "Update",
+    "name": "Update",
+    "group": "Link",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the link to be updated</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "link",
+            "description": "<p>Link of the link to Update</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "title",
+            "description": "<p>Title of the link to Update</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "description",
+            "description": "<p>Description of the link to Update</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Boolean",
+            "optional": true,
+            "field": "active",
+            "description": "<p>Active indicates that if the link is active to present</p>"
+          }
+        ],
+        "Required Role": [
+          {
+            "group": "Required Role",
+            "optional": false,
+            "field": "superadmin",
+            "description": ""
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response-Single:",
+          "content": "HTTP/1.1 200 OK\n{\n    id:String,\n    link: String,\n    description: String,\n    title: String,\n    active: Boolean,\n    done: [String]\n}",
+          "type": "json"
+        },
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success: true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the Link</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "link",
+            "description": "<p>Third party link to specific site, or survey</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "description",
+            "description": "<p>Description of the link</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "title",
+            "description": "<p>Title of the link</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "active",
+            "description": "<p>Indicates if the link is good to present</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "done",
+            "description": "<p>Array containing ids of users who clicked the link, visited it</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "success",
+            "description": "<p>True if update was successful</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Update Link, id is required. All other parameters are optional.</p>",
+    "version": "0.0.0",
+    "filename": "routes/lukeA/routes/link.js",
+    "groupTitle": "Link",
+    "error": {
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Authorization Error:",
+          "content": "HTTP/1.1 401\n{\n    error:'Proper authorization required',\n    auth:true\n}",
+          "type": "json"
+        },
+        {
+          "title": "Missing id:",
+          "content": "HTTP/1.1 422\n{\n    success: \"Missing id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Wrong id:",
+          "content": "HTTP/1.1 404\n{\n    success: \"No such id\"\n}",
+          "type": "json"
+        }
+      ]
+    }
+  },
+  {
+    "type": "get",
+    "url": "/lukeA/link/visit",
+    "title": "Visit",
+    "name": "Visit",
+    "group": "Link",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the link to be updated</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Remove Link by id.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeA/link/visit?id=e2921y8998e1",
+        "type": "json"
+      }
+    ],
+    "error": {
+      "examples": [
+        {
+          "title": "Missing id:",
+          "content": "HTTP/1.1 422\n{\n    error:\"Missing Id\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Wrong id:",
+          "content": "HTTP/1.1 422\n{\n    error:\"No such Link\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Login Error:",
+          "content": "HTTP/1.1 401\n{\n    error:\"Authentication required\",\n    login:true\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Error": [
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "4xx",
+            "description": "<p>Status Code of the error</p>"
+          },
+          {
+            "group": "Error",
+            "optional": false,
+            "field": "error",
+            "description": "<p>Error message</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/lukeA/routes/link.js",
+    "groupTitle": "Link"
+  },
+  {
     "type": "post",
     "url": "/lukeA/rank/create",
     "title": "Create",

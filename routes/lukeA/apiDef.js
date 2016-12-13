@@ -62,3 +62,90 @@
  *          error: 'No user with such id'
  *      }
  * */
+/**
+ * @apiDefine removeStatus
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200
+ *      {
+ *          success: "Removed N items"
+ *      }
+ * @apiSuccess {String} success Indicates amount of removed items.
+ *
+ * @apiErrorExample Missing id:
+ *      HTTP/1.1 422
+ *      {
+ *          success: "Missing id"
+ *      }
+ * @apiErrorExample Wrong id:
+ *      HTTP/1.1 404
+ *      {
+ *          success: "No such id"
+ *      }
+ * */
+/**
+ * @apiDefine updateStatus
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200
+ *      {
+ *          success: true
+ *      }
+ * @apiSuccess {Boolean} success True if update was successful
+ *
+ * @apiErrorExample Missing id:
+ *      HTTP/1.1 422
+ *      {
+ *          success: "Missing id"
+ *      }
+ * @apiErrorExample Wrong id:
+ *      HTTP/1.1 404
+ *      {
+ *          success: "No such id"
+ *      }
+ * */
+/**
+ * @apiDefine voteStatus
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200
+ *      {
+ *          success: true
+ *      }
+ * @apiSuccess {Boolean} success True if voting was successful
+ *
+ * @apiErrorExample Missing id:
+ *      HTTP/1.1 422
+ *      {
+ *          success: "Missing id"
+ *      }
+ * @apiErrorExample Wrong id:
+ *      HTTP/1.1 404
+ *      {
+ *          success: "No such id"
+ *      }
+ * */
+/**
+ * @apiDefine missingVote
+ * @apiErrorExample Missing Vote:
+ *      HTTP/1.1 422
+ *      {
+ *          success: "Missing vote:true or false"
+ *      }
+ * */
+/**
+ * @apiDefine voteCountStatus
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200
+ *      {
+ *          count: Number
+ *      }
+ * @apiSuccess {Number} count Vote count
+ * @apiErrorExample Missing id:
+ *      HTTP/1.1 422
+ *      {
+ *          success: "Missing id"
+ *      }
+ * @apiErrorExample Wrong id:
+ *      HTTP/1.1 404
+ *      {
+ *          success: "No such id"
+ *      }
+ * */

@@ -309,7 +309,7 @@ router.post('/create', jwtCheck, authConverter, function (req, res, next) {
         report.approved = false;
         report.rating = 0;
         report.rating2 = 0;
-        report.image_url = Utility.saveImageBase64(data.image, "lukeB/report/", id);//TEST THIS THING
+        report.image_url = Utility.saveImageBase64(data.image, "lukeB/report/", id);
         report.save(function (err, report) {
             if (err)throw err;
 

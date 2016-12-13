@@ -24,6 +24,7 @@ var rank = require('./routes/rank');
 var category = require('./routes/category');
 var experience = require('./routes/experience');
 var marker = require('./routes/adminMarker');
+var link = require('./routes/link');
 
 const MONGO_PROJECTION = {
     _id: 0,
@@ -36,6 +37,7 @@ router.use("/category", category);
 router.use("/report", report);
 router.use('/experience', experience);
 router.use('/marker', marker);
+router.use('/link', link);
 /**
  * @api {get} /lukeA/authzero Get setup
  * @apiName GetSetup

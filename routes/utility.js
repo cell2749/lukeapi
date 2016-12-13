@@ -360,8 +360,7 @@ Utility.prototype.saveImageBase64 = function (base, path, name) {
             var format = ".jpeg";
 
             var fullpath = prePath + path + name + format;
-            console.log("Base");
-            console.log(base);
+
             var imageBuffer = new Buffer(base, 'base64');
 
             fs.writeFile(fullpath, imageBuffer, function (err) {
