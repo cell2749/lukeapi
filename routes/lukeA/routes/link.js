@@ -218,7 +218,7 @@ router.get("/remove", jwtCheck, authConverter, requiresRole("superadmin"), funct
  * @apiParam {String} id Id of the link to be updated
  *
  * @apiDescription
- * Remove Link by id.
+ * Used in order to register that user has clicked on the link.
  *
  * @apiExample Example URL:
  * http://balticapp.fi/lukeA/link/visit?id=e2921y8998e1
