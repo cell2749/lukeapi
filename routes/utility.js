@@ -106,7 +106,7 @@ Utility.prototype.remove = function (Model, id, res) {
  *      }
  * */
 Utility.prototype.update = function (Model, data, res) {
-    var that= this;
+    var that = this;
     if (data.id) {
         Model.findOne({id: data.id}, function (err, doc) {
             if (doc) {
@@ -167,9 +167,11 @@ Utility.prototype.vote = function (Model, req, res, vote) {
 
                 if (doc) {
                     var exists = false;
+                    var date = new Date();
+                    date.setUTCHours(date.getUTCHours() - Math.floor(date.getTimezoneOffset() / 60));
                     var vote = {
                         profileId: req.user.profile.id,
-                        date: Date.now(),
+                        date: date.toISOString(),
                         vote: vote
                     };
                     var flagCount = 0;
@@ -194,6 +196,13 @@ Utility.prototype.vote = function (Model, req, res, vote) {
                                 res.status(200).json({success: true});
                             });
                         }
+                    }
+                    if (doc.votes.length == 0) {
+                        doc.votes.push(vote);
+                        doc.save(function (err, result) {
+                            if (err) console.log(err);
+                            res.status(200).json({success: true});
+                        });
                     }
                 } else {
                     res.status(404).json({error: "No such id"});
@@ -369,7 +378,7 @@ Utility.prototype.saveImageBase64 = function (base, path, name) {
 
             });
             return url + path + name + format;
-        }catch(e){
+        } catch (e) {
             console.log(e);
             return null;
         }
@@ -384,15 +393,15 @@ Utility.prototype.saveImage = function (image, path, name) {
     var format = ".jpeg";
 
     var fullPath = prePath + path + name + format;
-    if(image==null){
+    if (image == null) {
         console.log("ERROR: Image is empty");
         return null;
-    }else{
+    } else {
         fs.readFile(image.uri, function (err, data) {
-            if (err) console.log("ERROR READ ",err);
+            if (err) console.log("ERROR READ ", err);
             //console.log(data);
             fs.writeFile(fullPath, data, function (err) {
-                if (err) console.log("ERROR WRITE",err);
+                if (err) console.log("ERROR WRITE", err);
 
             });
         });
