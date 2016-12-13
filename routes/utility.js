@@ -106,13 +106,14 @@ Utility.prototype.remove = function (Model, id, res) {
  *      }
  * */
 Utility.prototype.update = function (Model, data, res) {
+    var that= this;
     if (data.id) {
         Model.findOne({id: data.id}, function (err, doc) {
             if (doc) {
                 for (var key in Model.schema.paths) {
-                    if (this.allowKey(key)) {
-                        var value = this.getKey(data, key) || this.getKey(doc, key);
-                        this.setKey(doc, key, value);
+                    if (that.allowKey(key)) {
+                        var value = that.getKey(data, key) || that.getKey(doc, key);
+                        that.setKey(doc, key, value);
                     }
                 }
 
