@@ -82,7 +82,52 @@ router.get("/", function (req, res) {
     });
 });
 /**
- * @api {get} /lukeA/link Create
+ * @api {get} /lukeA/link/admin-get Admin Get
+ * @apiName AdminGet
+ * @apiGroup Link
+ *
+ * @apiParam {String} [id] Id of the link to retrieve
+ * @apiParam {Boolean} [active] Active indicates that if the link is active to present
+ *
+ * @apiSuccessExample Success-Response-Single:
+ *      HTTP/1.1 200 OK
+ *      [{
+ *          id:String,
+ *          link: String,
+ *          description: String,
+ *          title: String,
+ *          active: Boolean,
+ *          done: [String]
+ *      }]
+ *
+ * @apiSuccess {String} id Id of the Link
+ * @apiSuccess {String} link Third party link to specific site, or survey
+ * @apiSuccess {String} description Description of the link
+ * @apiSuccess {String} title Title of the link
+ * @apiSuccess {Boolean} active Indicates if the link is good to present
+ * @apiSuccess {Array} done Array containing ids of users who clicked the link, visited it
+ *
+ * @apiDescription
+ * Link get request. Normal users and public get only active true by default. Super admins get everything by default.
+ * Super admins can specify parameter active in the request in order to get one or the other.
+ * If no id is specified, all the reports are delivered based on the active rules. Reports are active by default upon creation.
+ *
+ * @apiExample Example URL:
+ * http://balticapp.fi/lukeA/link?id=e2921y8998e1
+ */
+router.get("/admin-get",jwtCheck,authConverter,requiresRoles(["admin","superadmin"]),function(req,res){
+    var data = req.query;
+    var id = data.id || {$ne:null};
+    var active = data.active || {$ne:null};
+
+    LinkModel.find({active:active,id:id},MONGO_PROJECTION,function(err,doc){
+        if(err) console.log(err);
+
+        res.status(200).json(doc);
+    });
+});
+/**
+ * @api {post} /lukeA/link/create Create
  * @apiName Create
  * @apiGroup Link
  *
@@ -148,7 +193,7 @@ router.post("/create", jwtCheck, authConverter, requiresRole("superadmin"), func
         });
     }
 });/**
- * @api {get} /lukeA/link Update
+ * @api {gpost} /lukeA/link/update Update
  * @apiName Update
  * @apiGroup Link
  *

@@ -1922,7 +1922,100 @@ define({ "api": [
   },
   {
     "type": "get",
-    "url": "/lukeA/link",
+    "url": "/lukeA/link/admin-get",
+    "title": "Admin Get",
+    "name": "AdminGet",
+    "group": "Link",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "id",
+            "description": "<p>Id of the link to retrieve</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Boolean",
+            "optional": true,
+            "field": "active",
+            "description": "<p>Active indicates that if the link is active to present</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response-Single:",
+          "content": "HTTP/1.1 200 OK\n[{\n    id:String,\n    link: String,\n    description: String,\n    title: String,\n    active: Boolean,\n    done: [String]\n}]",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the Link</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "link",
+            "description": "<p>Third party link to specific site, or survey</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "description",
+            "description": "<p>Description of the link</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "title",
+            "description": "<p>Title of the link</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "active",
+            "description": "<p>Indicates if the link is good to present</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Array",
+            "optional": false,
+            "field": "done",
+            "description": "<p>Array containing ids of users who clicked the link, visited it</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Link get request. Normal users and public get only active true by default. Super admins get everything by default. Super admins can specify parameter active in the request in order to get one or the other. If no id is specified, all the reports are delivered based on the active rules. Reports are active by default upon creation.</p>",
+    "examples": [
+      {
+        "title": "Example URL:",
+        "content": "http://balticapp.fi/lukeA/link?id=e2921y8998e1",
+        "type": "json"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "routes/lukeA/routes/link.js",
+    "groupTitle": "Link"
+  },
+  {
+    "type": "post",
+    "url": "/lukeA/link/create",
     "title": "Create",
     "name": "Create",
     "group": "Link",
@@ -2252,8 +2345,8 @@ define({ "api": [
     }
   },
   {
-    "type": "get",
-    "url": "/lukeA/link",
+    "type": "gpost",
+    "url": "/lukeA/link/update",
     "title": "Update",
     "name": "Update",
     "group": "Link",
