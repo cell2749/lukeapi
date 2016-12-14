@@ -505,7 +505,9 @@ router.get("/start-weather-update", jwtCheck, authConverter, requiresOneOfRoles(
     WEATHER_UPDATE = setInterval(function () {
         PlaceModel.find({}, function (err, collection) {
             if (err) console.log(err);
-
+            if (WEATHER_UPDATE_LOOP_COUNTER >= collection.length) {
+                WEATHER_UPDATE_LOOP_COUNTER = 0;
+            }
             var options = {
                 hostname: 'api.openweathermap.org',
                 path: "/data/2.5/weather?lat=" + collection[WEATHER_UPDATE_LOOP_COUNTER].location.lat + "&lon=" + collection[WEATHER_UPDATE_LOOP_COUNTER].location.long + "&APPID=" + process.env.OPEN_WEATHER_API_KEY,
@@ -532,9 +534,7 @@ router.get("/start-weather-update", jwtCheck, authConverter, requiresOneOfRoles(
                         console.log("JSON parse ? ", e);
                     }
                     WEATHER_UPDATE_LOOP_COUNTER++;
-                    if (WEATHER_UPDATE_LOOP_COUNTER >= collection.length) {
-                        WEATHER_UPDATE_LOOP_COUNTER = 0;
-                    }
+
                 });
 
             }).end();

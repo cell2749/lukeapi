@@ -162,19 +162,16 @@ router.get('/', function (req, res) {
             flagged = data.flagged || flagged;
         }
     }
-    console.log(id);
-    console.log(approved);
-    console.log(profileId);
-    console.log(flagged);
+
     ReportModel.find({
         id: id,
         approved: approved,
         profileId: profileId,
         flagged: flagged
     }, newProjection).sort({"date": -1}).limit(limit).exec(function (err, collection) {
-        if (err) throw err;
+        if (err) console.log(err);
         var result = [];
-        console.log(collection);
+
         if (rating != null) {
             for (i = 0; i < collection.length; i++) {
                 if (collection[i].rating != null && rating < collection[i].rating) {
@@ -303,12 +300,7 @@ router.post('/create', jwtCheck, authConverter, function (req, res, next) {
             date.setUTCHours(date.getUTCHours()-Math.floor(date.getTimezoneOffset()/60));
             report.date = date.toISOString();
         }
-        console.log(data.image);
-        console.log(data.files);
-        console.log(data.file);
-        console.log(req.files);
-        console.log(req.file);
-        //vote.report.id = id;
+
         report._id = id;
         report.id = id;
         report.profileId = req.user.profile.id;
@@ -318,7 +310,7 @@ router.post('/create', jwtCheck, authConverter, function (req, res, next) {
         report.rating2 = 0;
         report.image_url = Utility.saveImageBase64(data.image, "lukeB/report/", id);
         report.save(function (err, report) {
-            if (err)throw err;
+            if (err)console.log(err);
 
             res.status(200).json(Utility.filter(report));
         });
@@ -461,9 +453,9 @@ router.post('/update', jwtCheck, authConverter, function (req, res) {
 router.get("/remove", jwtCheck, authConverter, function (req, res) {
     var id = req.query.id;
     ReportModel.findOne({id: id}, function (err, doc) {
-        if (err) throw err;
+        if (err) console.log(err);
 
-        if (doc.profileId == req.user.profileId || Utility.hasRole(req, "admin")) {
+        if (doc.profileId == req.user.profile.id || Utility.hasRole(req, "admin")) {
             Utility.deleteImage(doc.image_url);
             Utility.remove(ReportModel, id, res);
         } else {
@@ -605,11 +597,11 @@ router.get("/approve", jwtCheck, authConverter, requiresRole("admin"), function 
     var data = req.query;
     var id = data.id;
     ReportModel.findOne({id: id}, function (err, doc) {
-        if (err) throw err;
+        if (err) console.log(err);
         if (doc) {
             doc.approved = true;
             doc.save(function (err, result) {
-                if (err) throw err;
+                if (err) console.log(err);
                 res.status(200).json({success: true});
             });
         } else {
@@ -651,11 +643,11 @@ router.get("/disapprove", jwtCheck, authConverter, requiresRole("admin"), functi
     var data = req.query;
     var id = data.id;
     ReportModel.findOne({id: id}, function (err, doc) {
-        if (err) throw err;
+        if (err) console.log(err);
         if (doc) {
             doc.approved = false;
             doc.save(function (err, result) {
-                if (err) throw err;
+                if (err) console.log(err);
                 res.status(200).json({success: true});
             });
         } else {
@@ -696,11 +688,11 @@ router.get("/flag", jwtCheck, authConverter, restrictBanned, function (req, res)
     var data = req.query;
     var id = data.id;
     ReportModel.findOne({id: id}, function (err, doc) {
-        if (err) throw err;
+        if (err) console.log(err);
         if (doc) {
             doc.flagged = true;
             doc.save(function (err, result) {
-                if (err) throw err;
+                if (err) console.log(err);
                 res.status(200).json({success: true});
             });
         } else {
@@ -742,11 +734,11 @@ router.get("/unflag", jwtCheck, authConverter, requiresRole("admin"), function (
     var data = req.query;
     var id = data.id;
     ReportModel.findOne({id: id}, function (err, doc) {
-        if (err) throw err;
+        if (err) console.log(err);
         if (doc) {
             doc.flagged = false;
             doc.save(function (err, result) {
-                if (err) throw err;
+                if (err) console.log(err);
                 res.status(200).json({success: true});
             });
         } else {
