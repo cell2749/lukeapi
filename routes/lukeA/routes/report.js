@@ -449,7 +449,8 @@ router.post('/create', jwtCheck, authConverter, restrictBanned, function (req, r
                     RankModel.find({}, {id: 1, score: 1}, {sort: {score: 1}}, function (err, ranks) {
                         if (err) console.log(err);
 
-                        if (ranks.length = 0) {
+                        console.log(ranks);
+                        if (ranks.length == 0) {
                             doc.rankingId = null;
                         } else {
                             for (var i = 0; i < ranks.length; i++) {
