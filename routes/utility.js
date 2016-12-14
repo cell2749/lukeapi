@@ -175,35 +175,37 @@ Utility.prototype.vote = function (Model, req, res, vote) {
                         vote: vote
                     };
                     var flagCount = 0;
-                    for (var i = 0; i < doc.votes.length; i++) {
-                        if (doc.votes[i].profileId == req.user.profile.id) {
-                            doc.votes[i] = voteObj;
-                            exists = true;
-                        }
-                        if (doc.votes[i].vote == false || doc.votes[i].vote == "false") {
-                            flagCount++;
-                        }
-
-                        if (i == doc.votes.length - 1) {
-                            if (!exists) {
-                                doc.votes.push(voteObj);
-                            }
-                            if (this.maxFlags != null && flagCount >= this.maxFlags) {
-                                doc.flagged = true;
-                            }
-                            doc.save(function (err, result) {
-                                if (err) console.log(err);
-                                res.status(200).json({success: true});
-                            });
-                        }
-                    }
                     if (doc.votes.length == 0) {
                         doc.votes.push(voteObj);
                         doc.save(function (err, result) {
                             if (err) console.log(err);
                             res.status(200).json({success: true});
                         });
+                    } else {
+                        for (var i = 0; i < doc.votes.length; i++) {
+                            if (doc.votes[i].profileId == req.user.profile.id) {
+                                doc.votes[i] = voteObj;
+                                exists = true;
+                            }
+                            if (doc.votes[i].vote == false || doc.votes[i].vote == "false") {
+                                flagCount++;
+                            }
+
+                            if (i == doc.votes.length - 1) {
+                                if (!exists) {
+                                    doc.votes.push(voteObj);
+                                }
+                                if (this.maxFlags != null && flagCount >= this.maxFlags) {
+                                    doc.flagged = true;
+                                }
+                                doc.save(function (err, result) {
+                                    if (err) console.log(err);
+                                    res.status(200).json({success: true});
+                                });
+                            }
+                        }
                     }
+
                 } else {
                     res.status(404).json({error: "No such id"});
                 }
