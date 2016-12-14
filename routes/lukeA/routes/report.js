@@ -863,7 +863,7 @@ router.get("/upvote", jwtCheck, authConverter, restrictBanned, function (req, re
                                 RankModel.find({}, {id: 1, score: 1}, {sort: {score: 1}}, function (err, ranks) {
                                     if (err) console.log(err);
 
-                                    if (ranks.length = 0) {
+                                    if (ranks.length == 0) {
                                         usr.rankingId = null;
                                     } else {
                                         for (var i = 0; i < ranks.length; i++) {
@@ -979,7 +979,7 @@ router.get("/downvote", jwtCheck, authConverter, restrictBanned, function (req, 
                                 RankModel.find({}, {id: 1, score: 1}, {sort: {score: 1}}, function (err, ranks) {
                                     if (err) console.log(err);
 
-                                    if (ranks.length = 0) {
+                                    if (ranks.length == 0) {
                                         usr.rankingId = null;
                                     } else {
                                         for (var i = 0; i < ranks.length; i++) {
@@ -1127,7 +1127,7 @@ router.get("/vote", jwtCheck, authConverter, restrictBanned, function (req, res)
                                 RankModel.find({}, {id: 1, score: 1}, {sort: {score: 1}}, function (err, ranks) {
                                     if (err) console.log(err);
 
-                                    if (ranks.length = 0) {
+                                    if (ranks.length == 0) {
                                         usr.rankingId = null;
                                     } else {
                                         for (var i = 0; i < ranks.length; i++) {
