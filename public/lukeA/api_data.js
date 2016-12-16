@@ -5040,6 +5040,49 @@ define({ "api": [
   },
   {
     "type": "get",
+    "url": "/lukeA/user/delete",
+    "title": "Delete",
+    "name": "Delete",
+    "group": "User",
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "id",
+            "description": "<p>Id of the User to be deleted.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200\n{\n    success: \"removed N items\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "description": "<p>Deleted the user by id.</p>",
+    "version": "0.0.0",
+    "filename": "routes/lukeA/routes/user.js",
+    "groupTitle": "User",
+    "parameter": {
+      "fields": {
+        "Required Role": [
+          {
+            "group": "Required Role",
+            "optional": false,
+            "field": "superadmin",
+            "description": ""
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "get",
     "url": "/lukeA/user/delete-default-image",
     "title": "Delete default image",
     "name": "DeleteDefaultImage",

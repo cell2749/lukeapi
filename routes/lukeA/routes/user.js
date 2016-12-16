@@ -74,6 +74,48 @@ router.get('/get-all', function (req, res, next) {
     Utility.get(UserModel, null, res);
 });
 /**
+ * @api {get} /lukeA/user/delete Delete
+ * @apiName Delete
+ * @apiGroup User
+ *
+ * @apiSuccess {String} id Id of the User to be deleted.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200
+ *      {
+ *          success: "removed N items"
+ *      }
+ *
+ * @apiDescription
+ * Deleted the user by id.
+ *
+ * @apiUse roleSuper
+ *
+ */
+router.get('/delete', jwtCheck, authConverter, requiresRole("superadmin"), function (req, res) {
+    var userId = req.query.id;
+    management.users.get({id: userId}, function (err, user) {
+        if (err) {
+            res.status(404).json({error: "Invalid user id"});
+        } else {
+            var result = user.app_metadata.roles || [];
+            if (result.indexOf("superadmin") == -1) {
+                UserModel.find({id: userId}).remove(function (err, item) {
+                    if (err) console.log(err);
+
+                    if (item.result.n != 0) {
+                        res.status(200).json({success: "Removed " + item.result.n + " items"});
+                    } else {
+                        res.status(404).json({error: "No user with such id"});
+                    }
+                });
+            } else {
+                res.status(200).json({error: "cannot delete super admin"})
+            }
+        }
+    });
+});
+/**
  * @api {get} /lukeA/user Get user
  * @apiName GetUser
  * @apiGroup User
@@ -119,10 +161,10 @@ router.get('/', function (req, res, next) {
     var id;
     try {
         id = req.query.id || req.user.profile.id;
-    }catch(e){
+    } catch (e) {
         console.log(e);
     }
-    if(id!=null) {
+    if (id != null) {
         UserModel.findOne({id: id}, MONGO_PROJECTION, function (err, result) {
             if (err) console.log(err);
 
@@ -132,8 +174,8 @@ router.get('/', function (req, res, next) {
                 res.status(404).json({error: "No user with such id"});
             }
         });
-    }else{
-        res.status(422).json({error:"Missing id"});
+    } else {
+        res.status(422).json({error: "Missing id"});
     }
 });
 /**
@@ -178,14 +220,14 @@ router.get('/', function (req, res, next) {
  *          error:"Missing id"
  *      }
  */
-router.get('/me',jwtCheck,authConverter, function (req, res, next) {
+router.get('/me', jwtCheck, authConverter, function (req, res, next) {
     var id;
     try {
         id = req.user.profile.id;
-    }catch(e){
+    } catch (e) {
         console.log(e);
     }
-    if(id!=null) {
+    if (id != null) {
         UserModel.findOne({id: id}, MONGO_PROJECTION, function (err, result) {
             if (err) console.log(err);
 
@@ -195,8 +237,8 @@ router.get('/me',jwtCheck,authConverter, function (req, res, next) {
                 res.status(404).json({error: "No user with such id"});
             }
         });
-    }else{
-        res.status(404).json({error:"Something went wrong"});
+    } else {
+        res.status(404).json({error: "Something went wrong"});
     }
 });
 /**
@@ -256,10 +298,10 @@ router.post('/update', jwtCheck, authConverter, function (req, res) {
                         success = true;
                     }
                 }
-                if(data.image!=null&&doc.image_url!=null){
+                if (data.image != null && doc.image_url != null) {
                     Utility.deleteImage(doc.image_url);
                 }
-                doc.image_url = Utility.saveImageBase64(data.image, "lukeA/user/", doc._id)||doc.image_url;
+                doc.image_url = Utility.saveImageBase64(data.image, "lukeA/user/", doc._id) || doc.image_url;
                 doc.save(function (err, result) {
                     if (err) console.log(err);
                     res.status(200).json(Utility.filter(result));
@@ -383,7 +425,7 @@ router.get('/set-username', jwtCheck, authConverter, function (req, res) {
                         } else {
                             doc.username = username;
                             doc.save(function (err, result) {
-                                if (err)console.log(err);
+                                if (err) console.log(err);
                                 res.status(200).json({success: true});
                             });
 
@@ -857,7 +899,7 @@ router.post("/upload-default-image", jwtCheck, authConverter, requiresOneOfRoles
  */
 router.get("/delete-default-image", jwtCheck, authConverter, requiresOneOfRoles(["admin", "superadmin"]), function (req, res) {
     var image_name = req.query.name;
-    var image_url = "http://www.balticapp.fi/images/lukeA/user/default/"+image_name+".jpeg";
+    var image_url = "http://www.balticapp.fi/images/lukeA/user/default/" + image_name + ".jpeg";
     if (image_url != null && image_url.indexOf("user/default") != -1) {
         if (Utility.deleteImage(image_url) != null) {
             res.status(200).json({success: true});
