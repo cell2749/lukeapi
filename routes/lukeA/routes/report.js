@@ -30,6 +30,7 @@ var Utility = new UtModule([
     "_id",
     "__v",
     "image_url",
+    "thumbnail_url",
     "rating",
     "submitterId",
     "approved",
@@ -65,6 +66,7 @@ const MONGO_PROJECTION = {
  *          latitude: Number,
  *          altitude: Number,
  *          image_url: String,
+ *          thumbnail_url: String,
  *          title: String,
  *          description: String,
  *          date: String,
@@ -90,6 +92,7 @@ const MONGO_PROJECTION = {
  *          latitude: Number,
  *          altitude: Number,
  *          image_url: String,
+ *          thumbnail_url: String,
  *          title: String,
  *          description: String,
  *          date: String,
@@ -113,6 +116,7 @@ const MONGO_PROJECTION = {
  * @apiSuccess {Number} latitude Latitude of a report
  * @apiSuccess {Number} altitude Altitude of a report
  * @apiSuccess {String} image_url Url to image that report has
+ * @apiSuccess {String} thumbnail_url Url to smaller image that report has (40 px)
  * @apiSuccess {String} title Title of a report
  * @apiSuccess {String} description Description of a report
  * @apiSuccess {String} date Date when reprot was made
@@ -211,6 +215,7 @@ router.get('/', function (req, res) {
  *          latitude: Number,
  *          altitude: Number,
  *          image_url: String,
+ *          thumbnail_url: String,
  *          title: String,
  *          description: String,
  *          date: String,
@@ -236,6 +241,7 @@ router.get('/', function (req, res) {
  *          latitude: Number,
  *          altitude: Number,
  *          image_url: String,
+ *          thumbnail_url: String,
  *          title: String,
  *          description: String,
  *          date: String,
@@ -259,6 +265,7 @@ router.get('/', function (req, res) {
  * @apiSuccess {Number} latitude Latitude of a report
  * @apiSuccess {Number} altitude Altitude of a report
  * @apiSuccess {String} image_url Url to image that report has
+ * @apiSuccess {String} thumbnail_url Url to smaller image that report has (40 px)
  * @apiSuccess {String} title Title of a report
  * @apiSuccess {String} description Description of a report
  * @apiSuccess {String} date Date when reprot was made
@@ -354,6 +361,7 @@ router.get("/admin-get", jwtCheck, authConverter, requiresRole("admin"), functio
  *          latitude: Number,
  *          altitude: Number,
  *          image_url: String,
+ *          thumbnail_url: String,
  *          title: String,
  *          description: String,
  *          date: String,
@@ -378,6 +386,7 @@ router.get("/admin-get", jwtCheck, authConverter, requiresRole("admin"), functio
  * @apiSuccess {Number} latitude Latitude of a report
  * @apiSuccess {Number} altitude Altitude of a report
  * @apiSuccess {String} image_url Url to image that report has
+ * @apiSuccess {String} thumbnail_url Url to smaller image that report has (40 px)
  * @apiSuccess {String} title Title of a report
  * @apiSuccess {String} description Description of a report
  * @apiSuccess {String} date Date when report was made
@@ -482,8 +491,10 @@ router.post('/create', jwtCheck, authConverter, restrictBanned, function (req, r
                         var date = new Date();
                         date.setUTCHours(date.getUTCHours()-Math.floor(date.getTimezoneOffset()/60));
                         report.date = date.toISOString();
-
+                        //Save image and create thumbnail
                         report.image_url = Utility.saveImageBase64(data.image, "lukeA/report/", id);
+                        report.thumbnail_url = Utility.saveThumbnailBase64(data.image, "lukeA/report/", id);
+
                         report.submitterId = req.user.profile.id;
                         doc.save(function (err, userSaved) {
                             if (err) console.log(err);
@@ -521,6 +532,7 @@ router.post('/create', jwtCheck, authConverter, restrictBanned, function (req, r
  *          latitude: Number,
  *          altitude: Number,
  *          image_url: String,
+ *          thumbnail_url: String,
  *          title: String,
  *          description: String,
  *          date: String,
@@ -544,6 +556,7 @@ router.post('/create', jwtCheck, authConverter, restrictBanned, function (req, r
  * @apiSuccess {Number} latitude Latitude of a report
  * @apiSuccess {Number} altitude Altitude of a report
  * @apiSuccess {String} image_url Url to image that report has
+ * @apiSuccess {String} thumbnail_url Url to smaller image that report has (40 px)
  * @apiSuccess {String} title Title of a report
  * @apiSuccess {String} description Description of a report
  * @apiSuccess {String} date Date when reprot was made
@@ -606,7 +619,10 @@ router.post("/update", jwtCheck, authConverter, restrictBanned, function (req, r
                         doc[key] = data[key] || doc[key];
                     }
                 }
+                //Update potential thumbnail
                 doc.image_url = Utility.saveImageBase64(data.image, "lukeA/report/", doc.id) || doc.image_url;
+                doc.thumbnail_url = Utility.saveThumbnailBase64(data.image, "lukeA/report/", doc.id) || doc.thumbnail_url;
+
                 doc.save(function (err, result) {
                     res.status(200).json(Utility.filter(result));
                 });
@@ -667,6 +683,7 @@ router.get("/remove", jwtCheck, authConverter, function (req, res) {
         if (doc != null) {
             if ((doc.submitterId == req.user.profile.id || adminRoles.indexOf("admin") != -1)) {
                 Utility.deleteImage(doc.image_url);
+                Utility.deleteImage(doc.thumbnail_url);
                 ReportModel.find({id: id}).remove(function (err, item) {
                     if (err) console.log(err);
 

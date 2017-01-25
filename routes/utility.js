@@ -1,4 +1,5 @@
 var fs = require('fs');
+var gm = require('gm').subClass({imageMagick: true});
 const MONGO_PROJECTION = {
     __v: 0,
     _id: 0
@@ -408,6 +409,32 @@ Utility.prototype.saveImage = function (image, path, name) {
             });
         });
         return url + path + name + format;
+    }
+};
+Utility.prototype.saveThumbnailBase64 = function (base, path, name) {
+    var prePath = "/opt/balticapp/lukeapi/public/thumbnails/";
+    var url = "http://www.balticapp.fi/thumbnails/";
+    if (base != null) {
+        try {
+            var format = ".jpeg";
+
+            var fullpath = prePath + path + name + format;
+
+            var imageBuffer = new Buffer(base, 'base64');
+
+            fs.writeFile(fullpath, imageBuffer, function (err) {
+                if (err) console.log(err);
+                gm(fullpath).resize(40);
+
+            });
+            return url + path + name + format;
+        } catch (e) {
+            console.log(e);
+            return null;
+        }
+    } else {
+        console.log("Error: base is empty");
+        return null;
     }
 };
 

@@ -12,6 +12,7 @@ var schema = mongoose.Schema(
         latitude: Number,
         altitude: Number,
         image_url: String,
+        thumbnail_url: String,
         title: String,
         description: String,
         date: String,

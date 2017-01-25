@@ -3148,12 +3148,12 @@
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n[{\n    id: String\n    longitude: Number,\n    latitude: Number,\n    altitude: Number,\n    image_url: String,\n    title: String,\n    description: String,\n    date: String,\n    categoryId: [\n        String\n    ],\n    rating: Number,\n    submitterId: String,\n    approved: Boolean,\n    flagged: Boolean,\n    votes: [\n       {\n            userId: String,\n            vote: Boolean\n        }\n    ]\n}]",
+          "content": "HTTP/1.1 200 OK\n[{\n    id: String\n    longitude: Number,\n    latitude: Number,\n    altitude: Number,\n    image_url: String,\n    thumbnail_url: String,\n    title: String,\n    description: String,\n    date: String,\n    categoryId: [\n        String\n    ],\n    rating: Number,\n    submitterId: String,\n    approved: Boolean,\n    flagged: Boolean,\n    votes: [\n       {\n            userId: String,\n            vote: Boolean\n        }\n    ]\n}]",
           "type": "json"
         },
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n    id: String\n    longitude: Number,\n    latitude: Number,\n    altitude: Number,\n    image_url: String,\n    title: String,\n    description: String,\n    date: String,\n    categoryId: [\n        String\n    ],\n    rating: Number,\n    submitterId: String,\n    approved: Boolean,\n    flagged: Boolean,\n    votes: [\n       {\n            userId: String,\n            vote: Boolean\n        }\n    ]\n}",
+          "content": "HTTP/1.1 200 OK\n{\n    id: String\n    longitude: Number,\n    latitude: Number,\n    altitude: Number,\n    image_url: String,\n    thumbnail_url: String,\n    title: String,\n    description: String,\n    date: String,\n    categoryId: [\n        String\n    ],\n    rating: Number,\n    submitterId: String,\n    approved: Boolean,\n    flagged: Boolean,\n    votes: [\n       {\n            userId: String,\n            vote: Boolean\n        }\n    ]\n}",
           "type": "json"
         }
       ],
@@ -3193,6 +3193,13 @@
             "optional": false,
             "field": "image_url",
             "description": "<p>Url to image that report has</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "thumbnail_url",
+            "description": "<p>Url to smaller image that report has (40 px)</p>"
           },
           {
             "group": "Success 200",
@@ -3452,7 +3459,7 @@
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n    id: String\n    longitude: Number,\n    latitude: Number,\n    altitude: Number,\n    image_url: String,\n    title: String,\n    description: String,\n    date: String,\n    categoryId: [\n        String\n    ],\n    rating: Number,\n    submitterId: String,\n    approved: Boolean,\n    flagged: Boolean,\n    votes: [\n       {\n            userId: String,\n            vote: Boolean\n        }\n    ]\n    positive: Boolean\n}",
+          "content": "HTTP/1.1 200 OK\n{\n    id: String\n    longitude: Number,\n    latitude: Number,\n    altitude: Number,\n    image_url: String,\n    thumbnail_url: String,\n    title: String,\n    description: String,\n    date: String,\n    categoryId: [\n        String\n    ],\n    rating: Number,\n    submitterId: String,\n    approved: Boolean,\n    flagged: Boolean,\n    votes: [\n       {\n            userId: String,\n            vote: Boolean\n        }\n    ]\n    positive: Boolean\n}",
           "type": "json"
         }
       ],
@@ -3492,6 +3499,13 @@
             "optional": false,
             "field": "image_url",
             "description": "<p>Url to image that report has</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "thumbnail_url",
+            "description": "<p>Url to smaller image that report has (40 px)</p>"
           },
           {
             "group": "Success 200",
@@ -4040,12 +4054,12 @@
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n[{\n    id: String\n    longitude: Number,\n    latitude: Number,\n    altitude: Number,\n    image_url: String,\n    title: String,\n    description: String,\n    date: String,\n    categoryId: [\n        String\n    ],\n    rating: Number,\n    submitterId: String,\n    approved: Boolean,\n    flagged: Boolean,\n    votes: [\n       {\n            userId: String,\n            vote: Boolean\n        }\n    ]\n}]",
+          "content": "HTTP/1.1 200 OK\n[{\n    id: String\n    longitude: Number,\n    latitude: Number,\n    altitude: Number,\n    image_url: String,\n    thumbnail_url: String,\n    title: String,\n    description: String,\n    date: String,\n    categoryId: [\n        String\n    ],\n    rating: Number,\n    submitterId: String,\n    approved: Boolean,\n    flagged: Boolean,\n    votes: [\n       {\n            userId: String,\n            vote: Boolean\n        }\n    ]\n}]",
           "type": "json"
         },
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n    id: String\n    longitude: Number,\n    latitude: Number,\n    altitude: Number,\n    image_url: String,\n    title: String,\n    description: String,\n    date: String,\n    categoryId: [\n        String\n    ],\n    rating: Number,\n    submitterId: String,\n    approved: Boolean,\n    flagged: Boolean,\n    votes: [\n       {\n            userId: String,\n            vote: Boolean\n        }\n    ]\n}",
+          "content": "HTTP/1.1 200 OK\n{\n    id: String\n    longitude: Number,\n    latitude: Number,\n    altitude: Number,\n    image_url: String,\n    thumbnail_url: String,\n    title: String,\n    description: String,\n    date: String,\n    categoryId: [\n        String\n    ],\n    rating: Number,\n    submitterId: String,\n    approved: Boolean,\n    flagged: Boolean,\n    votes: [\n       {\n            userId: String,\n            vote: Boolean\n        }\n    ]\n}",
           "type": "json"
         }
       ],
@@ -4085,6 +4099,13 @@
             "optional": false,
             "field": "image_url",
             "description": "<p>Url to image that report has</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "thumbnail_url",
+            "description": "<p>Url to smaller image that report has (40 px)</p>"
           },
           {
             "group": "Success 200",
@@ -4321,7 +4342,7 @@
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n    id: String\n    longitude: Number,\n    latitude: Number,\n    altitude: Number,\n    image_url: String,\n    title: String,\n    description: String,\n    date: String,\n    categoryId: [\n        String\n    ],\n    rating: Number,\n    submitterId: String,\n    approved: Boolean,\n    flagged: Boolean,\n    votes: [\n       {\n            userId: String,\n            vote: Boolean\n        }\n    ]\n}",
+          "content": "HTTP/1.1 200 OK\n{\n    id: String\n    longitude: Number,\n    latitude: Number,\n    altitude: Number,\n    image_url: String,\n    thumbnail_url: String,\n    title: String,\n    description: String,\n    date: String,\n    categoryId: [\n        String\n    ],\n    rating: Number,\n    submitterId: String,\n    approved: Boolean,\n    flagged: Boolean,\n    votes: [\n       {\n            userId: String,\n            vote: Boolean\n        }\n    ]\n}",
           "type": "json"
         }
       ],
@@ -4361,6 +4382,13 @@
             "optional": false,
             "field": "image_url",
             "description": "<p>Url to image that report has</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "thumbnail_url",
+            "description": "<p>Url to smaller image that report has (40 px)</p>"
           },
           {
             "group": "Success 200",
