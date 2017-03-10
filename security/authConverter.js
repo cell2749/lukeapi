@@ -9,6 +9,7 @@ var management = new ManagementClient({
     domain: process.env.AUTH0_DOMAIN
 });
 module.exports = function(req,res,next) {
+    console.log("Authentication");
     management.users.get({id:req.user.sub},function(err,response){
         if(err){
             res.status(400).json({error: response});
