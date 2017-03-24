@@ -22,6 +22,7 @@ Utility.prototype.filter = function (object) {
         return filteredObject;
         }catch(err){
             console.log("Object:\n" + object + "\nError:\n" + err);
+            return {error:"Oops. Something went wrong."};
         }
     } else {
         return {}
