@@ -11,6 +11,7 @@ var Utility = function (keyes, maxFlags) {
 Utility.prototype.filter = function (object) {
     //console.log(object);
     if (object != "undefined") {
+        try{
         var filteredObject = JSON.parse(JSON.stringify(object), function (key, value) {
             if (key == '_id' || key == '__v') {
                 return undefined;
@@ -19,6 +20,9 @@ Utility.prototype.filter = function (object) {
             }
         });
         return filteredObject;
+        }catch(err){
+            console.log("Object:\n" + object + "\nError:\n" + err);
+        }
     } else {
         return {}
     }
